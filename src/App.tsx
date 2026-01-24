@@ -33,7 +33,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto max-w-5xl px-6 py-14">
+      <div className="mx-auto w-full max-w-7xl px-6 py-12 lg:px-10">
         <header className="mb-10">
           <div className="flex items-center justify-between gap-6 rounded-full border border-zinc-200 bg-white px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
             <div className="flex items-baseline gap-3">
@@ -54,28 +54,11 @@ function App() {
                 </>
               ) : null}
             </div>
-            <nav className="flex items-center gap-2">
-              <a
-                className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                href={profile.links.github}
-                target="_blank"
-                rel="noreferrer"
-              >
-                GitHub
-              </a>
-              <a
-                className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                href={profile.links.blog}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Blog
-              </a>
-            </nav>
+            <div />
           </div>
         </header>
 
-        <main className="grid gap-10 lg:grid-cols-[320px_1fr]">
+        <main className="grid gap-10 lg:grid-cols-[360px_1fr] lg:gap-12 xl:grid-cols-[380px_1fr]">
           <aside className="lg:sticky lg:top-10 lg:self-start">
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="relative z-0 h-20 bg-zinc-100">
