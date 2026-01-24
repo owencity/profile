@@ -32,10 +32,25 @@ function App() {
   }, [route])
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto w-full max-w-7xl px-6 py-12 lg:px-10">
+    <div className="relative min-h-screen overflow-hidden bg-zinc-50 text-zinc-900">
+      {/* Wide-screen background decoration (subtle) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden bg-[url('/bg-grid.svg')] [background-size:24px_24px] opacity-20 2xl:block"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden 2xl:block"
+      >
+        {/* corner frame lines */}
+        <div className="absolute left-10 top-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
+        <div className="absolute right-10 top-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
+        <div className="absolute left-10 bottom-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
+        <div className="absolute right-10 bottom-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
+      </div>
+      <div className="mx-auto w-full max-w-none px-4 py-10 sm:px-6 lg:px-12 2xl:px-16">
         <header className="mb-10">
-          <div className="flex items-center justify-between gap-6 rounded-full border border-zinc-200 bg-white px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+          <div className="flex w-full items-center justify-start gap-6 rounded-full border border-zinc-200 bg-white px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
             <div className="flex items-baseline gap-3">
               <a
                 className="text-sm font-semibold tracking-tight text-indigo-700 transition hover:text-indigo-600"
@@ -54,11 +69,10 @@ function App() {
                 </>
               ) : null}
             </div>
-            <div />
           </div>
         </header>
 
-        <main className="grid gap-10 lg:grid-cols-[360px_1fr] lg:gap-12 xl:grid-cols-[380px_1fr]">
+        <main className="grid gap-10 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[520px_minmax(0,1fr)] 2xl:grid-cols-[560px_minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-10 lg:self-start">
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="relative z-0 h-20 bg-zinc-100">
