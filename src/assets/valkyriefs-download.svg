@@ -1,0 +1,43 @@
+<svg width="1200" height="650" viewBox="0 0 1200 650" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FAFAFA"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="150" y1="130" x2="1050" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#10B981" stop-opacity="0.14"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1200" height="650" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect x="40" y="40" width="1120" height="570" rx="28" fill="url(#bg)" stroke="#E4E4E7" filter="url(#shadow)"/>
+  <rect x="56" y="56" width="1088" height="538" rx="22" fill="url(#accent)" opacity="1"/>
+  <rect x="56" y="56" width="1088" height="538" rx="22" fill="white" opacity="0.86"/>
+
+  <text x="110" y="170" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="40" font-weight="700" fill="#18181B">
+    ValkyrieFS 다운로드
+  </text>
+
+  <text x="110" y="230" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="22" font-weight="500" fill="#3F3F46">
+    배포 파일이 준비되면 운영체제별 설치 파일과 사용 가이드를 제공합니다.
+  </text>
+
+  <!-- Buttons -->
+  <rect x="110" y="300" width="360" height="84" rx="16" fill="#3F3F46"/>
+  <text x="170" y="352" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">
+    Windows 다운로드 (준비중)
+  </text>
+
+  <rect x="500" y="300" width="360" height="84" rx="16" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text x="560" y="352" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="22" font-weight="700" fill="#71717A">
+    macOS / Linux (준비중)
+  </text>
+
+  <text x="110" y="450" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="20" font-weight="500" fill="#71717A">
+    다운로드 링크/체크섬/릴리즈 노트는 배포 시점에 함께 공개합니다.
+  </text>
+</svg>
+
