@@ -44,16 +44,6 @@ function App() {
         aria-hidden
         className="pointer-events-none absolute inset-0 hidden bg-[url('/bg-grid.svg')] [background-size:24px_24px] opacity-20 2xl:block"
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 hidden 2xl:block"
-      >
-        {/* corner frame lines */}
-        <div className="absolute left-10 top-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
-        <div className="absolute right-10 top-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
-        <div className="absolute left-10 bottom-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
-        <div className="absolute right-10 bottom-10 h-20 w-20 rounded-2xl border border-zinc-200/70" />
-      </div>
       <div className="mx-auto w-full max-w-none px-4 py-10 sm:px-6 lg:px-12 2xl:px-16">
         <header className="mb-10">
           <div className="flex w-full items-center justify-start gap-6 rounded-full border border-zinc-200 bg-white px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
@@ -340,6 +330,26 @@ function App() {
                     <p className="mt-3 text-sm leading-7 text-zinc-700">
                       {profile.projects[0].details[0]} {profile.projects[0].details[1]}
                     </p>
+
+                    <div className="mt-4">
+                      <a
+                        className="block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:border-zinc-300"
+                        href="/val_02.png"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="ValkyrieFS 사용 화면 스크린샷 열기"
+                      >
+                        <img
+                          className="aspect-[16/9] w-full bg-white object-contain"
+                          src="/val_02.png"
+                          alt="ValkyrieFS 사용 화면 스크린샷"
+                          loading="lazy"
+                        />
+                      </a>
+                      <p className="mt-2 text-xs text-zinc-500">
+                        스크린샷을 클릭하면 원본으로 열립니다.
+                      </p>
+                    </div>
                   </div>
 
                   <div className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300 hover:shadow-md">
