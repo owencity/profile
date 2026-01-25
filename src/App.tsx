@@ -2,13 +2,19 @@ import { profile } from './profile'
 import { useEffect, useMemo, useState } from 'react'
 
 function App() {
-  const [route, setRoute] = useState(() => window.location.hash || '#/')
+  const [route, setRoute] = useState(() => window.location.pathname || '/')
 
   useEffect(() => {
-    const onHashChange = () => setRoute(window.location.hash || '#/')
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
+    const onPopState = () => setRoute(window.location.pathname || '/')
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
+
+  const navigate = (to: string) => {
+    if (to === route) return
+    window.history.pushState({}, '', to)
+    setRoute(to)
+  }
 
   const formatKoreanDate = (d: Date) => {
     const yyyy = d.getFullYear()
@@ -27,7 +33,7 @@ function App() {
   }, [])
 
   const pageTitle = useMemo(() => {
-    if (route === '#/valkyriefs') return 'ValkyrieFS'
+    if (route === '/valkyriefs') return 'ValkyrieFS'
     return 'Home'
   }, [route])
 
@@ -54,13 +60,17 @@ function App() {
             <div className="flex items-baseline gap-3">
               <a
                 className="text-sm font-semibold tracking-tight text-indigo-700 transition hover:text-indigo-600"
-                href="#/"
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/')
+                }}
               >
                 {profile.brand}
               </a>
               <span className="text-xs text-zinc-400">·</span>
               <span className="text-sm text-zinc-500">{todayText}</span>
-              {route !== '#/' ? (
+              {route !== '/' ? (
                 <>
                   <span className="text-xs text-zinc-300">/</span>
                   <span className="text-sm font-medium text-zinc-600">
@@ -158,7 +168,7 @@ function App() {
             </div>
           </aside>
 
-          {route === '#/valkyriefs' ? (
+          {route === '/valkyriefs' ? (
             <section className="space-y-10">
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -172,7 +182,11 @@ function App() {
                   </div>
                   <a
                     className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                    href="#/"
+                    href="/"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      navigate('/')
+                    }}
                   >
                     ← Back
                   </a>
@@ -313,7 +327,11 @@ function App() {
                       </div>
                       <a
                         className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                        href="#/valkyriefs"
+                        href="/valkyriefs"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          navigate('/valkyriefs')
+                        }}
                       >
                         다운로드 페이지
                       </a>

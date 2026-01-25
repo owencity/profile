@@ -11,7 +11,7 @@ export const profile = {
   name: '김동규',
   role: 'Backend Developer',
   brand: 'dev_kdk',
-  avatarUrl: '/avatar.jpg',
+  avatarUrl: '/brand.png',
   intro:
     '“개발 = 코딩”이 아니라, 현실의 문제를 구조화하고 시스템으로 해결하는 과정이라고 믿습니다. 그래서 구현보다 설계/경계/흐름을 우선합니다.',
   links: {
