@@ -1,4 +1,4 @@
-export type ProjectStatus = '확장 중' | '준비중'
+export type ProjectStatus = '확장 중' | '준비중' | '개발중'
 
 export type Project = {
   name: string
@@ -36,7 +36,7 @@ export const profile = {
     },
     {
       name: '24시간이모자라',
-      status: '준비중',
+      status: '개발중',
       summary:
         '카페, 음식점, 전기차 충전소 등 24시간 운영하는 곳을 쉽게 찾아갈 수 있게 하는 웹앱',
       details: [
