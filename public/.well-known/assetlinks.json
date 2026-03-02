@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.twentyfourhourmozara.app",
+      "sha256_cert_fingerprints": [
+        "40:23:1A:9A:59:B9:69:63:34:E3:A0:77:B2:C3:43:33:0A:14:81:A9:E3:2B:F8:56:D5:97:9E:1B:B9:68:DC:0D"
+      ]
+    }
+  }
+]
+
