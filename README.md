@@ -1,9 +1,24 @@
-# 김동규 개인 사이트 (Frontend)
+# 24시간이 모자라 (Frontend)
 
-백엔드 개발자 **김동규**의 개인 소개/프로젝트 랜딩 페이지입니다.
+**24시간 운영하는 카페/음식점/전기차 충전소**를 조회하고, 지도 위에 표시하는 웹앱의 프론트엔드 프로젝트입니다.
 
-- GitHub: https://github.com/owencity
-- Blog: https://owencity.tistory.com/
+## 스택
+
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS
+- **Backend**: Java (별도 프로젝트 / AWS EC2)
+- **DB**: PostgreSQL
+
+## 요구사항(요약)
+
+- **24시간 운영 장소 조회**: 카페 / 음식점 / 전기차 충전소
+- **지도 표시**: 조회 결과를 지도 위에 마커로 표시
+- **내 주변 1km 반경 조회**
+
+자세한 내용은 `docs/README.md`를 참고해주세요.
+
+## 문서
+
+- 상세 문서: `docs/README.md`
 
 ## 실행 방법
 
@@ -12,100 +27,39 @@ npm install
 npm run dev
 ```
 
-## 빌드
+## 빌드 / 프리뷰
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## 내용 수정 위치
+## 환경변수
 
-- 소개/링크/프로젝트 문구: `src/profile.ts`
+백엔드 API가 분리되어 있으므로 프론트는 API Base URL을 환경변수로 받는 것을 권장합니다.
+
+- `VITE_API_BASE_URL` (기본값: `http://localhost:8080`)
+- `VITE_NAVER_MAPS_KEY_ID` (네이버 지도 JS SDK `ncpKeyId`)
+- `VITE_APP_TARGET`
+  - 미설정: 기존 프로파일 웹 전체
+  - `24hours`: **앱 배포용(`/24hours/app`만 풀스크린 렌더링)**
+
+로컬 개발 예시:
+
+```bash
+# .env.local (git ignore됨)
+VITE_API_BASE_URL=http://localhost:8080
+VITE_NAVER_MAPS_KEY_ID=YOUR_NAVER_MAPS_KEY_ID
+VITE_APP_TARGET=24hours
+```
+
+## 주요 수정 위치(현 프로젝트 기준)
+
+- 데이터/문구: `src/profile.ts`
 - 페이지 레이아웃(UI): `src/App.tsx`
 
-## 프로필 사진 넣기
-
-아래 경로로 사진을 추가하면 좌측 프로필 카드에 원형으로 표시됩니다.
-
-- 파일 경로: `public/avatar.jpg`
-
-## GitHub Pages 배포(선택)
+## 배포 메모
 
 Vite 프로젝트를 GitHub Pages(프로젝트 페이지)로 배포할 경우, 리포지토리 이름에 맞게 `base` 설정이 필요합니다.
 
 - 예: 리포지토리가 `profile` 이라면 `vite.config.ts`에 `base: '/profile/'` 추가
-
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
