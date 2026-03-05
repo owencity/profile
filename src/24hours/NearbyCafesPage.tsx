@@ -476,6 +476,15 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
           )}
         </div>
 
+        <div className="border-b border-zinc-200 bg-indigo-50/60 px-3 py-2 text-xs leading-relaxed text-indigo-900">
+          <span className="font-semibold">24시간 운영 카페</span>를 지도에서 찾아보세요.
+          <span className="hidden sm:inline"> 지도를 이동한 뒤 </span>
+          <span className="sm:hidden"> 지도 이동 후 </span>
+          <span className="inline-flex items-center rounded bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">이 지역 검색</span>
+          <span className="hidden sm:inline"> 버튼을 누르면 해당 영역의 카페가 표시됩니다. 마커를 클릭하면 상세 정보를 확인할 수 있습니다.</span>
+          <span className="sm:hidden"> 을 누르면 카페가 나타납니다.</span>
+        </div>
+
         {geoMessage ? (
           <div className="border-b border-zinc-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             {geoMessage}

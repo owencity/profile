@@ -324,20 +324,20 @@ function App() {
             </section>
           ) : route === '/24hours' ? (
             <section>
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
+              <div className="mb-3 flex items-center justify-between sm:mb-4">
+                <div className="flex items-center gap-2">
                   <img
-                    className="h-7 w-7"
+                    className="h-6 w-6 sm:h-7 sm:w-7"
                     src="/24hours-logo.svg"
                     alt="24시간이모자라 로고"
                     loading="lazy"
                   />
-                  <h2 className="text-lg font-semibold tracking-tight">
+                  <h2 className="text-base font-semibold tracking-tight sm:text-lg">
                     24시간이모자라
                   </h2>
                 </div>
                 <a
-                  className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 shadow-sm transition hover:bg-zinc-50"
+                  className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-600 shadow-sm transition hover:bg-zinc-50"
                   href="/"
                   onClick={(e) => {
                     e.preventDefault()
