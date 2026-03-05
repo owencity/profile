@@ -73,10 +73,10 @@ function App() {
         aria-hidden
         className="pointer-events-none absolute inset-0 hidden bg-[url('/bg-grid.svg')] [background-size:24px_24px] opacity-20 2xl:block"
       />
-      <div className="mx-auto w-full max-w-none px-4 py-10 sm:px-6 lg:px-12 2xl:px-16">
-        <header className="mb-10">
-          <div className="flex w-full items-center justify-start gap-6 rounded-full border border-zinc-200 bg-white px-5 py-3 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-            <div className="flex items-baseline gap-3">
+      <div className="mx-auto w-full max-w-none px-3 py-4 sm:px-6 sm:py-10 lg:px-12 2xl:px-16">
+        <header className="mb-4 sm:mb-10">
+          <div className="flex w-full items-center justify-start gap-3 rounded-full border border-zinc-200 bg-white px-4 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)] sm:gap-6 sm:px-5 sm:py-3">
+            <div className="flex items-baseline gap-2 sm:gap-3">
               <a
                 className="text-sm font-semibold tracking-tight text-indigo-700 transition hover:text-indigo-600"
                 href="/"
@@ -87,12 +87,12 @@ function App() {
               >
                 {profile.brand}
               </a>
-              <span className="text-xs text-zinc-400">·</span>
-              <span className="text-sm text-zinc-500">{todayText}</span>
+              <span className="hidden text-xs text-zinc-400 sm:inline">·</span>
+              <span className="hidden text-sm text-zinc-500 sm:inline">{todayText}</span>
               {route !== '/' ? (
                 <>
                   <span className="text-xs text-zinc-300">/</span>
-                  <span className="text-sm font-medium text-zinc-600">
+                  <span className="text-xs font-medium text-zinc-600 sm:text-sm">
                     {pageTitle}
                   </span>
                 </>
@@ -102,7 +102,7 @@ function App() {
         </header>
 
         <main className="grid gap-10 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[520px_minmax(0,1fr)] 2xl:grid-cols-[560px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-10 lg:self-start">
+          <aside className="hidden lg:block lg:sticky lg:top-10 lg:self-start">
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="relative z-0 h-20 bg-zinc-100">
                 <div className="absolute inset-x-0 bottom-0 h-px bg-zinc-200" />
@@ -323,43 +323,32 @@ function App() {
               <div className="pb-6" />
             </section>
           ) : route === '/24hours' ? (
-            <section className="space-y-10">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <img
-                        className="h-9 w-9"
-                        src="/24hours-logo.svg"
-                        alt="24시간이모자라 로고"
-                        loading="lazy"
-                      />
-                      <h2 className="text-xl font-semibold tracking-tight">
-                        24시간이모자라
-                      </h2>
-                    </div>
-                    <p className="mt-1 text-sm text-zinc-600">
-                      카페, 음식점, 전기차 충전소 등 24시간 운영하는 곳을 지도에서 쉽게 찾고 안내하는 웹앱입니다.
-                    </p>
-                  </div>
-                  <a
-                    className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                    href="/"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      navigate('/')
-                    }}
-                  >
-                    ← Back
-                  </a>
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    className="h-7 w-7"
+                    src="/24hours-logo.svg"
+                    alt="24시간이모자라 로고"
+                    loading="lazy"
+                  />
+                  <h2 className="text-lg font-semibold tracking-tight">
+                    24시간이모자라
+                  </h2>
                 </div>
-
-                <div className="mt-6">
-                  <NearbyCafesPage />
-                </div>
+                <a
+                  className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 shadow-sm transition hover:bg-zinc-50"
+                  href="/"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    navigate('/')
+                  }}
+                >
+                  ← Back
+                </a>
               </div>
 
-              <div className="pb-6" />
+              <NearbyCafesPage />
             </section>
           ) : (
             <section className="space-y-10">
