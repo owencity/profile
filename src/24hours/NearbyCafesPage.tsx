@@ -135,6 +135,9 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
   const cafeMarkersRef = useRef<NaverMarker[]>([])
   const myMarkerRef = useRef<NaverMarker | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
+  const [selectedCafeId, setSelectedCafeId] = useState<number | null>(null)
+  const cafeCardRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const markerListenersRef = useRef<NaverEventListener[]>([])
 
   useEffect(() => {
     searchCenterRef.current = searchCenter
@@ -359,31 +362,56 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
     }
   }, [location.latitude, location.longitude, naverKeyId])
 
-  // Cafe markers update
+  const selectCafe = useCallback((cafeId: number) => {
+    setSelectedCafeId(cafeId)
+    setShowList(true)
+    requestAnimationFrame(() => {
+      const el = cafeCardRefs.current.get(cafeId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    })
+  }, [])
+
   useEffect(() => {
     const maps = getNaverMapsApi()
     if (!maps) return
     const map = mapRef.current
     if (!map) return
 
+    for (const l of markerListenersRef.current) {
+      try { maps.Event.removeListener(l) } catch { /* ignore */ }
+    }
+    markerListenersRef.current = []
+
     for (const m of cafeMarkersRef.current) {
-      try {
-        m.setMap(null)
-      } catch {
-        // ignore
-      }
+      try { m.setMap(null) } catch { /* ignore */ }
     }
     cafeMarkersRef.current = []
 
     cafeMarkersRef.current = nearby.items.map((cafe) => {
+      const label = cafe.name + (cafe.branch ? ` ${cafe.branch}` : '')
+      const escapedLabel = label.replace(/'/g, '&#39;').replace(/"/g, '&quot;')
       const marker = new maps.Marker({
         position: new maps.LatLng(cafe.latitude, cafe.longitude),
         map,
-        title: `${cafe.name}${cafe.branch ? ` ${cafe.branch}` : ''}`,
+        title: label,
+        icon: {
+          content: `<div style="display:flex;align-items:center;gap:4px;cursor:pointer">` +
+            `<div style="width:10px;height:10px;border-radius:9999px;background:#4338ca;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);flex-shrink:0"></div>` +
+            `<span style="font-size:11px;font-weight:600;color:#1e1b4b;background:white;padding:1px 6px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.12);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis">${escapedLabel}</span>` +
+            `</div>`,
+          size: new maps.Size(140, 20),
+          anchor: new maps.Point(5, 10),
+        },
       })
+      const listener = maps.Event.addListener(marker, 'click', () => {
+        selectCafe(cafe.id)
+      })
+      markerListenersRef.current.push(listener)
       return marker
     })
-  }, [nearby.items])
+  }, [nearby.items, selectCafe])
 
   const [showList, setShowList] = useState(false)
 
@@ -512,7 +540,12 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
             nearby.items.map((cafe) => (
               <div
                 key={cafe.id}
-                className="rounded-xl border border-zinc-200 bg-white p-2.5 shadow-sm"
+                ref={(el) => {
+                  if (el) cafeCardRefs.current.set(cafe.id, el)
+                  else cafeCardRefs.current.delete(cafe.id)
+                }}
+                onClick={() => setSelectedCafeId(cafe.id)}
+                className={`cursor-pointer rounded-xl border p-2.5 shadow-sm transition ${selectedCafeId === cafe.id ? 'border-indigo-400 bg-indigo-50 ring-1 ring-indigo-200' : 'border-zinc-200 bg-white hover:border-zinc-300'}`}
               >
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-sm font-semibold text-zinc-900 leading-tight">
