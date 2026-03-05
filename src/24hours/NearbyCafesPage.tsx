@@ -103,7 +103,7 @@ type NearbyCafesPageProps = {
   variant?: 'web' | 'app'
 }
 
-export function NearbyCafesPage({ variant = 'web' }: NearbyCafesPageProps) {
+export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPageProps) {
   const apiBaseUrl =
     (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080'
   const naverKeyId =
@@ -385,91 +385,83 @@ export function NearbyCafesPage({ variant = 'web' }: NearbyCafesPageProps) {
     })
   }, [nearby.items])
 
-  const listMaxHeightClass =
-    variant === 'app' ? 'max-h-[calc(100dvh-260px)]' : 'max-h-[60vh]'
+  const [showList, setShowList] = useState(false)
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6">
-      <div className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-white px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-zinc-900">내 주변 카페</p>
-            <p className="mt-0.5 text-xs text-zinc-600">
-              위치: <span className="font-medium">{locationText}</span>
-            </p>
-          </div>
+    <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6">
+      {/* ── Map panel ── */}
+      <div className="min-w-0 overflow-hidden rounded-none border-b border-zinc-200 bg-zinc-50 lg:rounded-2xl lg:border">
+        {/* Controls */}
+        <div className="flex items-center gap-2 border-b border-zinc-200 bg-white px-3 py-2">
+          <p className="mr-auto truncate text-xs text-zinc-500">
+            {locationText}
+          </p>
 
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold text-zinc-600" htmlFor="radius">
-              반경
-            </label>
-            <select
-              id="radius"
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-              value={radiusMeters}
-              onChange={(e) => {
-                const next = Number(e.target.value)
-                setRadiusMeters(next)
-                if (searchCenter) void resetAndLoad(searchCenter)
-              }}
-              disabled={loading}
-            >
-              {radiusOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+          <select
+            id="radius"
+            className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-indigo-300"
+            value={radiusMeters}
+            onChange={(e) => {
+              const next = Number(e.target.value)
+              setRadiusMeters(next)
+              if (searchCenter) void resetAndLoad(searchCenter)
+            }}
+            disabled={loading}
+          >
+            {radiusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
+          <button
+            type="button"
+            onClick={recenterToMyLocation}
+            className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-60"
+            disabled={loading}
+          >
+            내 위치
+          </button>
+
+          {isAreaDirty ? (
             <button
               type="button"
-              onClick={recenterToMyLocation}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={loading}
-              title="내 위치로 지도 이동"
+              onClick={applyPendingArea}
+              className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-60"
+              disabled={loading || !pendingCenter}
             >
-              내 위치로
+              이 지역 검색
             </button>
-
-            {isAreaDirty ? (
-              <button
-                type="button"
-                onClick={applyPendingArea}
-                className="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={loading || !pendingCenter}
-              >
-                이 지역에서 검색
-              </button>
-            ) : (
+          ) : (
             <button
               type="button"
               onClick={() => {
                 if (!searchCenter) return
                 void resetAndLoad(searchCenter)
               }}
-              className="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-60"
               disabled={loading || !searchCenter}
             >
               새로고침
             </button>
-            )}
-          </div>
+          )}
         </div>
 
         {geoMessage ? (
-          <div className="border-b border-zinc-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="border-b border-zinc-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             {geoMessage}
           </div>
         ) : null}
 
         {mapError ? (
-          <div className="border-b border-zinc-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+          <div className="border-b border-zinc-200 bg-rose-50 px-3 py-2 text-xs text-rose-900">
             {mapError}
           </div>
         ) : null}
 
         <div className="relative">
-          <div ref={mapContainerRef} className="aspect-[16/10] w-full bg-zinc-100" />
+          <div ref={mapContainerRef} className="aspect-square w-full bg-zinc-100 sm:aspect-[16/10]" />
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-sm font-semibold text-zinc-700">
               불러오는 중…
@@ -478,60 +470,70 @@ export function NearbyCafesPage({ variant = 'web' }: NearbyCafesPageProps) {
         </div>
       </div>
 
-      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-900">카페 목록</h3>
-            <p className="mt-1 text-xs text-zinc-600">
-              거리순으로 정렬됩니다. (무한 스크롤)
-            </p>
-          </div>
-          <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+      {/* ── Mobile toggle ── */}
+      <button
+        type="button"
+        onClick={() => setShowList((v) => !v)}
+        className="sticky bottom-0 z-10 flex items-center justify-center gap-1.5 border-t border-zinc-200 bg-white py-3 text-sm font-semibold text-indigo-600 lg:hidden"
+      >
+        {showList ? '지도 보기' : `카페 목록 (${nearby.items.length}개)`}
+        <svg
+          className={`h-4 w-4 transition ${showList ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* ── List panel ── */}
+      <div className={`min-w-0 rounded-none border-zinc-200 bg-white px-3 py-4 lg:rounded-2xl lg:border lg:p-5 lg:shadow-sm ${showList ? '' : 'hidden lg:block'}`}>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold text-zinc-900">카페 목록</h3>
+          <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">
             {nearby.items.length}개
           </span>
         </div>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
+          <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
             {errorMessage}
           </div>
         ) : null}
 
-        <div className={`mt-4 space-y-2 overflow-auto pr-1 ${listMaxHeightClass}`}>
+        <div className="mt-3 space-y-2 overflow-auto lg:max-h-[60vh]">
           {nearby.items.length === 0 && !loading ? (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
               결과가 없어요. 반경을 늘리거나 새로고침을 눌러보세요.
             </div>
           ) : (
             nearby.items.map((cafe) => (
               <div
                 key={cafe.id}
-                className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm"
+                className="rounded-xl border border-zinc-200 bg-white p-2.5 shadow-sm"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-zinc-900">
-                        {cafe.name}
-                        {cafe.branch ? (
-                          <span className="text-zinc-600"> {cafe.branch}</span>
-                        ) : null}
-                      </span>
-                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">
-                        {formatDistance(cafe.distance)}
-                      </span>
-                      {typeof cafe.rating === 'number' ? (
-                        <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
-                          평점 {cafe.rating.toFixed(1)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 truncate text-xs text-zinc-600">{cafe.address}</p>
-                    {cafe.phoneNumber ? (
-                      <p className="mt-1 text-xs text-zinc-500">{cafe.phoneNumber}</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-sm font-semibold text-zinc-900 leading-tight">
+                    {cafe.name}
+                    {cafe.branch ? (
+                      <span className="text-zinc-500"> {cafe.branch}</span>
                     ) : null}
-                  </div>
+                  </span>
+                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600">
+                    {formatDistance(cafe.distance)}
+                  </span>
+                  {typeof cafe.rating === 'number' ? (
+                    <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                      {cafe.rating.toFixed(1)}
+                    </span>
+                  ) : null}
                 </div>
+                <p className="mt-0.5 truncate text-xs text-zinc-500">{cafe.address}</p>
+                {cafe.phoneNumber ? (
+                  <p className="text-xs text-zinc-400">{cafe.phoneNumber}</p>
+                ) : null}
               </div>
             ))
           )}
@@ -545,7 +547,7 @@ export function NearbyCafesPage({ variant = 'web' }: NearbyCafesPageProps) {
           ) : null}
 
           {!nearby.hasMore && nearby.items.length > 0 ? (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-xs text-zinc-500">
               더 이상 결과가 없습니다.
             </div>
           ) : null}
