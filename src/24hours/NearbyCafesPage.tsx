@@ -11,6 +11,7 @@ type NaverEventListener = unknown
 type NaverMap = {
   setCenter: (center: NaverLatLng) => void
   getCenter: () => NaverLatLng
+  panTo: (center: NaverLatLng, opts?: unknown) => void
 }
 
 type NaverMarker = {
@@ -98,6 +99,11 @@ type NearbyState = {
 
 const DEFAULT_RADIUS_METERS = 5000
 const DEFAULT_SIZE = 20
+
+const PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36" fill="none">` +
+  `<path d="M14 0C6.268 0 0 6.268 0 14c0 5.25 3.024 10.174 7.6 14.374C11.072 31.674 14 36 14 36s2.928-4.326 6.4-7.626C24.976 24.174 28 19.25 28 14 28 6.268 21.732 0 14 0z" fill="#4338ca"/>` +
+  `<circle cx="14" cy="13" r="5.5" fill="white"/>` +
+  `</svg>`
 
 type NearbyCafesPageProps = {
   variant?: 'web' | 'app'
@@ -362,9 +368,19 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
     }
   }, [location.latitude, location.longitude, naverKeyId])
 
+  const cafeLocationsRef = useRef<Map<number, LatLngLiteral>>(new Map())
+
   const selectCafe = useCallback((cafeId: number) => {
     setSelectedCafeId(cafeId)
     setShowList(true)
+
+    const maps = getNaverMapsApi()
+    const map = mapRef.current
+    const loc = cafeLocationsRef.current.get(cafeId)
+    if (maps && map && loc) {
+      map.panTo(new maps.LatLng(loc.latitude, loc.longitude))
+    }
+
     requestAnimationFrame(() => {
       const el = cafeCardRefs.current.get(cafeId)
       if (el) {
@@ -389,20 +405,24 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
     }
     cafeMarkersRef.current = []
 
+    const locMap = new Map<number, LatLngLiteral>()
+
     cafeMarkersRef.current = nearby.items.map((cafe) => {
       const label = cafe.name + (cafe.branch ? ` ${cafe.branch}` : '')
       const escapedLabel = label.replace(/'/g, '&#39;').replace(/"/g, '&quot;')
+      locMap.set(cafe.id, { latitude: cafe.latitude, longitude: cafe.longitude })
+
       const marker = new maps.Marker({
         position: new maps.LatLng(cafe.latitude, cafe.longitude),
         map,
         title: label,
         icon: {
-          content: `<div style="display:flex;align-items:center;gap:4px;cursor:pointer">` +
-            `<div style="width:10px;height:10px;border-radius:9999px;background:#4338ca;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);flex-shrink:0"></div>` +
-            `<span style="font-size:11px;font-weight:600;color:#1e1b4b;background:white;padding:1px 6px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.12);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis">${escapedLabel}</span>` +
+          content: `<div style="display:flex;align-items:flex-end;gap:2px;cursor:pointer">` +
+            `<div style="flex-shrink:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25))">${PIN_SVG}</div>` +
+            `<span style="font-size:11px;font-weight:600;color:#1e1b4b;background:white;padding:2px 6px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.12);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px">${escapedLabel}</span>` +
             `</div>`,
-          size: new maps.Size(140, 20),
-          anchor: new maps.Point(5, 10),
+          size: new maps.Size(160, 36),
+          anchor: new maps.Point(14, 36),
         },
       })
       const listener = maps.Event.addListener(marker, 'click', () => {
@@ -411,6 +431,8 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
       markerListenersRef.current.push(listener)
       return marker
     })
+
+    cafeLocationsRef.current = locMap
   }, [nearby.items, selectCafe])
 
   const [showList, setShowList] = useState(false)
@@ -553,7 +575,7 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
                   if (el) cafeCardRefs.current.set(cafe.id, el)
                   else cafeCardRefs.current.delete(cafe.id)
                 }}
-                onClick={() => setSelectedCafeId(cafe.id)}
+                onClick={() => selectCafe(cafe.id)}
                 className={`cursor-pointer rounded-xl border p-2.5 shadow-sm transition ${selectedCafeId === cafe.id ? 'border-indigo-400 bg-indigo-50 ring-1 ring-indigo-200' : 'border-zinc-200 bg-white hover:border-zinc-300'}`}
               >
                 <div className="flex flex-wrap items-center gap-1.5">
