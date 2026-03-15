@@ -17,6 +17,7 @@ type NaverMap = {
 type NaverMarker = {
   setMap: (map: NaverMap | null) => void
   setPosition: (pos: NaverLatLng) => void
+  setIcon: (icon: { content: string; size: unknown; anchor: unknown }) => void
 }
 
 type NaverMapsApi = {
@@ -100,10 +101,17 @@ type NearbyState = {
 const DEFAULT_RADIUS_METERS = 5000
 const DEFAULT_SIZE = 20
 
-const PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36" fill="none">` +
-  `<path d="M14 0C6.268 0 0 6.268 0 14c0 5.25 3.024 10.174 7.6 14.374C11.072 31.674 14 36 14 36s2.928-4.326 6.4-7.626C24.976 24.174 28 19.25 28 14 28 6.268 21.732 0 14 0z" fill="#4338ca"/>` +
-  `<circle cx="14" cy="13" r="5.5" fill="white"/>` +
-  `</svg>`
+const PIN_PATH = `M14 0C6.268 0 0 6.268 0 14c0 5.25 3.024 10.174 7.6 14.374C11.072 31.674 14 36 14 36s2.928-4.326 6.4-7.626C24.976 24.174 28 19.25 28 14 28 6.268 21.732 0 14 0z`
+
+function makePinSvg(selected: boolean) {
+  const w = selected ? 36 : 28
+  const h = selected ? 46 : 36
+  const fill = selected ? '#e11d48' : '#4338ca'
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 28 36" fill="none">` +
+    `<path d="${PIN_PATH}" fill="${fill}"/>` +
+    `<circle cx="14" cy="13" r="5.5" fill="white"/>` +
+    `</svg>`
+}
 
 type NearbyCafesPageProps = {
   variant?: 'web' | 'app'
@@ -138,7 +146,7 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<NaverMap | null>(null)
   const idleListenerRef = useRef<NaverEventListener | null>(null)
-  const cafeMarkersRef = useRef<NaverMarker[]>([])
+  const cafeMarkersRef = useRef<Map<number, NaverMarker>>(new Map())
   const myMarkerRef = useRef<NaverMarker | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
   const [selectedCafeId, setSelectedCafeId] = useState<number | null>(null)
@@ -369,6 +377,44 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
   }, [location.latitude, location.longitude, naverKeyId])
 
   const cafeLocationsRef = useRef<Map<number, LatLngLiteral>>(new Map())
+  const prevSelectedRef = useRef<number | null>(null)
+  const cafeLabelsRef = useRef<Map<number, string>>(new Map())
+
+  function markerIcon(maps: NaverMapsApi, escapedLabel: string, selected: boolean) {
+    const pinSize = selected ? 'width:36px;height:46px' : 'width:28px;height:36px'
+    return {
+      content: `<div style="display:flex;align-items:flex-end;gap:2px;cursor:pointer">` +
+        `<div style="flex-shrink:0;${pinSize};filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25))">${makePinSvg(selected)}</div>` +
+        `<span style="font-size:${selected ? '12px' : '11px'};font-weight:600;color:${selected ? '#e11d48' : '#1e1b4b'};background:white;padding:2px 6px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,${selected ? '0.2' : '0.12'});white-space:nowrap;max-width:${selected ? '160px' : '120px'};overflow:hidden;text-overflow:ellipsis;margin-bottom:${selected ? '14px' : '10px'}">${escapedLabel}</span>` +
+        `</div>`,
+      size: new maps.Size(selected ? 200 : 160, selected ? 46 : 36),
+      anchor: new maps.Point(selected ? 18 : 14, selected ? 46 : 36),
+    }
+  }
+
+  useEffect(() => {
+    const maps = getNaverMapsApi()
+    if (!maps) return
+
+    const prev = prevSelectedRef.current
+    if (prev !== null) {
+      const prevMarker = cafeMarkersRef.current.get(prev)
+      const prevLabel = cafeLabelsRef.current.get(prev)
+      if (prevMarker && prevLabel) {
+        prevMarker.setIcon(markerIcon(maps, prevLabel, false))
+      }
+    }
+
+    if (selectedCafeId !== null) {
+      const marker = cafeMarkersRef.current.get(selectedCafeId)
+      const label = cafeLabelsRef.current.get(selectedCafeId)
+      if (marker && label) {
+        marker.setIcon(markerIcon(maps, label, true))
+      }
+    }
+
+    prevSelectedRef.current = selectedCafeId
+  }, [selectedCafeId])
 
   const selectCafe = useCallback((cafeId: number) => {
     setSelectedCafeId(cafeId)
@@ -400,39 +446,37 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
     }
     markerListenersRef.current = []
 
-    for (const m of cafeMarkersRef.current) {
+    for (const m of cafeMarkersRef.current.values()) {
       try { m.setMap(null) } catch { /* ignore */ }
     }
-    cafeMarkersRef.current = []
+    cafeMarkersRef.current = new Map()
 
     const locMap = new Map<number, LatLngLiteral>()
+    const markerMap = new Map<number, NaverMarker>()
+    const labelMap = new Map<number, string>()
 
-    cafeMarkersRef.current = nearby.items.map((cafe) => {
+    nearby.items.forEach((cafe) => {
       const label = cafe.name + (cafe.branch ? ` ${cafe.branch}` : '')
       const escapedLabel = label.replace(/'/g, '&#39;').replace(/"/g, '&quot;')
       locMap.set(cafe.id, { latitude: cafe.latitude, longitude: cafe.longitude })
+      labelMap.set(cafe.id, escapedLabel)
 
       const marker = new maps.Marker({
         position: new maps.LatLng(cafe.latitude, cafe.longitude),
         map,
         title: label,
-        icon: {
-          content: `<div style="display:flex;align-items:flex-end;gap:2px;cursor:pointer">` +
-            `<div style="flex-shrink:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25))">${PIN_SVG}</div>` +
-            `<span style="font-size:11px;font-weight:600;color:#1e1b4b;background:white;padding:2px 6px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.12);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px">${escapedLabel}</span>` +
-            `</div>`,
-          size: new maps.Size(160, 36),
-          anchor: new maps.Point(14, 36),
-        },
+        icon: markerIcon(maps, escapedLabel, false),
       })
       const listener = maps.Event.addListener(marker, 'click', () => {
         selectCafe(cafe.id)
       })
       markerListenersRef.current.push(listener)
-      return marker
+      markerMap.set(cafe.id, marker)
     })
 
+    cafeMarkersRef.current = markerMap
     cafeLocationsRef.current = locMap
+    cafeLabelsRef.current = labelMap
   }, [nearby.items, selectCafe])
 
   const [showList, setShowList] = useState(false)
