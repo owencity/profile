@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+public/pwa-192.png
+public/pwa-512.png
 
 # Editor directories and files
 .vscode/*
