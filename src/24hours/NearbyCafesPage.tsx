@@ -642,6 +642,28 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
                 {cafe.phoneNumber ? (
                   <p className="text-xs text-zinc-400">{cafe.phoneNumber}</p>
                 ) : null}
+                <div className="mt-1.5 flex gap-1.5">
+                  <a
+                    href={`https://map.naver.com/v5/directions/-/${cafe.longitude},${cafe.latitude},${encodeURIComponent(cafe.name + (cafe.branch ? ' ' + cafe.branch : ''))}/-/transit?c=${cafe.longitude},${cafe.latitude},15,0,0,0,dh`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 rounded-lg bg-green-50 px-2 py-1 text-[11px] font-semibold text-green-700 transition hover:bg-green-100"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+                    길찾기
+                  </a>
+                  <a
+                    href={`https://map.naver.com/v5/search/${encodeURIComponent(cafe.name + (cafe.branch ? ' ' + cafe.branch : '') + ' ' + cafe.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-100"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    상세정보
+                  </a>
+                </div>
               </div>
             ))
           )}

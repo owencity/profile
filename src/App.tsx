@@ -1,6 +1,8 @@
 import { profile } from './profile'
 import { useEffect, useMemo, useState } from 'react'
 import { NearbyCafesPage } from './24hours/NearbyCafesPage'
+import { TourismHubPage } from './tourism/TourismHubPage'
+import { TourismDetailPage } from './tourism/TourismDetailPage'
 
 function App() {
   const appTarget = (import.meta.env.VITE_APP_TARGET as string | undefined) ?? ''
@@ -50,6 +52,8 @@ function App() {
     if (route === '/valkyriefs') return 'ValkyrieFS'
     if (route === '/24hours/app') return '24시간이모자라'
     if (route === '/24hours') return '24시간이모자라'
+    if (route === '/tourism') return '관광공사 API'
+    if (route.startsWith('/tourism/')) return '관광공사 API'
     return 'Home'
   }, [route])
 
@@ -101,8 +105,8 @@ function App() {
           </div>
         </header>
 
-        <main className="grid gap-10 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[520px_minmax(0,1fr)] 2xl:grid-cols-[560px_minmax(0,1fr)]">
-          <aside className="hidden lg:block lg:sticky lg:top-10 lg:self-start">
+        <main className={`grid gap-10 lg:gap-12 ${route.startsWith('/tourism') ? 'max-w-4xl mx-auto w-full' : 'lg:grid-cols-[440px_minmax(0,1fr)] xl:grid-cols-[520px_minmax(0,1fr)] 2xl:grid-cols-[560px_minmax(0,1fr)]'}`}>
+          <aside className={`hidden lg:sticky lg:top-10 lg:self-start ${route.startsWith('/tourism') ? '' : 'lg:block'}`}>
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="relative z-0 h-20 bg-zinc-100">
                 <div className="absolute inset-x-0 bottom-0 h-px bg-zinc-200" />
@@ -322,6 +326,13 @@ function App() {
 
               <div className="pb-6" />
             </section>
+          ) : route === '/tourism' ? (
+            <TourismHubPage onNavigate={navigate} />
+          ) : route.startsWith('/tourism/') ? (
+            <TourismDetailPage
+              apiId={route.replace('/tourism/', '')}
+              onNavigate={navigate}
+            />
           ) : route === '/24hours' ? (
             <section>
               <div className="mb-3 flex items-center justify-between sm:mb-4">
@@ -428,8 +439,8 @@ function App() {
                         }}
                       >
                         바로가기
-        </a>
-      </div>
+                      </a>
+                    </div>
 
                     <p className="mt-3 text-sm leading-7 text-zinc-700">
                       {profile.projects[1].summary}
@@ -438,6 +449,7 @@ function App() {
                       {profile.projects[1].details[0]} {profile.projects[1].details[1]}
                     </p>
                   </div>
+
                 </div>
               </div>
 
