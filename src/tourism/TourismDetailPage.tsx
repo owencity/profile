@@ -216,7 +216,7 @@ function PlaceCard({ item, config, idx }: { item: TourismItem; config: ApiConfig
   )
 }
 
-function StatsCard({ item, config, idx, maxVal }: { item: TourismItem; config: ApiConfig; idx: number; maxVal: number }) {
+function StatsCard({ item, config, maxVal }: { item: TourismItem; config: ApiConfig; idx?: number; maxVal: number }) {
   const title = formatCellValue(config.titleKey, item[config.titleKey])
   const sub = config.subKey ? formatCellValue(config.subKey, item[config.subKey]) : null
   const rawVal = config.valueKey ? Number(item[config.valueKey]) : null
