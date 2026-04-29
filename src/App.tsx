@@ -3,6 +3,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { NearbyCafesPage } from './24hours/NearbyCafesPage'
 import { TourismHubPage } from './tourism/TourismHubPage'
 import { TourismDetailPage } from './tourism/TourismDetailPage'
+import { LoginModal } from './auth/LoginModal'
+import { AuthCallback } from './auth/AuthCallback'
+import { ChatRoom } from './chat/ChatRoom'
+import { useAuthStore } from './auth/useAuthStore'
+import { SecretRoomPage } from './secret/SecretRoomPage'
 
 function App() {
   const appTarget = (import.meta.env.VITE_APP_TARGET as string | undefined) ?? ''
@@ -13,6 +18,8 @@ function App() {
   const [route, setRoute] = useState(() =>
     is24hoursStandalone ? '/24hours/app' : window.location.pathname || '/',
   )
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const { user, logout } = useAuthStore()
 
   useEffect(() => {
     const onPopState = () => setRoute(window.location.pathname || '/')
@@ -54,7 +61,17 @@ function App() {
     if (route === '/24hours') return '24시간이모자라'
     if (route === '/tourism') return '관광공사 API'
     if (route.startsWith('/tourism/')) return '관광공사 API'
+    if (route.startsWith('/chat/')) return '채팅방'
+    if (route === '/auth/callback') return '로그인 중'
+    if (route === '/secret') return '비밀의 방'
     return 'Home'
+  }, [route])
+
+  const chatRoomName = useMemo(() => {
+    if (!route.startsWith('/chat/')) return ''
+    const roomId = route.replace('/chat/', '')
+    const decoded = decodeURIComponent(roomId)
+    return decoded.includes('cafe-') ? decoded.replace('cafe-', '') : decoded
   }, [route])
 
   if (isAppLikeMode) {
@@ -79,7 +96,7 @@ function App() {
       />
       <div className="mx-auto w-full max-w-none px-3 py-4 sm:px-6 sm:py-10 lg:px-12 2xl:px-16">
         <header className="mb-4 sm:mb-10">
-          <div className="flex w-full items-center justify-start gap-3 rounded-full border border-zinc-200 bg-white px-4 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)] sm:gap-6 sm:px-5 sm:py-3">
+          <div className="flex w-full items-center justify-between gap-3 rounded-full border border-zinc-200 bg-white px-4 py-2.5 shadow-[0_1px_0_rgba(0,0,0,0.04)] sm:gap-6 sm:px-5 sm:py-3">
             <div className="flex items-baseline gap-2 sm:gap-3">
               <a
                 className="text-sm font-semibold tracking-tight text-indigo-700 transition hover:text-indigo-600"
@@ -101,6 +118,52 @@ function App() {
                   </span>
                 </>
               ) : null}
+            </div>
+
+            {/* 로그인/유저 영역 */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="비밀의 방"
+                title="비밀의 방"
+                onClick={() => navigate('/secret')}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-600"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+              </button>
+
+              {user ? (
+                <>
+                  <span className="hidden max-w-[6rem] truncate text-xs font-medium text-zinc-700 sm:inline">
+                    {user.nickname}
+                  </span>
+                  <button
+                    className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500 shadow-sm transition hover:bg-zinc-50"
+                    onClick={logout}
+                  >
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  로그인
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -191,7 +254,23 @@ function App() {
             </div>
           </aside>
 
-          {route === '/valkyriefs' ? (
+          {route === '/auth/callback' ? (
+            <AuthCallback
+              onDone={(redirectTo) => {
+                window.history.replaceState({}, '', redirectTo)
+                setRoute(redirectTo)
+              }}
+            />
+          ) : route === '/secret' ? (
+            <SecretRoomPage onBack={() => navigate('/')} />
+          ) : route.startsWith('/chat/') ? (
+            <ChatRoom
+              roomId={route.replace('/chat/', '')}
+              roomName={chatRoomName || '채팅방'}
+              onBack={() => navigate('/24hours')}
+              onLoginRequired={() => setShowLoginModal(true)}
+            />
+          ) : route === '/valkyriefs' ? (
             <section className="space-y-10">
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -359,7 +438,9 @@ function App() {
                 </a>
               </div>
 
-              <NearbyCafesPage />
+              <NearbyCafesPage
+                onChatRoom={(roomId) => navigate(`/chat/${roomId}`)}
+              />
             </section>
           ) : (
             <section className="space-y-10">
@@ -458,6 +539,8 @@ function App() {
           )}
         </main>
       </div>
+
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
     </div>
   )
 }

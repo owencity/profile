@@ -115,9 +115,10 @@ function makePinSvg(selected: boolean) {
 
 type NearbyCafesPageProps = {
   variant?: 'web' | 'app'
+  onChatRoom?: (roomId: string) => void
 }
 
-export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPageProps) {
+export function NearbyCafesPage({ variant: _variant = 'web', onChatRoom }: NearbyCafesPageProps) {
   const apiBaseUrl =
     (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080'
   const naverKeyId =
@@ -663,6 +664,17 @@ export function NearbyCafesPage({ variant: _variant = 'web' }: NearbyCafesPagePr
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     상세정보
                   </a>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const roomId = `cafe-${encodeURIComponent(cafe.name + (cafe.branch ? ' ' + cafe.branch : ''))}`
+                      onChatRoom?.(roomId)
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                    채팅
+                  </button>
                 </div>
               </div>
             ))
