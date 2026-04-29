@@ -534,6 +534,92 @@ function App() {
                 </div>
               </div>
 
+              {/* 비밀의 방 문 */}
+              <button
+                type="button"
+                onClick={() => navigate('/secret')}
+                className="group relative block w-full overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-zinc-900 to-indigo-950 p-6 text-left shadow-xl transition hover:shadow-2xl hover:shadow-indigo-500/20"
+                aria-label="비밀의 방으로 들어가기"
+              >
+                {/* 별 배경 */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60">
+                  {Array.from({ length: 22 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute h-0.5 w-0.5 rounded-full bg-white"
+                      style={{
+                        left: `${(i * 53) % 100}%`,
+                        top: `${(i * 89) % 100}%`,
+                        opacity: 0.3 + ((i * 17) % 70) / 100,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* 빛 새어나오는 효과 */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-x-10 -top-10 h-32 bg-gradient-to-b from-amber-300/30 via-amber-400/10 to-transparent blur-3xl transition-opacity duration-500 group-hover:from-amber-300/50"
+                />
+
+                <div className="relative flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+                  {/* 문 SVG */}
+                  <div className="relative flex h-32 w-24 flex-shrink-0 items-end justify-center sm:h-36 sm:w-28">
+                    {/* 문틀 */}
+                    <div className="absolute inset-x-0 bottom-0 h-full rounded-t-[3rem] border-2 border-amber-700/60 bg-gradient-to-b from-amber-950 to-zinc-950 shadow-inner" />
+                    {/* 문짝 */}
+                    <div className="relative mx-1 mb-1 h-[calc(100%-0.5rem)] w-[calc(100%-0.5rem)] rounded-t-[2.7rem] border border-amber-700/40 bg-gradient-to-b from-amber-900 via-amber-950 to-zinc-900 transition-transform duration-500 group-hover:translate-x-1 group-hover:rotate-y-3 group-hover:[transform-origin:left]">
+                      {/* 문 패널 디테일 */}
+                      <div className="absolute inset-x-3 top-3 h-10 rounded-md border border-amber-700/30" />
+                      <div className="absolute inset-x-3 top-16 h-10 rounded-md border border-amber-700/30" />
+                      {/* 손잡이 */}
+                      <div className="absolute right-2 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,0.6)]" />
+                    </div>
+                    {/* 문 위 장식 (작은 자물쇠) */}
+                    <svg
+                      className="absolute -top-1 left-1/2 h-5 w-5 -translate-x-1/2 text-amber-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor" />
+                      <path d="M8 11V8a4 4 0 018 0v3" />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1 text-center sm:text-left">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+                      ── Secret ──
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold tracking-tight text-white sm:text-xl">
+                      비밀의 방
+                    </h3>
+                    <p className="mt-2 text-xs leading-6 text-zinc-400 sm:text-sm">
+                      비밀번호를 알고 있는 사람만 들어올 수 있습니다.<br />
+                      안에는… 옛 추억의 미니게임이 기다리고 있어요.
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300/90 transition group-hover:gap-2.5 group-hover:text-amber-200">
+                      문을 두드린다
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </button>
+
               <div className="pb-6" />
             </section>
           )}
