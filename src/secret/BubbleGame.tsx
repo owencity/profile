@@ -22,39 +22,280 @@ const STUN_BOUNCE = -260
 
 // 레벨: '#' = 벽, '=' = 통과형 발판 (위에서만 착지), ' ' = 빈공간
 // 좌우 wrap 가능 (보글보블 클래식)
-const LEVELS: string[][] = [
-  [
-    '################',
-    '                ',
-    '                ',
-    '                ',
-    '   ========     ',
-    '                ',
-    '======   =======',
-    '                ',
-    '   ========     ',
-    '                ',
-    '                ',
-    '================',
-    '                ',
-    '                ',
-  ],
-  [
-    '################',
-    '                ',
-    '   =====        ',
-    '                ',
-    '          ===== ',
-    '                ',
-    '  =====         ',
-    '                ',
-    '          ===== ',
-    '                ',
-    '   =====        ',
-    '================',
-    '                ',
-    '                ',
-  ],
+interface LevelDef {
+  layout: string[]
+  enemies: { col: number; row: number }[]
+}
+
+const LEVELS: LevelDef[] = [
+  // 1: 튜토리얼 - 가운데 발판 한 줄
+  {
+    layout: [
+      '################',
+      '                ',
+      '                ',
+      '                ',
+      '   ========     ',
+      '                ',
+      '======   =======',
+      '                ',
+      '   ========     ',
+      '                ',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 12, row: 9 },
+      { col: 7, row: 5 },
+      { col: 4, row: 3 },
+    ],
+  },
+  // 2: 지그재그
+  {
+    layout: [
+      '################',
+      '                ',
+      '   =====        ',
+      '                ',
+      '          ===== ',
+      '                ',
+      '  =====         ',
+      '                ',
+      '          ===== ',
+      '                ',
+      '   =====        ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 12, row: 5 },
+      { col: 3, row: 9 },
+      { col: 8, row: 1 },
+      { col: 13, row: 9 },
+    ],
+  },
+  // 3: 십자 모양
+  {
+    layout: [
+      '################',
+      '                ',
+      '                ',
+      '       ==       ',
+      '       ==       ',
+      '==============  ',
+      '       ==       ',
+      '       ==       ',
+      '                ',
+      '                ',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 2, row: 4 },
+      { col: 12, row: 4 },
+      { col: 2, row: 9 },
+      { col: 12, row: 9 },
+    ],
+  },
+  // 4: 계단 오르기
+  {
+    layout: [
+      '################',
+      '                ',
+      '==              ',
+      '                ',
+      '   ===          ',
+      '                ',
+      '      ===       ',
+      '                ',
+      '         ===    ',
+      '                ',
+      '            ====',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 1, row: 1 },
+      { col: 5, row: 5 },
+      { col: 9, row: 7 },
+      { col: 13, row: 9 },
+      { col: 7, row: 9 },
+    ],
+  },
+  // 5: 좌우 분리 + 중앙 다리
+  {
+    layout: [
+      '################',
+      '                ',
+      '                ',
+      '=====      =====',
+      '                ',
+      '                ',
+      '=====      =====',
+      '       ==       ',
+      '                ',
+      '=====      =====',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 2, row: 2 },
+      { col: 13, row: 2 },
+      { col: 7, row: 6 },
+      { col: 2, row: 8 },
+      { col: 13, row: 8 },
+    ],
+  },
+  // 6: 다단 + 양쪽 끝 짧은 발판
+  {
+    layout: [
+      '################',
+      '   ==      ==   ',
+      '                ',
+      '                ',
+      '=====      =====',
+      '                ',
+      '                ',
+      '   ========     ',
+      '                ',
+      '=====      =====',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 4, row: 0 },
+      { col: 11, row: 0 },
+      { col: 1, row: 3 },
+      { col: 14, row: 3 },
+      { col: 7, row: 6 },
+      { col: 7, row: 9 },
+    ],
+  },
+  // 7: 비대칭 미궁
+  {
+    layout: [
+      '################',
+      '==          ====',
+      '       ===      ',
+      '                ',
+      '====        ====',
+      '                ',
+      '   ==========   ',
+      '                ',
+      '====        ====',
+      '                ',
+      '       ===      ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 1, row: 0 },
+      { col: 14, row: 0 },
+      { col: 8, row: 1 },
+      { col: 2, row: 3 },
+      { col: 13, row: 3 },
+      { col: 7, row: 5 },
+    ],
+  },
+  // 8: 밀집 발판 (좁은 통로)
+  {
+    layout: [
+      '################',
+      '====    ========',
+      '                ',
+      '=========       ',
+      '                ',
+      '   ===========  ',
+      '                ',
+      '==========      ',
+      '                ',
+      '====    ========',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 6, row: 0 },
+      { col: 11, row: 2 },
+      { col: 2, row: 4 },
+      { col: 13, row: 4 },
+      { col: 12, row: 6 },
+      { col: 6, row: 8 },
+      { col: 6, row: 10 },
+    ],
+  },
+  // 9: 좌우 wrap 활용 (양쪽 끝)
+  {
+    layout: [
+      '################',
+      '==            ==',
+      '                ',
+      '====        ====',
+      '                ',
+      '======    ======',
+      '                ',
+      '======    ======',
+      '                ',
+      '====        ====',
+      '                ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 7, row: 2 },
+      { col: 8, row: 2 },
+      { col: 7, row: 4 },
+      { col: 8, row: 4 },
+      { col: 7, row: 6 },
+      { col: 8, row: 8 },
+      { col: 1, row: 9 },
+      { col: 14, row: 9 },
+    ],
+  },
+  // 10: 보스 - 빈 공간 + 적 다수
+  {
+    layout: [
+      '################',
+      '   =        =   ',
+      '                ',
+      '                ',
+      '   ==========   ',
+      '                ',
+      '   =        =   ',
+      '                ',
+      '   ==========   ',
+      '                ',
+      '   =        =   ',
+      '================',
+      '                ',
+      '                ',
+    ],
+    enemies: [
+      { col: 3, row: 0 },
+      { col: 12, row: 0 },
+      { col: 7, row: 3 },
+      { col: 8, row: 3 },
+      { col: 3, row: 5 },
+      { col: 12, row: 5 },
+      { col: 7, row: 7 },
+      { col: 8, row: 7 },
+      { col: 5, row: 10 },
+      { col: 10, row: 10 },
+    ],
+  },
 ]
 
 type GameState = 'idle' | 'playing' | 'paused' | 'won' | 'gameover'
@@ -194,24 +435,7 @@ export function BubbleGame() {
     bubblesRef.current = []
     fruitsRef.current = []
 
-    // 적 스폰 위치 (레벨에 따라 다르게)
-    const spawnPositions =
-      idx % 2 === 0
-        ? [
-            { col: 12, row: 9 },
-            { col: 8, row: 5 },
-            { col: 4, row: 5 },
-          ]
-        : [
-            { col: 12, row: 5 },
-            { col: 3, row: 9 },
-            { col: 8, row: 1 },
-            { col: 13, row: 9 },
-          ]
-
-    void level
-
-    enemiesRef.current = spawnPositions.map((p, i) => ({
+    enemiesRef.current = level.enemies.map((p, i) => ({
       id: idCounterRef.current++,
       x: p.col * TILE + 4,
       y: p.row * TILE + 6,
@@ -242,7 +466,9 @@ export function BubbleGame() {
   // === 적이 죽었을 때 (방울 터트림) ===
   const killEnemy = useCallback((enemy: Enemy) => {
     enemy.alive = false
-    scoreRef.current += 100
+    // 스테이지가 올라갈수록 적 처치 점수 ↑
+    const stageBonus = levelIdxRef.current * 50
+    scoreRef.current += 200 + stageBonus
     setScore(scoreRef.current)
     fruitsRef.current.push({
       id: idCounterRef.current++,
@@ -262,7 +488,7 @@ export function BubbleGame() {
     const dt = Math.min(0.033, (now - lastTickRef.current) / 1000)
     lastTickRef.current = now
 
-    const level = LEVELS[levelIdxRef.current]
+    const level = LEVELS[levelIdxRef.current].layout
     const player = playerRef.current
     if (!player) return
 
@@ -650,7 +876,7 @@ export function BubbleGame() {
       }
 
       if (rectsOverlap(f.x, f.y, 22, 22, player.x, player.y, player.w, player.h)) {
-        scoreRef.current += 50
+        scoreRef.current += 100 + levelIdxRef.current * 20
         setScore(scoreRef.current)
         f.born = -1
       }
@@ -664,7 +890,17 @@ export function BubbleGame() {
     // === 클리어 체크 ===
     if (enemiesRef.current.every((e) => !e.alive)) {
       const next = levelIdxRef.current + 1
+      // 클리어 보너스: 스테이지 번호 * 1000 (최소 2000)
+      const clearBonus = Math.max(2000, (levelIdxRef.current + 1) * 1000)
+      // 헤롱 안 한 보너스 (퍼펙트)
+      const perfectBonus = stunCountRef.current === 0 ? 3000 : 0
+      scoreRef.current += clearBonus + perfectBonus
+      setScore(scoreRef.current)
+
       if (next >= LEVELS.length) {
+        // 마지막 스테이지 추가 보너스
+        scoreRef.current += 10000
+        setScore(scoreRef.current)
         stateRef.current = 'won'
         setState('won')
         if (scoreRef.current > highScore) {
@@ -673,8 +909,6 @@ export function BubbleGame() {
         }
         return
       }
-      scoreRef.current += 1000
-      setScore(scoreRef.current)
       loadLevel(next)
     }
 
@@ -697,7 +931,7 @@ export function BubbleGame() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const level = LEVELS[levelIdxRef.current]
+    const level = LEVELS[levelIdxRef.current].layout
     const player = playerRef.current
 
     // 배경
@@ -925,10 +1159,15 @@ export function BubbleGame() {
     keysRef.current[code] = down
   }
 
+  // 캔버스(컨테이너) 크기는 화면 크기에 맞춰 동적으로
+  const gameWidthStyle: React.CSSProperties = {
+    width: 'min(96vw, calc((100vh - 240px) * 8 / 7), 800px)',
+  }
+
   return (
     <div className="flex flex-col items-center gap-3">
       {/* HUD */}
-      <div className="grid w-full max-w-[512px] grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2" style={gameWidthStyle}>
         <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-center shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">스테이지</p>
           <p className="text-lg font-bold tabular-nums text-zinc-900">{levelIdx + 1} / {LEVELS.length}</p>
@@ -949,13 +1188,14 @@ export function BubbleGame() {
       <div
         ref={containerRef}
         className="relative overflow-hidden rounded-2xl border-2 border-indigo-900 shadow-2xl shadow-indigo-500/20"
-        style={{ width: W, height: H, maxWidth: '100%' }}
+        style={{ ...gameWidthStyle, aspectRatio: `${W} / ${H}` }}
       >
         <canvas
           ref={canvasRef}
           width={W}
           height={H}
-          className="block w-full h-full"
+          className="block h-full w-full"
+          style={{ imageRendering: 'pixelated' }}
           tabIndex={0}
         />
 
@@ -1029,7 +1269,7 @@ export function BubbleGame() {
       </div>
 
       {/* 모바일 터치 컨트롤 */}
-      <div className="grid w-full max-w-[512px] grid-cols-2 gap-2 lg:hidden">
+      <div className="grid grid-cols-2 gap-2 lg:hidden" style={gameWidthStyle}>
         <div className="flex justify-center gap-2">
           <button
             type="button"

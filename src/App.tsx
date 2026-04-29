@@ -19,7 +19,18 @@ function App() {
     is24hoursStandalone ? '/24hours/app' : window.location.pathname || '/',
   )
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [doorOpening, setDoorOpening] = useState(false)
   const { user, logout } = useAuthStore()
+
+  const enterSecret = () => {
+    if (doorOpening) return
+    setDoorOpening(true)
+    window.setTimeout(() => {
+      window.history.pushState({}, '', '/secret')
+      setRoute('/secret')
+      setDoorOpening(false)
+    }, 1100)
+  }
 
   useEffect(() => {
     const onPopState = () => setRoute(window.location.pathname || '/')
@@ -87,6 +98,11 @@ function App() {
     )
   }
 
+  // 비밀의 방은 헤더/사이드바 없이 전체화면으로
+  if (route === '/secret') {
+    return <SecretRoomPage onBack={() => navigate('/')} />
+  }
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-zinc-50 text-zinc-900">
       {/* Wide-screen background decoration (subtle) */}
@@ -126,7 +142,7 @@ function App() {
                 type="button"
                 aria-label="비밀의 방"
                 title="비밀의 방"
-                onClick={() => navigate('/secret')}
+                onClick={enterSecret}
                 className="flex h-7 w-7 items-center justify-center rounded-full text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-600"
               >
                 <svg
@@ -261,8 +277,6 @@ function App() {
                 setRoute(redirectTo)
               }}
             />
-          ) : route === '/secret' ? (
-            <SecretRoomPage onBack={() => navigate('/')} />
           ) : route.startsWith('/chat/') ? (
             <ChatRoom
               roomId={route.replace('/chat/', '')}
@@ -537,7 +551,7 @@ function App() {
               {/* 비밀의 방 문 */}
               <button
                 type="button"
-                onClick={() => navigate('/secret')}
+                onClick={enterSecret}
                 className="group relative block w-full overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-zinc-900 to-indigo-950 p-6 text-left shadow-xl transition hover:shadow-2xl hover:shadow-indigo-500/20"
                 aria-label="비밀의 방으로 들어가기"
               >
@@ -627,6 +641,91 @@ function App() {
       </div>
 
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+
+      {doorOpening && <DoorOpeningOverlay />}
+    </div>
+  )
+}
+
+function DoorOpeningOverlay() {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-black">
+      {/* 황금 빛 폭발 */}
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-1/2"
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(252,211,77,0.95) 0%, rgba(245,158,11,0.7) 30%, rgba(120,53,15,0.3) 60%, transparent 100%)',
+          animation: 'doorBurst 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        }}
+      />
+
+      {/* 빛줄기 8방향 */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div
+          key={i}
+          aria-hidden
+          className="absolute left-1/2 top-1/2 origin-left"
+          style={{
+            width: '50vw',
+            height: 4,
+            transform: `rotate(${(i * 360) / 8}deg)`,
+            background:
+              'linear-gradient(to right, rgba(252,211,77,0.9), rgba(252,211,77,0) 100%)',
+            opacity: 0,
+            animation: `doorRay 1.1s ${0.1 + i * 0.03}s ease-out forwards`,
+          }}
+        />
+      ))}
+
+      {/* 문 (점점 커지면서 사라짐) */}
+      <div
+        aria-hidden
+        className="relative"
+        style={{
+          width: 80,
+          height: 120,
+          animation: 'doorZoom 1.1s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+        }}
+      >
+        <div className="absolute inset-x-0 bottom-0 h-full rounded-t-[2rem] border-2 border-amber-700/70 bg-gradient-to-b from-amber-900 via-amber-950 to-zinc-950" />
+        <div className="absolute inset-x-2 bottom-1 top-1 rounded-t-[1.7rem] bg-gradient-to-b from-amber-300 via-amber-400 to-amber-700 opacity-90 mix-blend-screen" />
+      </div>
+
+      <p
+        className="absolute bottom-[20vh] left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.5em] text-amber-300"
+        style={{ animation: 'doorTextFade 1.1s ease-out forwards' }}
+      >
+        ── 비밀의 방 ──
+      </p>
+
+      <style>{`
+        @keyframes doorBurst {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          25% { transform: translate(-50%, -50%) scale(2); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(35); opacity: 1; }
+        }
+        @keyframes doorZoom {
+          0% { transform: scale(0.6); opacity: 0; }
+          25% { transform: scale(1); opacity: 1; }
+          70% { transform: scale(4); opacity: 0.8; }
+          100% { transform: scale(8); opacity: 0; }
+        }
+        @keyframes doorRay {
+          0% { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleX(0); }
+          40% { opacity: 1; transform: rotate(var(--angle, 0deg)) scaleX(1); }
+          100% { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleX(1.5); }
+        }
+        @keyframes doorTextFade {
+          0%, 30% { opacity: 0; transform: translate(-50%, 10px); }
+          60% { opacity: 1; transform: translate(-50%, 0); }
+          100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+      `}</style>
     </div>
   )
 }
