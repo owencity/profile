@@ -8,6 +8,7 @@ import { AuthCallback } from './auth/AuthCallback'
 import { ChatRoom } from './chat/ChatRoom'
 import { useAuthStore } from './auth/useAuthStore'
 import { SecretRoomPage } from './secret/SecretRoomPage'
+import { DevGuidePage } from './devguide/DevGuidePage'
 
 function App() {
   const appTarget = (import.meta.env.VITE_APP_TARGET as string | undefined) ?? ''
@@ -101,6 +102,11 @@ function App() {
   // 비밀의 방은 헤더/사이드바 없이 전체화면으로
   if (route === '/secret') {
     return <SecretRoomPage onBack={() => navigate('/')} />
+  }
+
+  // 개발 가이드 페이지 — 풀스크린 (헤더/프로필 없음)
+  if (route === '/devguide') {
+    return <DevGuidePage />
   }
 
   return (
