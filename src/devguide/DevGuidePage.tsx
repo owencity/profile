@@ -348,9 +348,9 @@ function CrossCuttingBanner({
       <div className="px-6 py-5">
         <div className="mb-1 flex items-baseline gap-3">
           <h2 className={`text-xl font-bold ${accentClass}`}>{title}</h2>
-          <span className="text-sm text-zinc-500">{subtitle}</span>
+          <span className="text-sm text-zinc-400">{subtitle}</span>
         </div>
-        <p className="mb-5 text-sm leading-6 text-zinc-400">{intro}</p>
+        <p className="mb-5 text-sm leading-7 text-zinc-300">{intro}</p>
         {children}
       </div>
     </div>
@@ -389,9 +389,9 @@ function DetailDrawer({ phase, onClose }: { phase: Phase; onClose: () => void })
               <span className="text-lg font-bold" style={{ color: phase.color.accent }}>
                 {phase.title}
               </span>
-              <span className="text-sm text-zinc-500">{phase.subtitle}</span>
+              <span className="text-sm text-zinc-400">{phase.subtitle}</span>
             </div>
-            <p className="mt-0.5 text-xs text-zinc-500">심화 내용 — 실무에서 챙겨야 할 것들</p>
+            <p className="mt-0.5 text-xs text-zinc-400">심화 내용 — 실무에서 챙겨야 할 것들</p>
           </div>
           <button
             onClick={onClose}
@@ -406,7 +406,7 @@ function DetailDrawer({ phase, onClose }: { phase: Phase; onClose: () => void })
         <div className="flex-1 space-y-8 px-6 py-6">
           {phase.details.map((section) => (
             <div key={section.title}>
-              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              <p className="mb-3 text-xs font-black uppercase tracking-widest text-zinc-400">
                 {section.title}
               </p>
               <div className="space-y-3">
@@ -418,14 +418,14 @@ function DetailDrawer({ phase, onClose }: { phase: Phase; onClose: () => void })
                     <div className="flex items-start gap-3">
                       <span className="mt-0.5 flex-shrink-0 text-xl leading-none">{item.icon}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-zinc-100">{item.label}</p>
-                        <p className="mt-1 text-xs leading-5 text-zinc-400">{item.desc}</p>
+                        <p className="text-base font-bold text-white">{item.label}</p>
+                        <p className="mt-1 text-sm leading-6 text-zinc-300">{item.desc}</p>
                         {item.tags && item.tags.length > 0 && (
                           <div className="mt-2.5 flex flex-wrap gap-1.5">
                             {item.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-400"
+                                className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-300"
                               >
                                 {tag}
                               </span>
@@ -543,7 +543,7 @@ export function DevGuidePage() {
                         <span className={`rounded px-1 py-0.5 text-[9px] font-bold ${r.level === '주도' ? 'opacity-100' : 'opacity-60'}`}
                           style={{ background: role.border, color: role.color }}>{r.level}</span>
                       </div>
-                      <p className="truncate text-[11px] text-zinc-500">{r.note}</p>
+                      <p className="truncate text-xs text-zinc-400">{r.note}</p>
                     </div>
                   </div>
                 )
@@ -555,8 +555,8 @@ export function DevGuidePage() {
                 <div key={item.label} className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5">
                   <span className="mt-0.5 text-base leading-none">{item.icon}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-zinc-200">{item.label}</p>
-                    <p className="text-xs text-zinc-500">{item.desc}</p>
+                    <p className="text-sm font-semibold text-zinc-100">{item.label}</p>
+                    <p className="text-sm text-zinc-300">{item.desc}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {item.roles.map((r) => <RoleBadge key={r.key} roleKey={r.key} level={r.level} size="xs" />)}
                     </div>
@@ -584,7 +584,7 @@ export function DevGuidePage() {
                   <span className="text-base">{s.icon}</span>
                   <span className="text-xs font-bold" style={{ color: s.color }}>{s.stage}</span>
                 </div>
-                <p className="text-[11px] leading-5 text-zinc-400">{s.desc}</p>
+                <p className="text-xs leading-5 text-zinc-300">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -630,7 +630,7 @@ export function DevGuidePage() {
                       </h2>
                       <span className="text-sm font-medium text-zinc-500">{phase.subtitle}</span>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">{phase.intro}</p>
+                    <p className="mt-2 text-sm leading-7 text-zinc-300">{phase.intro}</p>
 
                     {/* 역할 요약 */}
                     <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -650,7 +650,7 @@ export function DevGuidePage() {
                                   {r.level}
                                 </span>
                               </div>
-                              <p className="truncate text-[11px] text-zinc-500">{r.note}</p>
+                              <p className="truncate text-xs text-zinc-400">{r.note}</p>
                             </div>
                           </div>
                         )
@@ -687,7 +687,7 @@ export function DevGuidePage() {
                                 </span>
                               )}
                             </p>
-                            <p className="mt-0.5 text-xs leading-5 text-zinc-500">{item.desc}</p>
+                            <p className="mt-0.5 text-sm leading-relaxed text-zinc-300">{item.desc}</p>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-1">
