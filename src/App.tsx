@@ -10,16 +10,42 @@ import { useAuthStore } from './auth/useAuthStore'
 import { SecretRoomPage } from './secret/SecretRoomPage'
 import { DevGuidePage } from './devguide/DevGuidePage'
 import { BlogPost } from './blog/BlogPost'
+import JeongsanApp from './jeongsan/JeongsanApp'
+
+/**
+ * 정산어택 경로. 로마자 표기가 `jungsan`(폴더)과 `jeongsan`(패키지·도메인)으로
+ * 갈려 있어 **둘 다 받는다.** 표시용 정식 경로는 `/jungsan` 이다.
+ * `/g/{token}` 은 단톡방에 뿌리는 공유 링크라 짧게 루트에 둔다 (SPEC §3).
+ */
+const JEONGSAN_PATH = /^\/(jungsan|jeongsan)(\/|$)|^\/g\//
+const isJeongsanPath = (p: string) => JEONGSAN_PATH.test(p)
+
+/**
+ * 독립 배포에서 머물러도 되는 경로.
+ *
+ * `/auth/callback` 은 정산어택 경로가 아니지만 **반드시 통과시켜야 한다.**
+ * OAuth 는 `?code=...` 를 붙여 이 주소로 되돌아오는데, 여기서 막으면
+ * 아래 replaceState 가 URL 을 `/jungsan` 으로 덮어써 code 가 사라진다.
+ */
+const isJeongsanAllowed = (p: string) => isJeongsanPath(p) || p === '/auth/callback'
 
 function App() {
   const appTarget = (import.meta.env.VITE_APP_TARGET as string | undefined) ?? ''
   const is24hoursStandalone = appTarget === '24hours'
   const is24hoursAppRoute = window.location.pathname === '/24hours/app'
+  // 정산어택 독립 배포 — 포트폴리오로 넘어가지 않는다
+  const isJeongsanStandalone = appTarget === 'jeongsan'
+  // ⚠ isAppLikeMode 에 isJeongsanStandalone 을 넣지 말 것.
+  //   아래 한 곳에서만 쓰이는데 거기서 24시간이모자라를 렌더한다.
+  //   넣으면 정산어택 분기보다 먼저 걸려서 URL 이 /24hours/app 으로 바뀐다.
   const isAppLikeMode = is24hoursStandalone || is24hoursAppRoute
 
-  const [route, setRoute] = useState(() =>
-    is24hoursStandalone ? '/24hours/app' : window.location.pathname || '/',
-  )
+  const [route, setRoute] = useState(() => {
+    const path = window.location.pathname || '/'
+    if (is24hoursStandalone) return '/24hours/app'
+    if (isJeongsanStandalone && !isJeongsanAllowed(path)) return '/jungsan'
+    return path
+  })
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [doorOpening, setDoorOpening] = useState(false)
   const { user, logout } = useAuthStore()
@@ -42,6 +68,8 @@ function App() {
 
   const navigate = (to: string) => {
     if (is24hoursStandalone && to !== '/24hours/app') return
+    // 독립 배포에서는 정산어택 밖으로 나가지 않는다 (소개 페이지로 넘어가지 않게)
+    if (isJeongsanStandalone && !isJeongsanAllowed(to)) return
     if (to === route) return
     window.history.pushState({}, '', to)
     setRoute(to)
@@ -50,6 +78,9 @@ function App() {
   // Keep URL pinned in standalone mode without setState-in-effect lint.
   if (is24hoursStandalone && window.location.pathname !== '/24hours/app') {
     window.history.replaceState({}, '', '/24hours/app')
+  }
+  if (isJeongsanStandalone && !isJeongsanAllowed(window.location.pathname || '/')) {
+    window.history.replaceState({}, '', '/jungsan')
   }
 
   const formatKoreanDate = (d: Date) => {
@@ -109,6 +140,11 @@ function App() {
   // 개발 가이드 페이지 — 풀스크린 (헤더/프로필 없음)
   if (route === '/devguide') {
     return <DevGuidePage />
+  }
+
+  // 정산어택 — 풀스크린. 공유 링크(/g/{token})가 단톡방에서 바로 열린다
+  if (isJeongsanPath(route)) {
+    return <JeongsanApp route={route} navigate={navigate} />
   }
 
   return (
