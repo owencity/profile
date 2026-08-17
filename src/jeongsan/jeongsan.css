@@ -1,0 +1,297 @@
+/*
+ * 정산어택 디자인 시스템 — 아이콘 시안 C(딥블루 + 오렌지)에서 도출.
+ *
+ * 모든 클래스에 `js-` 접두어를 붙여 포트폴리오 본체 스타일과 섞이지 않게 한다.
+ * 색은 `.js-root` 안에서만 유효하므로 다른 서브앱에 새지 않는다.
+ */
+.js-root {
+  /* 딥블루 — 아이콘 배경 #2C74D6 이 primary */
+  --p700: #1b4f9c;
+  --p600: #2c74d6;
+  --p500: #4a8ce8;
+  --p400: #7fb0f0;
+  --p100: #d6e6fb;
+  --p50: #eff6ff;
+
+  /* 오렌지 — 아이콘 ÷ 기호 #FF9A3D. "내 금액"과 "미입금" 두 곳에만 쓴다 */
+  --acc: #ff9a3d;
+  --acc-strong: #e07b1c;
+  --acc-bg: #fff4e8;
+
+  /* 경고 — 강조 오렌지와 구분되도록 더 붉게 */
+  --warn: #d93025;
+  --warn-bg: #fdecea;
+  --ok: #1e9e6a;
+  --ok-bg: #eaf7f1;
+  --wait: #b8860b;
+  --wait-bg: #fff7e8;
+
+  --ink: #0f2540;
+  --ink2: #41597c;
+  --ink3: #8aa0be;
+  --line: #dde7f5;
+
+  color: var(--ink);
+  font-family: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 레이아웃 ─────────────────────────────── */
+.js-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 28px;
+}
+.js-bar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px 0 14px;
+}
+.js-bar b { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+.js-back {
+  color: var(--ink3); font-size: 20px; font-weight: 700;
+  background: none; border: 0; cursor: pointer; padding: 0 4px 0 0;
+}
+.js-step {
+  margin-left: auto; font-size: 11px; font-weight: 800; color: var(--p600);
+  background: var(--p50); padding: 4px 10px; border-radius: 99px;
+}
+.js-step.on { background: var(--ok); color: #fff; }
+.js-step.warn { background: var(--warn); color: #fff; }
+
+.js-url {
+  background: var(--p50); border-radius: 99px; padding: 6px 13px;
+  font-size: 11px; color: var(--ink3); margin-bottom: 12px;
+  font-family: ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.js-url b { color: var(--p600); }
+
+/* ── 폼 ───────────────────────────────────── */
+.js-lab { font-size: 12px; font-weight: 800; color: var(--ink2); margin: 15px 2px 7px; }
+.js-lab .opt { font-weight: 600; color: var(--ink3); }
+.js-hint { font-size: 12px; color: var(--ink3); line-height: 1.6; margin-top: 6px; }
+.js-hint b { color: var(--ink2); }
+
+.js-inp {
+  width: 100%; border: 1.5px solid var(--line); border-radius: 13px;
+  padding: 12px 13px; font-size: 14px; color: var(--ink); background: #fbfdff;
+  font-family: inherit;
+}
+.js-inp:focus { outline: none; border-color: var(--p500); background: #fff; }
+.js-inp::placeholder { color: var(--ink3); }
+.js-row2 { display: flex; gap: 8px; }
+.js-row2 > * { flex: 1; }
+
+.js-radio {
+  display: flex; align-items: center; gap: 10px; padding: 11px 12px;
+  border: 1.5px solid var(--line); border-radius: 13px; margin-bottom: 7px;
+  background: #fbfdff; font-size: 13.5px; font-weight: 700; cursor: pointer;
+  width: 100%; text-align: left; font-family: inherit; color: var(--ink);
+}
+.js-radio.on { border-color: var(--p500); background: var(--p50); color: var(--p700); }
+.js-dot {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid #c3d4e8;
+  flex: 0 0 auto; position: relative;
+}
+.js-radio.on .js-dot { border-color: var(--p500); }
+.js-radio.on .js-dot::after {
+  content: ''; position: absolute; inset: 2.5px; border-radius: 50%; background: var(--p500);
+}
+
+.js-tog {
+  display: flex; align-items: center; gap: 10px; padding: 12px 13px;
+  border: 1.5px solid var(--line); border-radius: 13px; margin-bottom: 8px;
+  background: #fbfdff; cursor: pointer; width: 100%; font-family: inherit;
+}
+.js-tog.on { border-color: var(--p400); background: var(--p50); }
+.js-tog .tl { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.js-tog.sub { margin-left: 16px; }
+.js-sw {
+  margin-left: auto; width: 42px; height: 24px; border-radius: 99px;
+  background: #dbe5f0; position: relative; flex: 0 0 auto; transition: background 0.15s;
+}
+.js-tog.on .js-sw { background: var(--p500); }
+.js-sw::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+  transition: left 0.15s;
+}
+.js-tog.on .js-sw::after { left: 21px; }
+
+/* ── 카드 · 행 ─────────────────────────────── */
+.js-card {
+  border: 1.5px solid var(--line); border-radius: 16px; padding: 13px;
+  margin-bottom: 10px; background: #fbfdff;
+}
+.js-card .t {
+  font-size: 14px; font-weight: 800; margin-bottom: 9px;
+  display: flex; align-items: center; gap: 7px;
+}
+.js-card .t em { font-style: normal; margin-left: auto; font-size: 11.5px; color: var(--p600); font-weight: 800; }
+.js-kv { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--ink2); }
+.js-kv b { color: var(--ink); font-weight: 700; }
+.js-kv.sub { padding-left: 10px; font-size: 12px; color: var(--ink3); }
+
+.js-add {
+  width: 100%; border: 1.5px dashed var(--p400); color: var(--p600); border-radius: 14px;
+  padding: 12px; text-align: center; font-size: 13.5px; font-weight: 800;
+  background: var(--p50); margin-bottom: 10px; cursor: pointer; font-family: inherit;
+}
+
+.js-prow {
+  display: flex; align-items: center; gap: 10px; padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.js-prow:last-child { border-bottom: 0; }
+.js-av {
+  width: 32px; height: 32px; border-radius: 11px; background: var(--p100); color: var(--p600);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; flex: 0 0 auto; overflow: hidden;
+}
+.js-av.off { background: #eef2f7; color: var(--ink3); }
+.js-av.me { background: var(--p700); color: #fff; }
+.js-av img { width: 100%; height: 100%; object-fit: cover; }
+.js-pn { font-size: 14px; font-weight: 700; }
+.js-ps { font-size: 11.5px; color: var(--ink3); margin-top: 1px; }
+.js-amt { margin-left: auto; font-size: 14px; font-weight: 800; white-space: nowrap; }
+.js-amt.mut { color: var(--ink3); font-weight: 700; font-size: 12.5px; }
+
+.js-tag {
+  margin-left: auto; font-size: 11px; font-weight: 800; padding: 4px 9px;
+  border-radius: 99px; flex: 0 0 auto; white-space: nowrap;
+}
+.js-tag.ok { background: var(--p50); color: var(--p600); }
+.js-tag.no { background: var(--warn-bg); color: var(--warn); }
+.js-tag.acc { background: var(--acc-bg); color: var(--acc-strong); }
+.js-tag.done { background: var(--ok-bg); color: var(--ok); }
+.js-tag.wait { background: var(--wait-bg); color: var(--wait); }
+.js-tag.mut { background: #f1f5f9; color: var(--ink3); }
+
+/* ── 진행률 ────────────────────────────────── */
+.js-prog { background: var(--p50); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.js-prog .n { font-size: 23px; font-weight: 900; color: var(--p600); letter-spacing: -0.6px; }
+.js-prog .n small { font-size: 13px; color: var(--ink3); font-weight: 700; }
+.js-track { height: 7px; background: #ccdcf2; border-radius: 99px; margin-top: 9px; overflow: hidden; }
+.js-fill { height: 100%; background: linear-gradient(90deg, var(--p600), var(--p400)); border-radius: 99px; }
+.js-fill.ok { background: var(--ok); }
+
+/* ── 버튼 ─────────────────────────────────── */
+.js-cta {
+  width: 100%; margin-top: 12px; background: linear-gradient(96deg, var(--p700), var(--p500));
+  color: #fff; border: 0; border-radius: 15px; padding: 15px; text-align: center;
+  font-size: 15px; font-weight: 800; box-shadow: 0 7px 18px rgba(44, 116, 214, 0.28);
+  cursor: pointer; font-family: inherit;
+}
+.js-cta.acc {
+  background: linear-gradient(96deg, var(--acc-strong), var(--acc));
+  box-shadow: 0 7px 18px rgba(255, 154, 61, 0.32);
+}
+.js-cta.kakao { background: #fee500; color: #191600; box-shadow: 0 6px 16px rgba(254, 229, 0, 0.35); }
+.js-cta.google { background: #fff; color: #3c4043; border: 1.5px solid #dadce0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07); }
+.js-cta2 {
+  width: 100%; margin-top: 9px; border: 1.5px solid var(--line); color: var(--ink2);
+  background: #fff; border-radius: 15px; padding: 13px; text-align: center;
+  font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.js-cta2.warn { border-color: var(--warn); color: var(--warn); }
+.js-cta2.ok { border-color: var(--ok); color: var(--ok); }
+.js-ctarow { display: flex; gap: 9px; margin-top: 12px; }
+/* 버튼을 화면 아래에 붙이고 싶은 페이지에서만 쓴다 */
+.js-bottom { margin-top: auto !important; }
+.js-ctarow > * { margin-top: 0; flex: 1; }
+
+/* ── 송금 · 계좌 ───────────────────────────── */
+.js-tf {
+  display: flex; align-items: center; gap: 8px; font-size: 13px;
+  padding: 10px 12px; background: var(--p50); border-radius: 12px; margin-bottom: 7px;
+}
+.js-tf b { font-weight: 800; }
+.js-arw { color: var(--p500); font-weight: 900; }
+.js-tf .r { margin-left: auto; font-weight: 800; }
+
+.js-acct {
+  border: 1.5px solid var(--line); border-radius: 14px; padding: 12px;
+  background: #fbfdff; margin-bottom: 9px;
+}
+.js-acct.acc { border-color: var(--acc); }
+.js-acct .an { font-size: 16px; font-weight: 800; font-family: ui-monospace, monospace; letter-spacing: -0.2px; }
+.js-acct .am { font-size: 11.5px; color: var(--ink3); margin-top: 3px; }
+.js-copy {
+  width: 100%; margin-top: 9px; background: var(--p700); color: #fff; border: 0;
+  border-radius: 11px; padding: 10px; font-size: 12.5px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+}
+.js-copy.acc { background: var(--acc-strong); }
+.js-copy.done { background: var(--ok); }
+
+/* ── 결과 · 근거 ───────────────────────────── */
+.js-big { text-align: center; padding: 18px 0 14px; }
+.js-big .l { font-size: 13px; color: var(--ink2); font-weight: 700; }
+.js-big .v { font-size: 42px; font-weight: 900; letter-spacing: -2.2px; color: var(--acc); margin-top: 4px; }
+.js-big .v.recv { color: var(--ok); }
+.js-big .d { font-size: 12px; color: var(--ink3); margin-top: 5px; }
+
+.js-why { border: 2px solid var(--p400); border-radius: 17px; background: var(--p50); margin-bottom: 12px; }
+.js-why .wt { font-size: 12.5px; font-weight: 800; color: var(--p600); padding: 13px 13px 4px; }
+.js-wrow {
+  display: flex; align-items: flex-start; gap: 8px; font-size: 13px;
+  padding: 8px 13px; border-bottom: 1px dashed #b9d4f0;
+}
+.js-wrow .rl { font-weight: 800; flex: 0 0 34px; }
+.js-wrow .rd { color: var(--ink2); line-height: 1.5; }
+.js-wrow .rd small { display: block; font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.js-wrow .rv { margin-left: auto; font-weight: 800; white-space: nowrap; padding-left: 8px; }
+.js-wrow.mut .rd, .js-wrow.mut .rv { color: var(--ink3); }
+.js-wrow.adj { background: #dbeafe; border-bottom: 0; border-top: 1px solid #9dc0ec; }
+.js-wrow.sub { background: var(--acc-bg); border-bottom: 0; }
+.js-wrow.sub .rl, .js-wrow.sub .rv { color: var(--acc-strong); }
+.js-wrow.tot {
+  background: var(--p600); color: #fff; border: 0;
+  border-radius: 0 0 15px 15px; padding: 12px 13px;
+}
+.js-wrow.tot .rd { color: var(--p100); }
+.js-wrow.tot .rv { font-size: 15px; }
+
+/* ── 알림 박스 ─────────────────────────────── */
+.js-box {
+  border-radius: 15px; padding: 13px; margin-bottom: 12px;
+  background: var(--warn-bg); border: 1.5px solid #f3c4bf;
+}
+.js-box .bt { font-size: 13.5px; font-weight: 800; color: var(--warn); margin-bottom: 6px; }
+.js-box .bn { font-size: 12.5px; color: var(--ink2); line-height: 1.65; }
+.js-box .bn b { color: var(--warn); }
+.js-box .bb { display: flex; gap: 8px; margin-top: 11px; }
+.js-box .bb > * {
+  flex: 1; text-align: center; font-size: 13px; font-weight: 800; padding: 10px;
+  border-radius: 11px; border: 0; cursor: pointer; font-family: inherit;
+}
+.js-box .bb .a { background: var(--warn); color: #fff; }
+.js-box .bb .b { background: #fff; border: 1.5px solid #f3c4bf; color: var(--warn); }
+
+.js-notice {
+  background: var(--p50); border-radius: 13px; padding: 11px 12px;
+  font-size: 12px; color: var(--ink2); line-height: 1.65; margin-top: 12px;
+}
+.js-notice b { color: var(--ink); }
+
+.js-footer { margin-top: 14px; font-size: 11.5px; color: var(--ink3); text-align: center; line-height: 1.75; }
+.js-footer a { color: var(--p600); font-weight: 700; text-decoration: none; }
+
+/* ── 개발용 전환 바 ────────────────────────── */
+.js-dev {
+  position: sticky; top: 0; z-index: 20; display: flex; gap: 6px; flex-wrap: wrap;
+  align-items: center; background: #0f2540; color: #fff; padding: 7px 10px;
+  font-size: 11px; border-radius: 0 0 12px 12px; margin: -16px -16px 12px;
+}
+.js-dev span { opacity: 0.6; margin-right: 2px; }
+.js-dev button {
+  background: rgba(255, 255, 255, 0.12); color: #fff; border: 0; border-radius: 99px;
+  padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.js-dev button.on { background: var(--acc); color: #191600; }
