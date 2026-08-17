@@ -28,10 +28,21 @@ export function Bar({
   )
 }
 
+/**
+ * 주소창 장식. **"이건 앱이 아니라 웹페이지다"** 를 참여자에게 알리는 것이
+ * 목적이므로(`ADR-003`) 실제 호스트를 쓴다.
+ *
+ * 하드코딩하면 배포처마다 틀린다 — 로컬은 `localhost:5173`,
+ * 독립 배포는 `jungsan.devkdk.com`, 포트폴리오 경유는 `www.devkdk.com` 이다.
+ *
+ * ⚠ 여기 보이는 주소는 **공유용이 아니다.** 단톡방에 뿌리는 것은
+ *   `api.ts` 의 `shareUrl()` — 백엔드 호스트다 (`ADR-007`).
+ */
 export function Url({ path }: { path: string }) {
   return (
     <div className="js-url">
-      www.devkdk.com<b>{path}</b>
+      {window.location.host}
+      <b>{path}</b>
     </div>
   )
 }

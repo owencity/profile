@@ -26,6 +26,28 @@ export const isMock = () => BASE === ''
 export const googleEnabled =
   (import.meta.env.VITE_JEONGSAN_GOOGLE_ENABLED as string | undefined) === 'true'
 
+/**
+ * 단톡방에 뿌리는 공유 링크의 호스트. **프론트 주소가 아니다.**
+ *
+ * 카카오톡은 링크를 붙이면 자기 크롤러로 그 URL 을 GET 해서 `og:*` 태그로
+ * 카드를 만든다. **크롤러는 JS 를 실행하지 않으므로** CSR 인 이 프론트가 무엇을
+ * 그리든 카드에는 반영되지 않는다. 그래서 백엔드가 OG 태그가 든 HTML 을 응답하고,
+ * 사람은 그 HTML 의 스크립트로 이 프론트로 넘어온다 — `ADR-007`.
+ *
+ * ⚠ 주소창에서 복사한 프론트 주소를 뿌리면 OG 를 거치지 않아 카드가 안 뜬다.
+ *   화면은 **항상 이 주소**를 보여주고 복사시켜야 한다.
+ */
+const SHARE_BASE =
+  (import.meta.env.VITE_JEONGSAN_SHARE_BASE_URL as string | undefined) ??
+  'https://join.devkdk.com'
+
+/** 표시용 — 스킴을 뗀다. `join.devkdk.com/g/k3f9dq2` */
+export const shareUrlLabel = (token: string) =>
+  `${SHARE_BASE.replace(/^https?:\/\//, '')}/g/${token}`
+
+/** 복사·공유용 전체 URL */
+export const shareUrl = (token: string) => `${SHARE_BASE}/g/${token}`
+
 type ApiEnvelope<T> = { data?: T } & Partial<T>
 
 async function get<T>(path: string, fallback: T): Promise<T> {

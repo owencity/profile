@@ -8,6 +8,7 @@
  * 주최자가 빼낼 수단이 있어야 한다. 확정 경고의 **초과** 케이스에서 쓰인다.
  */
 import type { Gathering } from '../types'
+import { shareUrlLabel } from '../api'
 import { Bar, PersonRow, Shell } from '../ui'
 
 export function RosterPage({
@@ -54,9 +55,14 @@ export function RosterPage({
         링크만 알면 아무나 들어올 수 있으니 <b>모르는 사람은 여기서 뺍니다.</b>
       </div>
 
+      {/*
+        공유 링크는 백엔드 호스트다. 이 앱 주소(jungsan.devkdk.com)를 뿌리면
+        카카오톡 카드가 안 뜬다 — 크롤러가 JS 를 실행하지 않아서다 (ADR-007).
+      */}
       <div className="js-lab">공유 링크</div>
       <div className="js-url" style={{ marginBottom: 6 }}>
-        www.devkdk.com<b>/g/{g.shareToken}</b>
+        {shareUrlLabel(g.shareToken).replace(`/g/${g.shareToken}`, '')}
+        <b>/g/{g.shareToken}</b>
       </div>
       <div className="js-hint">
         링크에는 <b>참석자 이름과 금액</b>이 담깁니다. 엉뚱한 곳에 공유했다면 재발급하세요.
