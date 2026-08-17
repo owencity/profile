@@ -10,7 +10,7 @@
  */
 import { useState } from 'react'
 import type { Gathering } from '../types'
-import { dateLabel, won } from '../api'
+import { dateLabel, googleEnabled, won } from '../api'
 import { Bar, Card, KV, PersonRow, Shell, Url, WarnBox } from '../ui'
 
 type Step = 'login' | 'confirm'
@@ -74,9 +74,11 @@ export function JoinPage({
         <button className="js-cta kakao js-bottom" onClick={() => setStep('confirm')}>
           카카오로 시작하기
         </button>
-        <button className="js-cta2 google" onClick={() => setStep('confirm')}>
-          구글로 시작하기
-        </button>
+        {googleEnabled && (
+          <button className="js-cta2 google" onClick={() => setStep('confirm')}>
+            구글로 시작하기
+          </button>
+        )}
       </Shell>
     )
   }

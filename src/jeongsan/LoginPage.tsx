@@ -10,6 +10,7 @@
  *   ② 결과에 근거를 함께 보여준다
  * 여기에 "N빵이 아니다"를 앞에 세웠다 — 첫 문장에서 무엇이 다른지 말해야 한다.
  */
+import { googleEnabled } from './api'
 import { Shell } from './ui'
 
 /** 아이콘 시안 C — 딥블루 배경 + 오렌지 버스트 + ÷ */
@@ -119,9 +120,11 @@ export function LoginPage({ onLogin }: { onLogin: () => void }) {
       <button className="js-cta kakao" style={{ marginTop: 20 }} onClick={onLogin}>
         카카오로 시작하기
       </button>
-      <button className="js-cta2 google" onClick={onLogin}>
-        구글로 시작하기
-      </button>
+      {googleEnabled && (
+        <button className="js-cta2 google" onClick={onLogin}>
+          구글로 시작하기
+        </button>
+      )}
 
       <div className="js-footer">
         닉네임과 프로필 사진만 받습니다 · 이메일·전화번호·실명은 받지 않습니다

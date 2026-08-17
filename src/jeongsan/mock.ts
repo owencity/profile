@@ -38,7 +38,10 @@ const participants: Participant[] = [
   },
   {
     id: P.재훈, name: '재훈', exempt: false, responded: true,
-    paymentStatus: 'SENT', paidAmount: 29_470, isHost: false, provider: 'google',
+    // 구글 로그인을 감춰둔 동안은 구글 참여자가 생길 수 없다. RosterPage 가
+    // provider 를 "카카오 / 구글" 로 찍으므로 google 로 두면 없는 상태가 보인다.
+    // 구글을 켜면 여기 하나를 google 로 되돌려 그 분기도 다시 확인할 것.
+    paymentStatus: 'SENT', paidAmount: 29_470, isHost: false, provider: 'kakao',
     payout: { bankName: '카카오뱅크', accountNo: '3333-01-2345678', accountHolder: '이재훈' },
   },
   {

@@ -11,6 +11,21 @@ const BASE = (import.meta.env.VITE_JEONGSAN_API_BASE_URL as string | undefined) 
 
 export const isMock = () => BASE === ''
 
+/**
+ * 구글 로그인을 화면에 띄울지. **기본은 꺼짐이다.**
+ *
+ * 카카오 앱만 먼저 등록했다. 등록하지 않은 제공자의 버튼을 띄우면 눌러도
+ * 아무 일이 없고, 사용자는 서비스가 고장난 줄 안다.
+ *
+ * 주석 처리가 아니라 플래그로 둔 이유 — 주석으로 지우면 되살릴 때
+ * 화면에서 무엇이 빠졌는지 아무도 기억하지 못한다.
+ *
+ * 켤 때는 `.env.local` 과 Vercel 양쪽에 `VITE_JEONGSAN_GOOGLE_ENABLED=true`.
+ * 구글 OAuth 클라이언트 등록이 먼저다.
+ */
+export const googleEnabled =
+  (import.meta.env.VITE_JEONGSAN_GOOGLE_ENABLED as string | undefined) === 'true'
+
 type ApiEnvelope<T> = { data?: T } & Partial<T>
 
 async function get<T>(path: string, fallback: T): Promise<T> {
