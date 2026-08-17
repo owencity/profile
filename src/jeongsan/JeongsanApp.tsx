@@ -2,13 +2,13 @@
  * 정산어택 서브앱 진입점.
  *
  * 라우팅 (SPEC §3 · §8)
- *   /jeongsan               H0 내 모임
- *   /jeongsan/new           H1 모임 만들기
- *   /jeongsan/:id/amount    H2 금액 입력
- *   /jeongsan/:id/collect   H3 수집 현황
- *   /jeongsan/:id/confirm   H3-b 확정 미리보기
- *   /jeongsan/:id/roster    H5 명단
- *   /jeongsan/:id/result    H4 결과·입금
+ *   /jungsan               H0 내 모임
+ *   /jungsan/new           H1 모임 만들기
+ *   /jungsan/:id/amount    H2 금액 입력
+ *   /jungsan/:id/collect   H3 수집 현황
+ *   /jungsan/:id/confirm   H3-b 확정 미리보기
+ *   /jungsan/:id/roster    H5 명단
+ *   /jungsan/:id/result    H4 결과·입금
  *
  *   /g/:token       ← 한 URL이 상태에 따라 분기한다
  *                     미참여+COLLECTING → W0-1/W0-2 · 미참여+CONFIRMED → W0-차단
@@ -56,7 +56,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
 
   useEffect(() => {
     if (isMock()) return
-    const m = route.match(/^\/jeongsan\/(\d+)/)
+    const m = route.match(/^\/jungsan\/(\d+)/)
     if (!m) return
     const id = Number(m[1])
     void fetchGathering(id).then(setG).catch(() => {})
@@ -120,28 +120,28 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }
 
   // ── 주최자 앱 ────────────────────────────────
-  if (route === '/jeongsan/new') {
-    return wrap(<CreatePage onNext={() => navigate('/jeongsan/1/amount')} onBack={() => navigate('/jeongsan')} />)
+  if (route === '/jungsan/new') {
+    return wrap(<CreatePage onNext={() => navigate('/jungsan/1/amount')} onBack={() => navigate('/jungsan')} />)
   }
 
-  const host = route.match(/^\/jeongsan\/(\d+)\/(\w+)$/)
+  const host = route.match(/^\/jungsan\/(\d+)\/(\w+)$/)
   if (host) {
     const id = host[1]
     const page = host[2]
-    const back = () => navigate(`/jeongsan/${id}/collect`)
+    const back = () => navigate(`/jungsan/${id}/collect`)
     switch (page) {
       case 'amount':
         return wrap(
-          <AmountPage g={g} onNext={() => navigate(`/jeongsan/${id}/collect`)} onBack={() => navigate('/jeongsan')} />,
+          <AmountPage g={g} onNext={() => navigate(`/jungsan/${id}/collect`)} onBack={() => navigate('/jungsan')} />,
         )
       case 'collect':
         return wrap(
           <CollectPage
             g={g}
-            onConfirm={() => navigate(`/jeongsan/${id}/confirm`)}
-            onRoster={() => navigate(`/jeongsan/${id}/roster`)}
+            onConfirm={() => navigate(`/jungsan/${id}/confirm`)}
+            onRoster={() => navigate(`/jungsan/${id}/roster`)}
             onShare={() => alert('카카오톡 공유 (mock)')}
-            onBack={() => navigate('/jeongsan')}
+            onBack={() => navigate('/jungsan')}
           />,
         )
       case 'confirm':
@@ -151,9 +151,9 @@ export default function JeongsanApp({ route, navigate }: Props) {
             s={s}
             onAccept={() => {
               setG({ ...g, status: 'CONFIRMED' })
-              navigate(`/jeongsan/${id}/result`)
+              navigate(`/jungsan/${id}/result`)
             }}
-            onRoster={() => navigate(`/jeongsan/${id}/roster`)}
+            onRoster={() => navigate(`/jungsan/${id}/roster`)}
             onShare={() => alert('카카오톡 공유 (mock)')}
             onBack={back}
           />,
@@ -168,9 +168,9 @@ export default function JeongsanApp({ route, navigate }: Props) {
             joinRequest="지원"
             onReopen={() => {
               setG({ ...g, status: 'COLLECTING' })
-              navigate(`/jeongsan/${id}/collect`)
+              navigate(`/jungsan/${id}/collect`)
             }}
-            onBack={() => navigate('/jeongsan')}
+            onBack={() => navigate('/jungsan')}
             onShare={() => alert('카카오톡 공유 (mock)')}
           />,
         )
@@ -181,8 +181,8 @@ export default function JeongsanApp({ route, navigate }: Props) {
   return wrap(
     <HomePage
       list={summaries}
-      onOpen={(id) => navigate(`/jeongsan/${id}/${g.status === 'CONFIRMED' ? 'result' : 'collect'}`)}
-      onCreate={() => navigate('/jeongsan/new')}
+      onOpen={(id) => navigate(`/jungsan/${id}/${g.status === 'CONFIRMED' ? 'result' : 'collect'}`)}
+      onCreate={() => navigate('/jungsan/new')}
     />,
   )
 }
