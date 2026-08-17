@@ -33,6 +33,7 @@ import { JoinPage } from './participant/JoinPage'
 import { CheckPage } from './participant/CheckPage'
 import { MyResultPage } from './participant/MyResultPage'
 import { AllPage } from './participant/AllPage'
+import { LoginPage } from './LoginPage'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -48,6 +49,8 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // 개발용 — 어떤 참여자 시점으로 볼지, 그리고 상태를 강제로 바꿔본다
   const [asId, setAsId] = useState<Id>(MOCK_IDS.재훈)
   const [joined, setJoined] = useState(true)
+  // 주최자 로그인 상태. 실제로는 useAuthStore 의 user 유무로 판단한다.
+  const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => {
     if (isMock()) return
@@ -85,6 +88,9 @@ export default function JeongsanApp({ route, navigate }: Props) {
       <button className={joined ? 'on' : ''} onClick={() => setJoined(!joined)}>
         {joined ? '참여함' : '미참여'}
       </button>
+      <button className={loggedIn ? 'on' : ''} onClick={() => setLoggedIn(!loggedIn)}>
+        {loggedIn ? '로그인' : '로그아웃'}
+      </button>
     </div>
   )
 
@@ -120,6 +126,11 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }
 
   // ── 주최자 앱 ────────────────────────────────
+  // 주최자도 로그인해야 한다. 참여자 경로(/g/)는 JoinPage 가 자체적으로 로그인을 받는다.
+  if (!loggedIn) {
+    return wrap(<LoginPage onLogin={() => setLoggedIn(true)} />)
+  }
+
   if (route === '/jungsan/new') {
     return wrap(<CreatePage onNext={() => navigate('/jungsan/1/amount')} onBack={() => navigate('/jungsan')} />)
   }

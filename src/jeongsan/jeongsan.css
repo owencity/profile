@@ -401,3 +401,12 @@
 @media (min-width: 560px) {
   .js-dev { margin: -22px -22px 14px; border-radius: 0 0 14px 14px; }
 }
+
+/* ── 주최자 로그인 ─────────────────────────── */
+.js-login { text-align: center; padding: 46px 0 26px; }
+.js-login svg { margin: 0 auto; box-shadow: 0 12px 30px rgba(27, 79, 156, 0.28); }
+.js-login .t {
+  font-size: 27px; font-weight: 900; letter-spacing: -1.2px; margin-top: 18px;
+  color: var(--p700);
+}
+.js-login .s { font-size: 13.5px; color: var(--ink2); line-height: 1.65; margin-top: 9px; }
