@@ -345,3 +345,38 @@
 .js-dp-day.on {
   background: var(--p600) !important; color: #fff !important; box-shadow: none;
 }
+
+/* ── 참여 확인 ─────────────────────────────── */
+.js-join-hero { text-align: center; padding: 40px 0 22px; }
+.js-join-hero .l { font-size: 13px; color: var(--ink2); font-weight: 700; }
+.js-join-hero .v {
+  font-size: 27px; font-weight: 900; letter-spacing: -1.2px; color: var(--p600);
+  margin-top: 10px;
+}
+.js-join-hero .d { font-size: 12.5px; color: var(--ink3); margin-top: 7px; }
+
+.js-confirm {
+  border: 1.5px solid var(--p400); background: var(--p50); border-radius: 15px;
+  padding: 13px; margin-top: 14px;
+}
+.js-confirm .ct { font-size: 12.5px; font-weight: 800; color: var(--p600); margin-bottom: 8px; }
+.js-confirm ul { margin: 0; padding-left: 0; list-style: none; }
+.js-confirm li {
+  font-size: 13px; color: var(--ink2); line-height: 1.6; padding: 4px 0 4px 15px;
+  position: relative; display: flex; align-items: baseline; gap: 6px;
+}
+.js-confirm li::before {
+  content: '·'; position: absolute; left: 3px; color: var(--p500); font-weight: 900;
+}
+.js-confirm li b { color: var(--ink); }
+.js-confirm li .n {
+  margin-left: auto; font-weight: 800; color: var(--p600); white-space: nowrap;
+  font-size: 12.5px;
+}
+
+/* 수집 중에만 보이는 본인 탈퇴 */
+.js-leave {
+  width: 100%; margin-top: 14px; background: none; border: 0; color: var(--ink3);
+  font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+  text-decoration: underline; text-underline-offset: 3px;
+}

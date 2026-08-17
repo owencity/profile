@@ -124,6 +124,23 @@ export function CheckPage({
       <button className="js-cta js-bottom" onClick={onSubmit}>
         제출하기
       </button>
+
+      {/*
+        본인 탈퇴 — 수집 중에만 가능하다. SPEC §9가 범위 밖으로 둔 것은
+        "승인이 필요한 참여 취소"이고, 승인 없는 본인 탈퇴는 다르다.
+        잘못 들어온 사람이 스스로 빠지면 주최자가 할 일이 없어진다.
+        확정 후에는 금액이 확정됐으므로 불가하다.
+      */}
+      <button
+        className="js-leave"
+        onClick={() => {
+          if (window.confirm('이 모임에서 나가시겠어요?\n체크한 내용도 함께 지워집니다.')) {
+            alert('모임에서 나갔습니다 (mock)')
+          }
+        }}
+      >
+        이 모임에서 나가기
+      </button>
     </Shell>
   )
 }
