@@ -12,8 +12,8 @@ export const profile = {
   role: 'Backend Developer',
   brand: 'dev_kdk',
   avatarUrl: '/brand.png',
-  intro:
-    '개발을 코드 작성이 아니라 현실의 문제를 구조화해 시스템으로 푸는 과정이라고 믿습니다. 그래서 그럴듯해 보여도 감으로 판단하지 않고, 직접 측정하고 검증한 뒤에 결정합니다.',
+  // 줄바꿈은 App.tsx 의 whitespace-pre-line 이 살린다
+  intro: 'this is mococo!\nmococo just do it!',
   links: {
     github: 'https://github.com/owencity',
     blog: '/blog/solo-dev-culture',

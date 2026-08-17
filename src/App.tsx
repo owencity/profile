@@ -272,7 +272,7 @@ function App() {
                   </span>
                 </div>
 
-                <p className="mt-5 text-sm leading-6 text-zinc-700">
+                <p className="mt-5 whitespace-pre-line text-sm leading-6 text-zinc-700">
                   {profile.intro}
                 </p>
 
