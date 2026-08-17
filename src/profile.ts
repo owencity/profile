@@ -16,7 +16,8 @@ export const profile = {
     '개발을 코드 작성이 아니라 현실의 문제를 구조화해 시스템으로 푸는 과정이라고 믿습니다. 그래서 그럴듯해 보여도 감으로 판단하지 않고, 직접 측정하고 검증한 뒤에 결정합니다.',
   links: {
     github: 'https://github.com/owencity',
-    blog: 'https://owencity.tistory.com/',
+    blog: '/blog/solo-dev-culture',
+    externalBlog: 'https://owencity.tistory.com/',
   },
   valkyrieFs: {
     releaseLatestUrl: 'https://github.com/owencity/valkyrieFS/releases/latest',

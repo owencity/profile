@@ -9,6 +9,7 @@ import { ChatRoom } from './chat/ChatRoom'
 import { useAuthStore } from './auth/useAuthStore'
 import { SecretRoomPage } from './secret/SecretRoomPage'
 import { DevGuidePage } from './devguide/DevGuidePage'
+import { BlogPost } from './blog/BlogPost'
 
 function App() {
   const appTarget = (import.meta.env.VITE_APP_TARGET as string | undefined) ?? ''
@@ -76,6 +77,7 @@ function App() {
     if (route.startsWith('/chat/')) return '채팅방'
     if (route === '/auth/callback') return '로그인 중'
     if (route === '/secret') return '비밀의 방'
+    if (route.startsWith('/blog/')) return 'Blog'
     return 'Home'
   }, [route])
 
@@ -250,17 +252,16 @@ function App() {
                       ↗
                     </span>
                   </a>
-                  <a
-                    className="group flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-                    href={profile.links.blog}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
+                    onClick={() => navigate(profile.links.blog)}
                   >
                     <span>Blog</span>
                     <span className="text-zinc-400 transition group-hover:text-zinc-500">
-                      ↗
+                      →
                     </span>
-                  </a>
+                  </button>
                 </div>
 
                 <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
@@ -282,6 +283,11 @@ function App() {
                 window.history.replaceState({}, '', redirectTo)
                 setRoute(redirectTo)
               }}
+            />
+          ) : route.startsWith('/blog/') ? (
+            <BlogPost
+              slug={route.replace('/blog/', '')}
+              onBack={() => navigate('/')}
             />
           ) : route.startsWith('/chat/') ? (
             <ChatRoom
