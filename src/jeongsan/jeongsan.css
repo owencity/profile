@@ -409,4 +409,25 @@
   font-size: 27px; font-weight: 900; letter-spacing: -1.2px; margin-top: 18px;
   color: var(--p700);
 }
-.js-login .s { font-size: 13.5px; color: var(--ink2); line-height: 1.65; margin-top: 9px; }
+.js-login .s { font-size: 14px; color: var(--ink2); line-height: 1.65; margin-top: 10px; font-weight: 600; }
+
+/* 소개 3항목 */
+.js-feats { border-top: 1px solid var(--line); }
+.js-feat {
+  display: flex; gap: 12px; padding: 15px 2px; border-bottom: 1px solid var(--line);
+}
+.js-feat .no {
+  flex: 0 0 30px; height: 30px; border-radius: 10px;
+  background: linear-gradient(140deg, var(--p700), var(--p500));
+  color: #fff; font-weight: 900; font-size: 11.5px;
+  display: flex; align-items: center; justify-content: center; letter-spacing: -0.3px;
+}
+.js-feat .ft { font-size: 14.5px; font-weight: 800; letter-spacing: -0.3px; }
+.js-feat .fd { font-size: 13px; color: var(--ink2); line-height: 1.65; margin-top: 5px; }
+.js-feat .fd em { font-style: normal; color: var(--acc-strong); font-weight: 800; }
+
+.js-badge {
+  margin-top: 16px; background: var(--p50); border-radius: 13px; padding: 12px 13px;
+  font-size: 12.5px; color: var(--ink2); line-height: 1.6; text-align: center;
+}
+.js-badge b { color: var(--p700); }

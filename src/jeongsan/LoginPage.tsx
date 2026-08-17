@@ -1,14 +1,19 @@
 /**
- * 주최자 로그인. `/jungsan` 진입 시 로그인 전이면 이 화면부터 나온다.
+ * 주최자 로그인 겸 소개 화면. `/jungsan` 진입 시 로그인 전이면 여기부터 나온다.
  *
  * 받는 정보는 **회원번호 · 닉네임 · 프로필 사진** 셋뿐이다.
  * 전부 카카오 기본 동의항목이라 **비즈앱 전환이 필요 없다.**
  * 이메일·실명·전화번호는 받지 않는다 — 알림은 FCM 이고 신원은 회원번호가 맡는다.
+ *
+ * 설명은 SPEC §1이 정한 두 가지 차별점을 그대로 쓴다.
+ *   ① 입력을 총무 혼자 하지 않는다
+ *   ② 결과에 근거를 함께 보여준다
+ * 여기에 "N빵이 아니다"를 앞에 세웠다 — 첫 문장에서 무엇이 다른지 말해야 한다.
  */
 import { Shell } from './ui'
 
 /** 아이콘 시안 C — 딥블루 배경 + 오렌지 버스트 + ÷ */
-function AppIcon({ size = 88 }: { size?: number }) {
+export function AppIcon({ size = 88 }: { size?: number }) {
   // 11갈래 코믹 폭발. icon2.html 의 burst() 와 같은 방식으로 좌표를 만든다.
   const star = (r: number) => {
     const n = 11
@@ -57,34 +62,72 @@ function AppIcon({ size = 88 }: { size?: number }) {
   )
 }
 
+const FEATURES = [
+  {
+    t: 'N빵으로 나누지 않습니다',
+    d: (
+      <>
+        3차에서 누가 빠졌고 4차에서 누가 술을 안 마셨는지까지{' '}
+        <em>차수별로 나눠</em> 계산합니다.
+      </>
+    ),
+  },
+  {
+    t: '총무 혼자 입력하지 않습니다',
+    d: (
+      <>
+        총무는 <em>금액만</em> 넣습니다. 누가 어디에 있었고 술을 마셨는지는{' '}
+        <em>각자 링크에서</em> 체크합니다.
+      </>
+    ),
+  },
+  {
+    t: '금액만 알려주지 않습니다',
+    d: (
+      <>
+        <em>“1차 참석·논알콜 → 17,800원”</em> 처럼 왜 그 금액인지 근거를 함께 보여줍니다.
+      </>
+    ),
+  },
+]
+
 export function LoginPage({ onLogin }: { onLogin: () => void }) {
   return (
     <Shell>
       <div className="js-login">
         <AppIcon />
         <div className="t">정산어택</div>
-        <div className="s">
-          1차, 2차로 끝나지 않는 술자리를
-          <br />
-          차수별로 나눠 계산합니다
-        </div>
+        <div className="s">1차, 2차로 끝나지 않는 술자리를 위해</div>
       </div>
 
-      <div className="js-confirm" style={{ marginTop: 0 }}>
-        <div className="ct">받는 정보는 이것뿐입니다</div>
-        <ul>
-          <li>닉네임 · 프로필 사진 — <b>동명이인을 구분하기 위한 것</b></li>
-          <li>이메일 · 전화번호 · 실명은 <b>받지 않습니다</b></li>
-        </ul>
+      <div className="js-feats">
+        {FEATURES.map((f, i) => (
+          <div className="js-feat" key={f.t}>
+            <div className="no">{String(i + 1).padStart(2, '0')}</div>
+            <div>
+              <div className="ft">{f.t}</div>
+              <div className="fd">{f.d}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <button className="js-cta kakao js-bottom" onClick={onLogin}>
+      <div className="js-badge">
+        참여자는 <b>앱을 설치하지 않습니다.</b> 링크로 들어와 웹에서 체크합니다.
+      </div>
+
+      <button className="js-cta kakao" style={{ marginTop: 20 }} onClick={onLogin}>
         카카오로 시작하기
       </button>
       <button className="js-cta2 google" onClick={onLogin}>
         구글로 시작하기
       </button>
-      <div className="js-footer">광고를 넣지 않습니다.</div>
+
+      <div className="js-footer">
+        닉네임과 프로필 사진만 받습니다 · 이메일·전화번호·실명은 받지 않습니다
+        <br />
+        <b style={{ color: 'var(--ink2)' }}>광고를 넣지 않습니다.</b>
+      </div>
     </Shell>
   )
 }
