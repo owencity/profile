@@ -17,6 +17,7 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
   const [bank, setBank] = useState('국민은행')
   const [account, setAccount] = useState('123456-78-901234')
   const [count, setCount] = useState('5')
+  const valid = Number(count) >= 2
 
   return (
     <Shell>
@@ -48,26 +49,49 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
         <b>다른 사람이 결제한 차수가 있으면, 그 사람 계좌는 본인이 등록합니다.</b>
       </div>
 
+      {/*
+        참여자 수는 필수다. 이 숫자가 "정원을 넘는 참여는 주최자 승인" 게이트의
+        기준이라, 비어 있으면 방어가 통째로 사라진다.
+        사후 개설이라 주최자는 인원을 알고, H3에서 나중에 고칠 수 있으니 틀려도 된다.
+      */}
       <div className="js-lab">
-        참여자 수 <span className="opt">· 본인 포함 · 선택</span>
+        참여자 수 <span className="opt">· 본인 포함 · 필수</span>
       </div>
       <input
         className="js-inp"
         type="number"
         inputMode="numeric"
+        min={2}
         value={count}
         onChange={(e) => setCount(e.target.value)}
       />
       <div className="js-hint">
         <b>{myName || '주최자'}님을 포함한 인원</b>을 적어주세요. 명단은 적지 않아도 됩니다 —
         <b> 링크로 각자 들어옵니다.</b>
-        <br />
-        확정 전에 빠진 사람이 있는지 알려드리는 용도이고, 나중에 바꿔도 됩니다.
+      </div>
+      <div className="js-confirm" style={{ marginTop: 10 }}>
+        <div className="ct">이 숫자가 하는 일</div>
+        <ul>
+          <li>확정 전에 <b>빠진 사람이 있으면</b> 알려드립니다</li>
+          <li>
+            <b>모르는 사람이 들어오면</b> 주최자 확인을 받습니다
+            <span className="n">{Number(count) || 0}명 초과 시</span>
+          </li>
+        </ul>
       </div>
 
-      <button className="js-cta js-bottom" onClick={onNext}>
+      <button
+        className="js-cta js-bottom"
+        onClick={onNext}
+        style={valid ? undefined : { opacity: 0.45 }}
+      >
         모임 만들고 링크 받기
       </button>
+      {!valid && (
+        <div className="js-hint" style={{ textAlign: 'center', color: 'var(--warn)' }}>
+          참여자 수를 2명 이상으로 적어주세요
+        </div>
+      )}
     </Shell>
   )
 }

@@ -37,6 +37,10 @@
 }
 
 /* ── 레이아웃 ─────────────────────────────── */
+.js-root {
+  min-height: 100dvh;
+  background: linear-gradient(165deg, #eaf2fd 0%, #f6faff 45%, #eef4fd 100%);
+}
 .js-shell {
   max-width: 480px;
   margin: 0 auto;
@@ -45,6 +49,18 @@
   display: flex;
   flex-direction: column;
   padding: 16px 16px 28px;
+}
+
+/* 데스크톱에서는 폰 폭 그대로 두고 카드처럼 띄운다.
+   참여자 웹은 카카오톡 인앱 브라우저(모바일)가 100%이므로 폭을 늘리지 않는다. */
+@media (min-width: 560px) {
+  .js-shell {
+    margin: 28px auto 40px;
+    min-height: calc(100dvh - 68px);
+    border-radius: 26px;
+    box-shadow: 0 18px 50px rgba(15, 37, 64, 0.13), 0 0 0 1px rgba(15, 37, 64, 0.05);
+    padding: 22px 22px 30px;
+  }
 }
 .js-bar {
   display: flex;
@@ -379,4 +395,9 @@
   width: 100%; margin-top: 14px; background: none; border: 0; color: var(--ink3);
   font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   text-decoration: underline; text-underline-offset: 3px;
+}
+
+/* 개발용 바는 데스크톱 카드 안쪽에 맞춘다 (base 규칙보다 뒤에 와야 이긴다) */
+@media (min-width: 560px) {
+  .js-dev { margin: -22px -22px 14px; border-radius: 0 0 14px 14px; }
 }
