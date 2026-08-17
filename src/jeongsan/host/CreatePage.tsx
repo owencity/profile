@@ -8,10 +8,11 @@
  */
 import { useState } from 'react'
 import { Bar, Shell } from '../ui'
+import { DatePicker, toISO } from '../DatePicker'
 
 export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const [name, setName] = useState('8월 팀 회식')
-  const [date, setDate] = useState('2026-08-14')
+  const [date, setDate] = useState(() => toISO(new Date()))
   const [myName, setMyName] = useState('동규')
   const [bank, setBank] = useState('국민은행')
   const [account, setAccount] = useState('123456-78-901234')
@@ -25,7 +26,7 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
       <input className="js-inp" value={name} onChange={(e) => setName(e.target.value)} />
 
       <div className="js-lab">모임 날짜</div>
-      <input className="js-inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      <DatePicker value={date} onChange={setDate} />
 
       <div className="js-lab">
         내 이름 <span className="opt">· 참여자에게 보입니다</span>

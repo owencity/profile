@@ -295,3 +295,53 @@
   padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
 }
 .js-dev button.on { background: var(--acc); color: #191600; }
+
+/* ── 날짜 선택 ─────────────────────────────── */
+.js-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.js-chip {
+  background: #fbfdff; color: var(--ink2); border: 1.5px solid var(--line);
+  border-radius: 99px; padding: 9px 15px; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.js-chip.on { background: var(--p600); color: #fff; border-color: var(--p600); }
+
+.js-dp-value {
+  margin-top: 9px; font-size: 15px; font-weight: 800; color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.js-dp {
+  margin-top: 10px; border: 1.5px solid var(--line); border-radius: 16px;
+  background: #fff; padding: 12px; box-shadow: 0 6px 18px rgba(15, 37, 64, 0.07);
+}
+.js-dp-head {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 0 4px 8px;
+}
+.js-dp-head b { font-size: 14.5px; font-weight: 800; }
+.js-dp-head button {
+  width: 32px; height: 32px; border-radius: 10px; border: 0; background: var(--p50);
+  color: var(--p600); font-size: 18px; font-weight: 800; cursor: pointer;
+  font-family: inherit; line-height: 1;
+}
+.js-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.js-dp-dow {
+  text-align: center; font-size: 11px; font-weight: 800; color: var(--ink3);
+  padding: 4px 0 6px;
+}
+.js-dp-dow.sun { color: var(--warn); }
+.js-dp-dow.sat { color: var(--p500); }
+.js-dp-day {
+  height: 38px; border: 0; background: none; border-radius: 10px;
+  font-size: 13.5px; font-weight: 700; color: var(--ink); cursor: pointer;
+  font-family: inherit; padding: 0;
+}
+.js-dp-day:hover { background: var(--p50); }
+.js-dp-day.dim { color: #c8d4e4; }
+.js-dp-day.sun { color: var(--warn); }
+.js-dp-day.sat { color: var(--p500); }
+.js-dp-day.dim.sun, .js-dp-day.dim.sat { color: #d9c9cc; }
+.js-dp-day.today { box-shadow: inset 0 0 0 1.5px var(--p400); }
+.js-dp-day.on {
+  background: var(--p600) !important; color: #fff !important; box-shadow: none;
+}
