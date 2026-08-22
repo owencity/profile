@@ -11,6 +11,7 @@
  * 여기에 "N빵이 아니다"를 앞에 세웠다 — 첫 문장에서 무엇이 다른지 말해야 한다.
  */
 import { googleEnabled } from './api'
+import { PixelCitySky } from './PixelCitySky'
 import { Shell } from './ui'
 
 /** 아이콘 시안 C — 딥블루 배경 + 오렌지 버스트 + ÷ */
@@ -95,10 +96,13 @@ const FEATURES = [
 export function LoginPage({ onLogin }: { onLogin: () => void }) {
   return (
     <Shell>
-      <div className="js-login">
-        <AppIcon />
-        <div className="t">정산어택</div>
-        <div className="s">1차, 2차로 끝나지 않는 술자리를 위해</div>
+      <div className="js-hero">
+        <PixelCitySky />
+        <div className="js-login">
+          <AppIcon />
+          <div className="t">정산어택</div>
+          <div className="s">1차, 2차로 끝나지 않는 술자리를 위해</div>
+        </div>
       </div>
 
       <div className="js-feats">

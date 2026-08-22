@@ -409,14 +409,69 @@
   .js-dev { margin: -22px -22px 14px; border-radius: 0 0 14px 14px; }
 }
 
-/* ── 주최자 로그인 ─────────────────────────── */
-.js-login { text-align: center; padding: 46px 0 26px; }
-.js-login svg { margin: 0 auto; box-shadow: 0 12px 30px rgba(27, 79, 156, 0.28); }
+/* ── 주최자 로그인 — 히어로(도트 노을 도시) ──────────
+   .js-shell 배경(흰색)은 다른 모든 화면이 같이 쓰므로 건드리지 않는다.
+   히어로는 로그인 화면 상단에만 얹고, 아래로 갈수록 흰 배경으로 페이드한다. */
+.js-hero {
+  position: relative;
+  margin: -16px -16px 0;
+  min-height: 260px;
+  overflow: hidden;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+@media (min-width: 560px) {
+  .js-hero { margin: -22px -22px 0; border-radius: 26px 26px 0 0; }
+}
+.js-pixelcity {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block;
+}
+/* 도시 위에서 아래(흰 배경)로 자연스럽게 사라진다 */
+.js-hero::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 55%, #fff 96%);
+}
+
+.js-login { position: relative; z-index: 1; text-align: center; padding: 34px 0 26px; }
+.js-login svg:not(.js-pixelcity) { margin: 0 auto; box-shadow: 0 12px 30px rgba(27, 79, 156, 0.32); }
 .js-login .t {
   font-size: 27px; font-weight: 900; letter-spacing: -1.2px; margin-top: 18px;
-  color: var(--p700);
+  color: #fff; text-shadow: 0 2px 10px rgba(18, 56, 111, 0.45);
 }
-.js-login .s { font-size: 14px; color: var(--ink2); line-height: 1.65; margin-top: 10px; font-weight: 600; }
+.js-login .s {
+  font-size: 14px; color: rgba(255, 255, 255, 0.88); line-height: 1.65;
+  margin-top: 10px; font-weight: 600; text-shadow: 0 1px 6px rgba(18, 56, 111, 0.4);
+}
+
+/* ── 도트 도시 애니메이션 — opacity/transform 만 움직인다 ── */
+@keyframes pc-twinkle {
+  0%, 100% { opacity: .25; }
+  50% { opacity: 1; }
+}
+@keyframes pc-window {
+  0%   { opacity: 0; }
+  15%  { opacity: .95; }
+  60%  { opacity: .95; }
+  75%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes pc-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+}
+@keyframes pc-sun-pulse {
+  0%, 100% { opacity: .85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.js-pc-star { animation-name: pc-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.js-pc-window { animation-name: pc-window; animation-timing-function: ease-in-out; animation-iteration-count: infinite; opacity: 0; }
+.js-pc-cloud-a { animation: pc-drift 70s ease-in-out infinite; }
+.js-pc-cloud-b { animation: pc-drift 95s ease-in-out infinite reverse; }
+.js-pc-sun { animation: pc-sun-pulse 6s ease-in-out infinite; transform-origin: 200px 116px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-pc-star, .js-pc-window, .js-pc-cloud-a, .js-pc-cloud-b, .js-pc-sun { animation: none; opacity: .7; }
+}
 
 /* 소개 3항목 */
 .js-feats { border-top: 1px solid var(--line); }
