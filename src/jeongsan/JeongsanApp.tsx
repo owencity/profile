@@ -34,6 +34,7 @@ import { CheckPage } from './participant/CheckPage'
 import { MyResultPage } from './participant/MyResultPage'
 import { AllPage } from './participant/AllPage'
 import { LoginPage } from './LoginPage'
+import { PixelCitySky } from './PixelCitySky'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -51,6 +52,24 @@ export default function JeongsanApp({ route, navigate }: Props) {
   const [joined, setJoined] = useState(true)
   // 주최자 로그인 상태. 실제로는 useAuthStore 의 user 유무로 판단한다.
   const [loggedIn, setLoggedIn] = useState(false)
+
+  // 탭 제목·파비콘을 포트폴리오("김동규 | Backend Developer")가 아니라
+  // 정산어택으로 바꾼다. index.html 은 두 서브앱이 공유하는 정적 파일이라
+  // 여기서 CSR 로 덮어써야 한다. 독립 배포(jungsan.devkdk.com)에서도
+  // JeongsanApp 이 항상 떠 있으니 그대로 적용된다.
+  useEffect(() => {
+    const prevTitle = document.title
+    const iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    const prevIconHref = iconLink?.href
+
+    document.title = '정산어택'
+    if (iconLink) iconLink.href = '/jeongsan-icon.svg'
+
+    return () => {
+      document.title = prevTitle
+      if (iconLink && prevIconHref) iconLink.href = prevIconHref
+    }
+  }, [])
 
   useEffect(() => {
     if (isMock()) return
@@ -94,8 +113,16 @@ export default function JeongsanApp({ route, navigate }: Props) {
     </div>
   )
 
-  const wrap = (node: React.ReactNode) => (
-    <div className="js-root">
+  // 로그인 화면만 도트 도시를 화면 전체 배경으로 쓴다(js-login-mode).
+  // 다른 화면(H0~W3)의 .js-shell(흰 배경)은 이 클래스가 없어 그대로다.
+  //
+  // PixelCitySky 를 .js-shell "안"이 아니라 .js-root 의 형제로 둔다 — 안에 두면
+  // z-index 스택 규칙상(포지션 없는 일반 흐름 자식이 z-index:0 포지션 자식보다
+  // 나중에 칠해진다) 아래 기능 카드들을 도시 배경이 덮어버린다. 형제로 빼야
+  // .js-shell 의 backdrop-filter 도 실제로 이 배경을 흐리게 비칠 대상이 생긴다.
+  const wrap = (node: React.ReactNode, rootClass = '') => (
+    <div className={`js-root ${rootClass}`.trim()}>
+      {rootClass.includes('js-login-mode') && <PixelCitySky />}
       {/* import.meta.env.DEV 로 가린다. isMock() 은 "백엔드가 아직 없다"일 뿐이고
           지금 jungsan.devkdk.com 배포도 백엔드가 없어 isMock() 이 true 다 —
           그걸로 가리면 실서비스에도 이 바가 그대로 떴다(실제로 떴었다).
@@ -132,7 +159,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // ── 주최자 앱 ────────────────────────────────
   // 주최자도 로그인해야 한다. 참여자 경로(/g/)는 JoinPage 가 자체적으로 로그인을 받는다.
   if (!loggedIn) {
-    return wrap(<LoginPage onLogin={() => setLoggedIn(true)} />)
+    return wrap(<LoginPage onLogin={() => setLoggedIn(true)} />, 'js-login-mode')
   }
 
   if (route === '/jungsan/new') {
