@@ -10,7 +10,7 @@ export type Project = {
 export const profile = {
   name: '김동규',
   role: 'Backend Developer',
-  brand: 'dev_kdk',
+  brand: 'dev_mococo',
   avatarUrl: '/brand.png',
   // 줄바꿈은 App.tsx 의 whitespace-pre-line 이 살린다
   intro: 'this is mococo!\nmococo just do it!',

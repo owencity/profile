@@ -10,6 +10,7 @@ import { useAuthStore } from './auth/useAuthStore'
 import { SecretRoomPage } from './secret/SecretRoomPage'
 import { DevGuidePage } from './devguide/DevGuidePage'
 import { BlogPost } from './blog/BlogPost'
+import { PortfolioHome } from './portfolio/PortfolioHome'
 import JeongsanApp from './jeongsan/JeongsanApp'
 
 /**
@@ -145,6 +146,12 @@ function App() {
   // 정산어택 — 풀스크린. 공유 링크(/g/{token})가 단톡방에서 바로 열린다
   if (isJeongsanPath(route)) {
     return <JeongsanApp route={route} navigate={navigate} />
+  }
+
+  // 홈 — 백엔드 개발자 포트폴리오. 풀스크린 (기존 사이드바/프로젝트 목록 대체)
+  // 프로젝트 카드는 페이지 이동이 아니라 모달로 뜬다 (PortfolioHome 내부에서 처리)
+  if (route === '/') {
+    return <PortfolioHome />
   }
 
   return (
