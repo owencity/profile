@@ -96,7 +96,11 @@ export default function JeongsanApp({ route, navigate }: Props) {
 
   const wrap = (node: React.ReactNode) => (
     <div className="js-root">
-      {dev}
+      {/* import.meta.env.DEV 로 가린다. isMock() 은 "백엔드가 아직 없다"일 뿐이고
+          지금 jungsan.devkdk.com 배포도 백엔드가 없어 isMock() 이 true 다 —
+          그걸로 가리면 실서비스에도 이 바가 그대로 떴다(실제로 떴었다).
+          DEV 는 `vite build`(Vercel 이 만드는 것) 에서는 항상 false 다. */}
+      {import.meta.env.DEV && dev}
       {node}
     </div>
   )
