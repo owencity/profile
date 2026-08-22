@@ -63,74 +63,28 @@ export function AppIcon({ size = 88 }: { size?: number }) {
   )
 }
 
-const FEATURES = [
-  {
-    t: 'N빵으로 나누지 않습니다',
-    d: (
-      <>
-        3차에서 누가 빠졌고 4차에서 누가 술을 안 마셨는지까지{' '}
-        <em>차수별로 나눠</em> 계산합니다.
-      </>
-    ),
-  },
-  {
-    t: '총무 혼자 입력하지 않습니다',
-    d: (
-      <>
-        총무는 <em>금액만</em> 넣습니다. 누가 어디에 있었고 술을 마셨는지는{' '}
-        <em>각자 링크에서</em> 체크합니다.
-      </>
-    ),
-  },
-  {
-    t: '금액만 알려주지 않습니다',
-    d: (
-      <>
-        <em>“1차 참석·논알콜 → 17,800원”</em> 처럼 왜 그 금액인지 근거를 함께 보여줍니다.
-      </>
-    ),
-  },
-]
-
 export function LoginPage({ onLogin }: { onLogin: () => void }) {
   return (
     <Shell>
       <div className="js-login">
         <AppIcon />
         <div className="t">정산어택</div>
-        <div className="s">1차, 2차로 끝나지 않는 술자리를 위해</div>
-      </div>
-
-      <div className="js-feats">
-        {FEATURES.map((f, i) => (
-          <div className="js-feat" key={f.t}>
-            <div className="no">{String(i + 1).padStart(2, '0')}</div>
-            <div>
-              <div className="ft">{f.t}</div>
-              <div className="fd">{f.d}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="js-badge">
-        참여자는 <b>앱을 설치하지 않습니다.</b> 링크로 들어와 웹에서 체크합니다.
+        <div className="hook">같이 놀고 같이 먹는데 왜 총무만 고생을 해야하냐!</div>
+        <div className="s">
+          그래서 총무들의 고생을 위해 만든 정산 앱입니다.
+          <br />
+          총무를 위해 당신의 클릭 1스푼을 얹어주세요.
+        </div>
       </div>
 
       <button className="js-cta kakao" style={{ marginTop: 20 }} onClick={onLogin}>
-        카카오로 시작하기
+        카카오로 3초만에 시작하기
       </button>
       {googleEnabled && (
         <button className="js-cta2 google" onClick={onLogin}>
           구글로 시작하기
         </button>
       )}
-
-      <div className="js-footer">
-        닉네임과 프로필 사진만 받습니다 · 이메일·전화번호·실명은 받지 않습니다
-        <br />
-        <b style={{ color: 'var(--ink2)' }}>광고를 넣지 않습니다.</b>
-      </div>
     </Shell>
   )
 }
