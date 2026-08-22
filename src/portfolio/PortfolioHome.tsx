@@ -4,6 +4,7 @@ import { portfolio, CATEGORY_STYLES, STATUS_STYLES, formatCareerDuration } from 
 import { ProjectModal } from './ProjectModal'
 
 const LONG_PRESS_MS = 800
+const CAPTURE_SCALE = 2
 
 export function PortfolioHome() {
   const [openSlug, setOpenSlug] = useState<string | null>(null)
@@ -19,18 +20,45 @@ export function PortfolioHome() {
   }
 
   const exportPdf = async () => {
-    if (!pdfContentRef.current || isExporting) return
+    const target = pdfContentRef.current
+    if (!target || isExporting) return
     setIsExporting(true)
     try {
+      // 웹폰트(Pretendard)가 아직 안 불러와진 상태로 찍히면 글자 폭이 달라져
+      // 화면과 다른 레이아웃으로 캡처된다 — 로드 완료를 기다린 뒤 캡처한다.
+      await document.fonts.ready
+
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import('html2canvas-pro'),
         import('jspdf'),
       ])
-      const canvas = await html2canvas(pdfContentRef.current, {
-        scale: 2,
+
+      const canvas = await html2canvas(target, {
+        scale: CAPTURE_SCALE,
         backgroundColor: '#fafafa',
         useCORS: true,
+        // 캡처용 내부 렌더링 창 크기를 명시해서 sm/lg/2xl 반응형 스타일이
+        // 실제 화면과 다르게 계산되는 걸 막는다.
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
       })
+
+      // 이메일·GitHub처럼 실제 링크였던 요소는 PDF에서도 클릭 가능하도록
+      // 좌표를 계산해 링크 주석으로 덧붙인다 (캡처 이미지 자체엔 링크가 없다).
+      const containerRect = target.getBoundingClientRect()
+      const links = Array.from(
+        target.querySelectorAll<HTMLAnchorElement>('[data-pdf-link]'),
+      ).map((el) => {
+        const r = el.getBoundingClientRect()
+        return {
+          url: el.href,
+          x: (r.left - containerRect.left) * CAPTURE_SCALE,
+          y: (r.top - containerRect.top) * CAPTURE_SCALE,
+          width: r.width * CAPTURE_SCALE,
+          height: r.height * CAPTURE_SCALE,
+        }
+      })
+
       const imgData = canvas.toDataURL('image/jpeg', 0.92)
       const pdf = new jsPDF({
         orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
@@ -38,6 +66,9 @@ export function PortfolioHome() {
         format: [canvas.width, canvas.height],
       })
       pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height)
+      for (const link of links) {
+        pdf.link(link.x, link.y, link.width, link.height, { url: link.url })
+      }
       pdf.save('김동규_백엔드개발자_포트폴리오.pdf')
     } finally {
       setIsExporting(false)
@@ -55,7 +86,7 @@ export function PortfolioHome() {
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
       <div className="mx-auto w-full max-w-[1680px] px-4 py-10 sm:px-8 sm:py-14 lg:px-16 lg:py-16 2xl:px-24">
-        <div className="mb-10 flex items-center justify-between sm:mb-14">
+        <div className="mb-10 sm:mb-14">
           <span
             className={`select-none text-sm font-semibold tracking-tight text-indigo-700 transition ${isExporting ? 'opacity-50' : ''}`}
             style={{ touchAction: 'none' }}
@@ -66,14 +97,6 @@ export function PortfolioHome() {
           >
             {profile.brand}
           </span>
-          <a
-            className="text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
-            href={portfolio.contact.githubUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub ↗
-          </a>
         </div>
 
         <div ref={pdfContentRef}>
@@ -104,11 +127,13 @@ export function PortfolioHome() {
                   icon="✉️"
                   text={portfolio.contact.email}
                   href={`mailto:${portfolio.contact.email}`}
+                  pdfLinkId="email"
                 />
                 <ContactRow
                   icon="🐙"
                   text={portfolio.contact.githubLabel}
                   href={portfolio.contact.githubUrl}
+                  pdfLinkId="github"
                 />
               </div>
             </div>
@@ -244,7 +269,17 @@ function SectionHeading({ emoji, title }: { emoji: string; title: string }) {
   )
 }
 
-function ContactRow({ icon, text, href }: { icon: string; text: string; href?: string }) {
+function ContactRow({
+  icon,
+  text,
+  href,
+  pdfLinkId,
+}: {
+  icon: string
+  text: string
+  href?: string
+  pdfLinkId?: string
+}) {
   const content = (
     <span className="flex items-center gap-2.5">
       <span aria-hidden className="text-xl">
@@ -260,6 +295,7 @@ function ContactRow({ icon, text, href }: { icon: string; text: string; href?: s
       href={href}
       target={href.startsWith('http') ? '_blank' : undefined}
       rel="noreferrer"
+      data-pdf-link={pdfLinkId}
     >
       {content}
     </a>
