@@ -144,7 +144,14 @@ function App() {
   }
 
   // 정산어택 — 풀스크린. 공유 링크(/g/{token})가 단톡방에서 바로 열린다
+  // 독립 배포(jungsan.devkdk.com)가 아니면 여기서 서비스하지 않는다 — 같은 경로 그대로
+  // 서브도메인으로 보내버린다. 옛날에 뿌려진 www.devkdk.com/jungsan 링크도 안 깨지고
+  // 정상 작동하는 앱으로 넘어간다.
   if (isJeongsanPath(route)) {
+    if (!isJeongsanStandalone) {
+      window.location.replace(`https://jungsan.devkdk.com${route}`)
+      return null
+    }
     return <JeongsanApp route={route} navigate={navigate} />
   }
 
