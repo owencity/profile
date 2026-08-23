@@ -85,7 +85,10 @@ export function PortfolioHome() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto w-full max-w-[1680px] px-4 py-10 sm:px-8 sm:py-14 lg:px-16 lg:py-16 2xl:px-24">
+      <div
+        ref={pdfContentRef}
+        className="mx-auto w-full max-w-[1680px] px-4 py-10 sm:px-8 sm:py-14 lg:px-16 lg:py-16 2xl:px-24"
+      >
         <div className="mb-10 sm:mb-14">
           <span
             className={`select-none text-sm font-semibold tracking-tight text-indigo-700 transition ${isExporting ? 'opacity-50' : ''}`}
@@ -99,7 +102,6 @@ export function PortfolioHome() {
           </span>
         </div>
 
-        <div ref={pdfContentRef}>
         {/* Hero / Intro */}
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="grid gap-8 sm:grid-cols-[280px_minmax(0,1fr)] sm:items-start sm:gap-12">
@@ -250,7 +252,6 @@ export function PortfolioHome() {
             </button>
           ))}
         </section>
-        </div>
 
         <div className="pb-10" />
       </div>
