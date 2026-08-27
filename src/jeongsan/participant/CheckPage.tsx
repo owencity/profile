@@ -45,7 +45,7 @@ export function CheckPage({
     )
 
   return (
-    <Shell>
+    <Shell narrow>
       <Url path={`/g/${g.shareToken}`} />
       <Bar title={g.name} />
 

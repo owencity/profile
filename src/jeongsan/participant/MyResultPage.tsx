@@ -36,7 +36,7 @@ export function MyResultPage({
   }
 
   return (
-    <Shell>
+    <Shell narrow>
       <Url path={`/g/${g.shareToken}`} />
 
       <div className="js-big">

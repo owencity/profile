@@ -35,7 +35,7 @@ export function JoinPage({
   // ── 확정 후 진입 → 참여 불가
   if (g.status === 'CONFIRMED') {
     return (
-      <Shell>
+      <Shell narrow>
         <Url path={`/g/${g.shareToken}`} />
         <Bar title={g.name} step="확정됨" tone="on" />
         <WarnBox title="이미 정산이 확정되었어요">

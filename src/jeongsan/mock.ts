@@ -15,6 +15,8 @@
 import type {
   Gathering,
   GatheringSummary,
+  GroupDetail,
+  GroupSummary,
   Id,
   Participant,
   Settlement,
@@ -198,5 +200,80 @@ export const mockSummaries: GatheringSummary[] = [
     respondedCount: 2, paidCount: 0, payableCount: 0,
   },
 ]
+
+/**
+ * H0 모임 목록 목업.
+ *
+ * 화면이 갈라 보여줄 두 경우를 **둘 다 넣는다** — 총무(OWNER)인 모임과
+ * 참여자(MEMBER)로 들어가 있는 모임. 한 쪽만 있으면 구분이 되는지 알 수 없다.
+ * 번개(FLASH)와 주기(RECURRING)도 마찬가지로 섞어둔다.
+ */
+export const mockGroups: GroupSummary[] = [
+  {
+    id: 100, name: '신림팸', groupType: 'RECURRING', role: 'OWNER', ownerName: '동규',
+    memberCount: 5, gatheringCount: 3,
+  },
+  {
+    id: 101, name: '8월 26일 번개', groupType: 'FLASH', role: 'OWNER', ownerName: '동규',
+    memberCount: 4, gatheringCount: 1,
+  },
+  {
+    id: 102, name: '대학 동기 모임', groupType: 'RECURRING', role: 'MEMBER', ownerName: '태현',
+    memberCount: 8, gatheringCount: 12,
+  },
+  {
+    id: 103, name: '수요일 번개', groupType: 'FLASH', role: 'MEMBER', ownerName: '해린',
+    memberCount: 3, gatheringCount: 1,
+  },
+]
+
+/**
+ * 모임 상세 목업. **번개와 주기 둘 다** 넣는다 —
+ * 번개는 술자리가 1개고 "새 술자리" 버튼이 없어야 하는데,
+ * 주기 하나만 있으면 그 차이를 화면에서 확인할 수 없다.
+ */
+export const mockGroupDetails: Record<number, GroupDetail> = {
+  100: {
+    id: 100, name: '신림팸', groupType: 'RECURRING', shareToken: 'aB3xY9kL2mNp',
+    members: [
+      { userId: 1, nickname: '동규', role: 'OWNER' },
+      { userId: 2, nickname: '민지', role: 'MEMBER' },
+      { userId: 3, nickname: '재훈', role: 'MEMBER' },
+      { userId: 4, nickname: '수아', role: 'MEMBER' },
+      { userId: 5, nickname: '지원', role: 'MEMBER' },
+    ],
+    gatherings: [
+      { id: 1, name: '8월 팀 회식', date: '2026-08-14', status: 'CONFIRMED' },
+      { id: 2, name: '7월 환영회', date: '2026-07-22', status: 'CONFIRMED' },
+      { id: 3, name: '6월 첫 모임', date: '2026-06-15', status: 'COLLECTING' },
+    ],
+  },
+  101: {
+    id: 101, name: '8월 26일 번개', groupType: 'FLASH', shareToken: 'kR7mQ2vXwZ1t',
+    members: [
+      { userId: 1, nickname: '동규', role: 'OWNER' },
+      { userId: 3, nickname: '재훈', role: 'MEMBER' },
+      { userId: 4, nickname: '수아', role: 'MEMBER' },
+      { userId: 5, nickname: '지원', role: 'MEMBER' },
+    ],
+    gatherings: [{ id: 9, name: '8월 26일 번개', date: '2026-08-26', status: 'COLLECTING' }],
+  },
+  102: {
+    id: 102, name: '대학 동기 모임', groupType: 'RECURRING', shareToken: null,
+    members: [
+      { userId: 7, nickname: '태현', role: 'OWNER' },
+      { userId: 1, nickname: '동규', role: 'MEMBER' },
+    ],
+    gatherings: [{ id: 11, name: '연말 모임', date: '2026-12-20', status: 'COLLECTING' }],
+  },
+  103: {
+    id: 103, name: '수요일 번개', groupType: 'FLASH', shareToken: null,
+    members: [
+      { userId: 8, nickname: '해린', role: 'OWNER' },
+      { userId: 1, nickname: '동규', role: 'MEMBER' },
+    ],
+    gatherings: [{ id: 12, name: '수요일 번개', date: '2026-08-19', status: 'CONFIRMED' }],
+  },
+}
 
 export const MOCK_IDS = P

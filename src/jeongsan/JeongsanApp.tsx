@@ -19,10 +19,12 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import './jeongsan.css'
-import { fetchGathering, fetchMyGatherings, fetchPreview, isMock } from './api'
-import { mockGathering, mockSettlement, mockSummaries, MOCK_IDS } from './mock'
-import type { Gathering, Id, Settlement } from './types'
-import { HomePage } from './host/HomePage'
+import { fetchGathering, fetchGroup, fetchMe, fetchMyGroups, fetchPreview, isMock, kakaoLoginUrl } from './api'
+import { mockGathering, mockGroupDetails, mockGroups, mockSettlement, MOCK_IDS } from './mock'
+import type { Gathering, Id, Me, Settlement } from './types'
+import { GroupHomePage } from './host/GroupHomePage'
+import { CreateGroupPage } from './host/CreateGroupPage'
+import { GroupDetailPage } from './host/GroupDetailPage'
 import { CreatePage } from './host/CreatePage'
 import { AmountPage } from './host/AmountPage'
 import { CollectPage } from './host/CollectPage'
@@ -34,7 +36,7 @@ import { CheckPage } from './participant/CheckPage'
 import { MyResultPage } from './participant/MyResultPage'
 import { AllPage } from './participant/AllPage'
 import { LoginPage } from './LoginPage'
-import { PixelCitySky } from './PixelCitySky'
+import { SideStreet } from './SideStreet'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -45,13 +47,16 @@ type Props = {
 export default function JeongsanApp({ route, navigate }: Props) {
   const [g, setG] = useState<Gathering>(mockGathering)
   const [s, setS] = useState<Settlement>(mockSettlement)
-  const [summaries, setSummaries] = useState(mockSummaries)
+  const [groups, setGroups] = useState(mockGroups)
+  const [groupDetail, setGroupDetail] = useState(mockGroupDetails[100])
 
   // 개발용 — 어떤 참여자 시점으로 볼지, 그리고 상태를 강제로 바꿔본다
   const [asId, setAsId] = useState<Id>(MOCK_IDS.재훈)
   const [joined, setJoined] = useState(true)
-  // 주최자 로그인 상태. 실제로는 useAuthStore 의 user 유무로 판단한다.
+  // 로그인 상태. mock 모드에서는 개발용 전환 바로 껐다 켠다.
   const [loggedIn, setLoggedIn] = useState(false)
+  // 로그인한 사용자. 아래 `me`(목업 참여자)와 다른 개념이라 이름을 나눈다.
+  const [authUser, setAuthUser] = useState<Me | null>(null)
 
   // 탭 제목·파비콘을 포트폴리오("김동규 | Backend Developer")가 아니라
   // 정산어택으로 바꾼다. index.html 은 두 서브앱이 공유하는 정적 파일이라
@@ -71,10 +76,30 @@ export default function JeongsanApp({ route, navigate }: Props) {
     }
   }, [])
 
+  // 로그인 상태를 **서버에 물어본다.** 쿠키가 httpOnly 라 JS 로는 읽을 수 없어서
+  // 프론트가 스스로 알 방법이 없다 — 이게 없으면 쿠키가 살아 있어도 새로고침할
+  // 때마다 로그인 화면이 뜬다.
   useEffect(() => {
     if (isMock()) return
-    void fetchMyGatherings().then(setSummaries).catch(() => {})
+    void fetchMe().then((user) => {
+      if (!user) return
+      setAuthUser(user)
+      setLoggedIn(true)
+      void fetchMyGroups().then(setGroups).catch(() => {})
+    })
   }, [])
+
+  // 모임 상세 — /jungsan/group/:id 로 들어오면 그 모임을 읽는다.
+  useEffect(() => {
+    const m = route.match(/^\/jungsan\/group\/(\d+)$/)
+    if (!m) return
+    const id = Number(m[1])
+    if (isMock()) {
+      setGroupDetail(mockGroupDetails[id] ?? mockGroupDetails[100])
+      return
+    }
+    void fetchGroup(id).then(setGroupDetail).catch(() => {})
+  }, [route])
 
   useEffect(() => {
     if (isMock()) return
@@ -113,16 +138,15 @@ export default function JeongsanApp({ route, navigate }: Props) {
     </div>
   )
 
-  // 로그인 화면만 도트 도시를 화면 전체 배경으로 쓴다(js-login-mode).
-  // 다른 화면(H0~W3)의 .js-shell(흰 배경)은 이 클래스가 없어 그대로다.
+  // 화면 공통 껍데기. rootClass 는 화면별 변형이 필요할 때만 쓴다.
   //
-  // PixelCitySky 를 .js-shell "안"이 아니라 .js-root 의 형제로 둔다 — 안에 두면
-  // z-index 스택 규칙상(포지션 없는 일반 흐름 자식이 z-index:0 포지션 자식보다
-  // 나중에 칠해진다) 아래 기능 카드들을 도시 배경이 덮어버린다. 형제로 빼야
-  // .js-shell 의 backdrop-filter 도 실제로 이 배경을 흐리게 비칠 대상이 생긴다.
+  // 캔버스 도트 배경(PixelCitySky·PixelNightAlley)은 **떼어냈다.** 배경이 화려하면
+  // 목록·금액 같은 정보가 안 읽힌다. 8비트 느낌은 배경이 아니라 **화면 요소 자체**
+  // (각진 모서리·굵은 선·솔리드 그림자)로 낸다. 렌더러 파일은 남겨뒀다.
   const wrap = (node: React.ReactNode, rootClass = '') => (
     <div className={`js-root ${rootClass}`.trim()}>
-      {rootClass.includes('js-login-mode') && <PixelCitySky />}
+      {/* 좌우 여백 배경. 넓은 화면에서만 보인다(CSS 가 결정). */}
+      <SideStreet />
       {/* import.meta.env.DEV 로 가린다. isMock() 은 "백엔드가 아직 없다"일 뿐이고
           지금 jungsan.devkdk.com 배포도 백엔드가 없어 isMock() 이 true 다 —
           그걸로 가리면 실서비스에도 이 바가 그대로 떴다(실제로 떴었다).
@@ -159,10 +183,53 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // ── 주최자 앱 ────────────────────────────────
   // 주최자도 로그인해야 한다. 참여자 경로(/g/)는 JoinPage 가 자체적으로 로그인을 받는다.
   if (!loggedIn) {
-    return wrap(<LoginPage onLogin={() => setLoggedIn(true)} />, 'js-login-mode')
+    return wrap(
+      <LoginPage
+        onLogin={() => {
+          // mock 모드에는 백엔드가 없다 — 화면 확인용으로 상태만 켠다.
+          if (isMock()) { setLoggedIn(true); return }
+          // 실제 흐름: 서버가 카카오 인가 화면으로 302 시킨다(API.md §2.1).
+          window.location.href = kakaoLoginUrl()
+        }}
+      />,
+    )
   }
 
+  // 모임 만들기 — 번개/주기를 먼저 고른다.
   if (route === '/jungsan/new') {
+    return wrap(
+      <CreateGroupPage
+        onCreate={(v) => {
+          // TODO 서버 연동: POST /api/v1/groups → 응답의 id 로 이동한다.
+          //      지금은 목업이라 첫 모임 상세로 보낸다.
+          alert(`모임 생성 (mock)
+${v.groupType} · ${v.name}`)
+          navigate('/jungsan/group/100')
+        }}
+        onBack={() => navigate('/jungsan')}
+      />,
+    )
+  }
+
+  // 모임 상세 — 그 안의 술자리 목록
+  const groupRoute = route.match(/^\/jungsan\/group\/(\d+)$/)
+  if (groupRoute) {
+    const gid = Number(groupRoute[1])
+    const summary = groups.find((x) => x.id === gid)
+    return wrap(
+      <GroupDetailPage
+        group={groupDetail}
+        isOwner={summary ? summary.role === 'OWNER' : true}
+        onOpenGathering={(id) => navigate(`/jungsan/${id}/collect`)}
+        onNewGathering={() => navigate('/jungsan/gathering/new')}
+        onInvite={() => alert('초대 링크 복사 (mock)')}
+        onBack={() => navigate('/jungsan')}
+      />,
+    )
+  }
+
+  // 술자리 만들기 (모임 안에서)
+  if (route === '/jungsan/gathering/new') {
     return wrap(<CreatePage onNext={() => navigate('/jungsan/1/amount')} onBack={() => navigate('/jungsan')} />)
   }
 
@@ -219,11 +286,13 @@ export default function JeongsanApp({ route, navigate }: Props) {
     }
   }
 
-  // ── H0 (기본)
+  // ── H0 (기본) — 모임 목록. 술자리가 아니라 **모임**이 첫 화면이다.
+  //    모임을 열면 그 안의 술자리 목록으로 들어간다(다음 작업).
   return wrap(
-    <HomePage
-      list={summaries}
-      onOpen={(id) => navigate(`/jungsan/${id}/${g.status === 'CONFIRMED' ? 'result' : 'collect'}`)}
+    <GroupHomePage
+      groups={groups}
+      meName={authUser?.nickname}
+      onOpen={(id) => navigate(`/jungsan/group/${id}`)}
       onCreate={() => navigate('/jungsan/new')}
     />,
   )

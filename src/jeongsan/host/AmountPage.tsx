@@ -21,7 +21,7 @@ export function AmountPage({
   const nameOf = (id: number) => g.participants.find((p) => p.id === id)?.name ?? '?'
 
   return (
-    <Shell>
+    <Shell narrow>
       <Bar title="금액 입력" onBack={onBack} step="2 / 2" />
 
       {g.rounds.map((r) => (

@@ -20,7 +20,7 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
   const valid = Number(count) >= 2
 
   return (
-    <Shell>
+    <Shell narrow>
       <Bar title="새 모임" onBack={onBack} step="1 / 2" />
 
       <div className="js-lab">모임 이름</div>

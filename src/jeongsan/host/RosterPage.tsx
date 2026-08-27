@@ -20,7 +20,7 @@ export function RosterPage({
 }) {
   const expected = g.expectedCount
   return (
-    <Shell>
+    <Shell narrow>
       <Bar
         title="명단"
         onBack={onBack}

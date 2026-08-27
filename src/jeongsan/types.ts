@@ -14,6 +14,59 @@ export type PaymentStatus = 'NONE' | 'SENT' | 'RECEIVED'
 export type GatheringStatus = 'COLLECTING' | 'CONFIRMED'
 export type Provider = 'kakao' | 'google'
 
+/* ── 모임(Group) ───────────────────────────────
+   ⚠ 용어 주의: **모임 = Group · 술자리 = Gathering** 이다.
+   모임 하나가 술자리 여러 개를 담는다. 번개(FLASH)만 예외로 딱 하나를 담는다. */
+
+/** 번개(1회성) / 주기(계속 만나는 고정 멤버). `API.md` §3-b */
+export type GroupType = 'FLASH' | 'RECURRING'
+
+/** 모임에서 내 역할. 총무(OWNER)와 참여자(MEMBER)를 화면에서 갈라 보여준다. */
+export type GroupRole = 'OWNER' | 'MEMBER'
+
+/** 로그인한 사용자. `GET /api/v1/auth/me` — 토큰에는 id 만 담기고 나머지는 DB 에서 온다. */
+export type Me = {
+  id: Id
+  nickname: string
+  profileImageUrl: string | null
+}
+
+/** H0 목록용 모임 요약. `GET /api/v1/groups` */
+export type GroupSummary = {
+  id: Id
+  name: string
+  groupType: GroupType
+  role: GroupRole
+  /** 총무 닉네임. 참여 중인 모임에서 누가 총무인지 보여준다. */
+  ownerName: string
+  memberCount: number
+  gatheringCount: number
+}
+
+export type GroupMember = {
+  userId: Id
+  nickname: string
+  role: GroupRole
+}
+
+/** 모임 안의 술자리 한 줄. */
+export type GroupGathering = {
+  id: Id
+  name: string
+  date: string
+  status: GatheringStatus
+}
+
+/** 모임 상세. `GET /api/v1/groups/{id}` */
+export type GroupDetail = {
+  id: Id
+  name: string
+  groupType: GroupType
+  shareToken: string | null
+  members: GroupMember[]
+  gatherings: GroupGathering[]
+}
+
 export type Payout = {
   bankName: string
   accountNo: string

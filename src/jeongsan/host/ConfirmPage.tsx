@@ -33,7 +33,7 @@ export function ConfirmPage({
   )
 
   return (
-    <Shell>
+    <Shell narrow>
       <Bar
         title="이대로 확정할까요?"
         onBack={onBack}

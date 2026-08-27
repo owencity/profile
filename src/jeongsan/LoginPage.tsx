@@ -65,7 +65,7 @@ export function AppIcon({ size = 88 }: { size?: number }) {
 
 export function LoginPage({ onLogin }: { onLogin: () => void }) {
   return (
-    <Shell>
+    <Shell narrow>
       <div className="js-login">
         <AppIcon />
         <div className="t">정산어택</div>
