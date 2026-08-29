@@ -36,6 +36,7 @@ import { CheckPage } from './participant/CheckPage'
 import { MyResultPage } from './participant/MyResultPage'
 import { AllPage } from './participant/AllPage'
 import { LoginPage } from './LoginPage'
+import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
 
 type Props = {
@@ -140,12 +141,16 @@ export default function JeongsanApp({ route, navigate }: Props) {
 
   // 화면 공통 껍데기. rootClass 는 화면별 변형이 필요할 때만 쓴다.
   //
-  // 캔버스 도트 배경(PixelCitySky·PixelNightAlley)은 **떼어냈다.** 배경이 화려하면
-  // 목록·금액 같은 정보가 안 읽힌다. 8비트 느낌은 배경이 아니라 **화면 요소 자체**
-  // (각진 모서리·굵은 선·솔리드 그림자)로 낸다. 렌더러 파일은 남겨뒀다.
+  // **로그인 화면만 도트 도시를 화면 전체 배경으로 쓴다(js-login-mode).**
+  // 나머지 화면은 배경을 깔지 않는다 — 목록·금액이 안 읽힌다. 거기서의 8비트 느낌은
+  // 배경이 아니라 화면 요소 자체(각진 모서리·굵은 선·솔리드 그림자)로 낸다.
+  //
+  // PixelCitySky 를 .js-shell "안"이 아니라 .js-root 의 형제로 둔다 — 안에 두면
+  // 카드 크기에 갇혀서 화면 전체를 못 덮는다.
   const wrap = (node: React.ReactNode, rootClass = '') => (
     <div className={`js-root ${rootClass}`.trim()}>
-      {/* 좌우 여백 배경. 넓은 화면에서만 보인다(CSS 가 결정). */}
+      {rootClass.includes('js-login-mode') && <PixelCitySky />}
+      {/* 좌우 여백 배경. 넓은 화면에서만, 그리고 로그인 화면이 아닐 때만(CSS 가 결정). */}
       <SideStreet />
       {/* import.meta.env.DEV 로 가린다. isMock() 은 "백엔드가 아직 없다"일 뿐이고
           지금 jungsan.devkdk.com 배포도 백엔드가 없어 isMock() 이 true 다 —
@@ -192,6 +197,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
           window.location.href = kakaoLoginUrl()
         }}
       />,
+      'js-login-mode',
     )
   }
 
