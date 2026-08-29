@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 760" role="img" style="color:#131A20"
+     aria-label="동기화 트리거부터 대상 조회, 메시지 발행, 컨슈머 수신, 외부 API 호출을 거쳐 성공 시 완료 표시, 실패 시 재시도 3회 후 DLQ 이관과 알람으로 이어지는 순서도">
+  <rect width="800" height="760" fill="#F7F9FA"/>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="a2r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#A63A2B"/>
+    </marker>
+  </defs>
+
+  <rect x="150" y="24" width="200" height="46" rx="23" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="250" y="52" text-anchor="middle" font-size="13.5" fill="currentColor">동기화 트리거</text>
+
+  <line x1="250" y1="70" x2="250" y2="106" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+
+  <rect x="150" y="106" width="200" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="133" text-anchor="middle" font-size="13.5" fill="currentColor">대상 이력 조회</text>
+
+  <line x1="250" y1="150" x2="250" y2="170" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+
+  <polygon points="250,170 348,212 250,254 152,212" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="217" text-anchor="middle" font-size="13" fill="currentColor">대상 있음?</text>
+
+  <line x1="348" y1="212" x2="500" y2="212" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+  <text x="424" y="204" text-anchor="middle" font-size="12" font-family="ui-monospace, monospace" fill="currentColor">아니오</text>
+  <rect x="500" y="190" width="150" height="44" rx="22" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="575" y="217" text-anchor="middle" font-size="13" fill="currentColor">종료</text>
+
+  <line x1="250" y1="254" x2="250" y2="292" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+  <text x="262" y="277" font-size="12" font-family="ui-monospace, monospace" fill="currentColor">예</text>
+
+  <rect x="150" y="292" width="200" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="313" text-anchor="middle" font-size="13.5" fill="currentColor">큐에 메시지 발행</text>
+  <text x="250" y="329" text-anchor="middle" font-size="12" fill="currentColor">이력 단위</text>
+
+  <line x1="250" y1="336" x2="250" y2="372" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+
+  <rect x="150" y="372" width="200" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="393" text-anchor="middle" font-size="13.5" fill="currentColor">컨슈머 수신</text>
+  <text x="250" y="409" text-anchor="middle" font-size="12" fill="currentColor">prefetch 1 · 2~4 병렬</text>
+
+  <line x1="250" y1="416" x2="250" y2="452" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+
+  <rect x="150" y="452" width="200" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="477" text-anchor="middle" font-size="13.5" fill="currentColor">외부 API 호출</text>
+  <text x="250" y="494" text-anchor="middle" font-size="12" fill="currentColor">상품 50건 단위 분할</text>
+
+  <line x1="250" y1="504" x2="250" y2="532" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+
+  <polygon points="250,532 348,576 250,620 152,576" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="250" y="581" text-anchor="middle" font-size="13" fill="currentColor">성공?</text>
+
+  <line x1="250" y1="620" x2="250" y2="668" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
+  <text x="262" y="648" font-size="12" font-family="ui-monospace, monospace" fill="#0B8A73">예</text>
+  <rect x="150" y="668" width="200" height="46" rx="23" fill="none" stroke="#0B8A73" stroke-width="1.6"/>
+  <text x="250" y="696" text-anchor="middle" font-size="13.5" fill="#0B8A73">동기화 완료 표시</text>
+
+  <polyline points="348,576 424,576 424,478 500,478" fill="none" stroke="#A63A2B" stroke-width="1.5" marker-end="url(#a2r)"/>
+  <text x="386" y="568" font-size="12" font-family="ui-monospace, monospace" fill="#A63A2B">아니오</text>
+
+  <rect x="500" y="452" width="230" height="52" fill="none" stroke="#A63A2B" stroke-width="1.5"/>
+  <text x="615" y="477" text-anchor="middle" font-size="13.5" fill="#A63A2B">재시도 최대 3회</text>
+  <text x="615" y="494" text-anchor="middle" font-size="12" fill="#A63A2B">백오프 10초 → 60초</text>
+
+  <line x1="615" y1="504" x2="615" y2="556" stroke="#A63A2B" stroke-width="1.5" marker-end="url(#a2r)"/>
+  <text x="626" y="534" font-size="12" font-family="ui-monospace, monospace" fill="#A63A2B">소진</text>
+
+  <rect x="500" y="556" width="230" height="46" fill="none" stroke="#A63A2B" stroke-width="1.5"/>
+  <text x="615" y="576" text-anchor="middle" font-size="13.5" fill="#A63A2B">DLQ 이관</text>
+  <text x="615" y="592" text-anchor="middle" font-size="12" fill="#A63A2B">14일 보존 · 원문 유지</text>
+
+  <line x1="615" y1="602" x2="615" y2="660" stroke="#A63A2B" stroke-width="1.5" marker-end="url(#a2r)"/>
+
+  <rect x="500" y="660" width="230" height="46" fill="none" stroke="#A63A2B" stroke-width="1.5"/>
+  <text x="615" y="688" text-anchor="middle" font-size="13.5" fill="#A63A2B">실패 알람 · 재처리 대기</text>
+</svg>

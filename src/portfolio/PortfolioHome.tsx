@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { profile } from '../profile'
 import { portfolio, CATEGORY_STYLES, STATUS_STYLES, formatCareerDuration } from './data'
+import { ProjectContent } from './ProjectContent'
 import { ProjectModal } from './ProjectModal'
 
 const LONG_PRESS_MS = 800
@@ -10,6 +11,7 @@ export function PortfolioHome() {
   const [openSlug, setOpenSlug] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const pdfContentRef = useRef<HTMLDivElement>(null)
+  const pdfProjectPagesRef = useRef<HTMLDivElement>(null)
   const pressTimerRef = useRef<number | null>(null)
 
   const clearPressTimer = () => {
@@ -33,10 +35,14 @@ export function PortfolioHome() {
         import('jspdf'),
       ])
 
-      const canvas = await html2canvas(target, {
+      const captureOpts = {
         scale: CAPTURE_SCALE,
         backgroundColor: '#fafafa',
         useCORS: true,
+      }
+
+      const canvas = await html2canvas(target, {
+        ...captureOpts,
         // 캡처용 내부 렌더링 창 크기를 명시해서 sm/lg/2xl 반응형 스타일이
         // 실제 화면과 다르게 계산되는 걸 막는다.
         windowWidth: document.documentElement.scrollWidth,
@@ -59,16 +65,39 @@ export function PortfolioHome() {
         }
       })
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92)
       const pdf = new jsPDF({
         orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
         unit: 'px',
         format: [canvas.width, canvas.height],
       })
-      pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height)
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, canvas.width, canvas.height)
       for (const link of links) {
         pdf.link(link.x, link.y, link.width, link.height, { url: link.url })
       }
+
+      // 카드를 눌러야 보이는 모달 상세 내용(문제/해결/결과)은 화면 캡처에 안 잡히니,
+      // 화면 밖에 렌더해둔 같은 내용을 프로젝트당 한 페이지씩 뒤에 붙인다.
+      const projectPageEls = pdfProjectPagesRef.current
+        ? Array.from(
+            pdfProjectPagesRef.current.querySelectorAll<HTMLElement>('[data-pdf-project]'),
+          )
+        : []
+      for (const el of projectPageEls) {
+        const projectCanvas = await html2canvas(el, captureOpts)
+        pdf.addPage(
+          [projectCanvas.width, projectCanvas.height],
+          projectCanvas.width > projectCanvas.height ? 'landscape' : 'portrait',
+        )
+        pdf.addImage(
+          projectCanvas.toDataURL('image/jpeg', 0.92),
+          'JPEG',
+          0,
+          0,
+          projectCanvas.width,
+          projectCanvas.height,
+        )
+      }
+
       pdf.save('김동규_백엔드개발자_포트폴리오.pdf')
     } finally {
       setIsExporting(false)
@@ -105,12 +134,21 @@ export function PortfolioHome() {
         {/* Hero / Intro */}
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="grid gap-8 sm:grid-cols-[280px_minmax(0,1fr)] sm:items-start sm:gap-12">
-            <img
-              className="w-full rounded-xl object-contain"
-              src={portfolio.photoUrl}
-              alt={`${profile.name} 프로필 사진`}
-              loading="lazy"
-            />
+            <div className="relative">
+              <img
+                className="w-full rounded-xl object-contain"
+                src={portfolio.photoUrl}
+                alt={`${profile.name} 프로필 사진`}
+                loading="lazy"
+              />
+              <img
+                src={portfolio.mascotUrl}
+                alt=""
+                aria-hidden
+                loading="lazy"
+                className="absolute -left-4 -top-4 h-16 w-16 -rotate-12 rounded-full border-2 border-white bg-white object-cover p-0.5 shadow-md sm:h-20 sm:w-20"
+              />
+            </div>
 
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
@@ -198,14 +236,7 @@ export function PortfolioHome() {
               onClick={() => setOpenSlug(project.slug)}
               className="group flex flex-col items-start rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
             >
-              <img
-                src={portfolio.mascotUrl}
-                alt=""
-                aria-hidden
-                loading="lazy"
-                className="h-16 w-16 rounded-full border border-zinc-100 bg-white object-cover p-1"
-              />
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span
                   className={`rounded-full border px-2.5 py-0.5 text-sm font-semibold ${
                     CATEGORY_STYLES[project.category] ??
@@ -257,6 +288,23 @@ export function PortfolioHome() {
       </div>
 
       {openSlug && <ProjectModal slug={openSlug} onClose={() => setOpenSlug(null)} />}
+
+      {/* PDF 내보내기 전용 — 카드를 눌러야 보이는 모달 상세를 화면 밖에 항상 렌더해둔다 */}
+      <div aria-hidden className="pointer-events-none fixed left-[-99999px] top-0">
+        <div ref={pdfProjectPagesRef}>
+          {portfolio.projects.map((project) => (
+            <div
+              key={project.slug}
+              data-pdf-project={project.slug}
+              className="w-[900px] bg-[#fafafa] p-10"
+            >
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <ProjectContent project={project} forPdf />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

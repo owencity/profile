@@ -1,8 +1,22 @@
 export type ProjectStatus = '진행 중' | '시작 전'
 
+export type ProjectDiagram = {
+  src: string
+  /** PDF 내보내기(html2canvas)는 <img src="*.svg">를 제대로 못 읽어서, 캡처용으로만 쓰는 래스터 버전 */
+  pdfSrc: string
+  alt: string
+  caption: string
+}
+
 export type ProjectSolution = {
   label: string
   desc: string
+  diagram?: ProjectDiagram
+}
+
+export type ProjectSolutionGroup = {
+  title: string
+  items: ProjectSolution[]
 }
 
 export type ProjectResult = {
@@ -20,8 +34,10 @@ export type PortfolioProject = {
   period?: string
   techStack: string[]
   summary: string[]
+  diagram?: ProjectDiagram
   problem?: string
   solutions?: ProjectSolution[]
+  solutionGroups?: ProjectSolutionGroup[]
   result?: ProjectResult
 }
 
@@ -73,7 +89,7 @@ export const portfolio = {
   projects: [
     {
       slug: 'event-driven-integration',
-      title: '외부 연동 아키텍처 — 폴링에서 이벤트 기반으로',
+      title: '외부 연동 아키텍처 — 실패를 잃어버리지 않는 설계',
       category: '아키텍처',
       status: '진행 중',
       org: '유통 상품 관리 시스템 고도화',
@@ -86,26 +102,60 @@ export const portfolio = {
       ],
       problem:
         '스케줄러 폴링 방식은 자사몰 서버 장애 시 실패 건이 유실되고 수동 복구가 필요한 구조였습니다. 장애 1회가 연동 파이프라인 전체를 지연시켰습니다.',
-      solutions: [
+      solutionGroups: [
         {
-          label: '동기/비동기 분리',
-          desc: 'RabbitMQ 기반 이벤트 발행 구조로 전환해 비동기 실시간 연동을 구현했습니다.',
+          title: '구조 전환',
+          items: [
+            {
+              label: '동기/비동기 분리',
+              desc: 'RabbitMQ 기반 이벤트 발행 구조로 전환해 비동기 실시간 연동을 구현했습니다.',
+              diagram: {
+                src: '/projects/event-integration-system.svg',
+                pdfSrc: '/projects/event-integration-system.png',
+                alt: '클라이언트에서 애플리케이션을 거쳐 데이터베이스로 가는 동기 경로와, 애플리케이션에서 메시지 브로커와 컨슈머를 거쳐 외부 커머스 API로 가는 비동기 경로를 분리한 시스템 구성도',
+                caption:
+                  '외부 API 호출은 전부 비동기 영역에 있습니다. 트리거는 큐에 넣고 즉시 응답하므로 외부 플랫폼 장애가 사용자 화면 응답으로 전파되지 않고, 실패는 재시도 후 DLQ에 보존되어 알람으로 이어집니다.',
+              },
+            },
+          ],
         },
         {
-          label: '실패 격리 (DLQ)',
-          desc: '전송 실패 시 자동으로 재시도하고, 재시도 횟수를 초과한 건은 Dead Letter Queue로 격리해 유실 없이 사후 재처리할 수 있도록 했습니다.',
+          title: '실패 격리',
+          items: [
+            {
+              label: '재시도 후 DLQ 이관',
+              desc: '전송 실패 시 자동으로 재시도하고, 재시도 횟수를 초과한 건은 Dead Letter Queue로 격리해 유실 없이 사후 재처리할 수 있도록 했습니다.',
+              diagram: {
+                src: '/projects/event-integration-flow.svg',
+                pdfSrc: '/projects/event-integration-flow.png',
+                alt: '동기화 트리거부터 대상 조회, 메시지 발행, 컨슈머 수신, 외부 API 호출을 거쳐 성공 시 완료 표시, 실패 시 재시도 3회 후 DLQ 이관과 알람으로 이어지는 순서도',
+                caption:
+                  '재시도는 즉시 반복하지 않고 백오프(10초→60초)를 두어 외부 장애를 악화시키지 않고, 소진된 메시지는 원문 그대로 DLQ에 남아 유실 없이 재처리할 수 있습니다.',
+              },
+            },
+          ],
         },
         {
-          label: '멱등성 설계',
-          desc: 'at-least-once 전달로 인한 중복 전송에 대비해 멱등 처리를 설계했습니다. 재시도가 발생해도 중복 반영 없이 안전하게 처리됩니다.',
+          title: '안정성 확보',
+          items: [
+            {
+              label: '멱등성 설계',
+              desc: 'at-least-once 전달로 인한 중복 전송에 대비해 멱등 처리를 설계했습니다. 재시도가 발생해도 중복 반영 없이 안전하게 처리됩니다.',
+            },
+            {
+              label: '수동 재처리 지원',
+              desc: '최종 실패한 작업은 실패 사유를 로그로 남기고, 담당자가 화면에서 직접 재시도할 수 있도록 제공했습니다.',
+            },
+          ],
         },
         {
-          label: '운영',
-          desc: '최종 실패한 작업은 실패 사유를 로그로 남기고, 담당자가 화면에서 직접 재시도할 수 있도록 제공했습니다.',
-        },
-        {
-          label: '관측성',
-          desc: 'Prometheus·Loki·Grafana 조합으로 이상 징후를 규칙 기반으로 판정해 웹훅 알림으로 받는 구조를 만들었습니다. 장애를 사후에 로그로 확인하는 방식에서 벗어났습니다.',
+          title: '관측성',
+          items: [
+            {
+              label: '이상 탐지 · 웹훅 알람',
+              desc: 'Prometheus·Loki·Grafana 조합으로 이상 징후를 규칙 기반으로 판정해 웹훅 알림으로 받는 구조를 만들었습니다. 장애를 사후에 로그로 확인하는 방식에서 벗어났습니다.',
+            },
+          ],
         },
       ],
       result: {

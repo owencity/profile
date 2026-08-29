@@ -31,7 +31,7 @@ export function ProjectModal({ slug, onClose }: ProjectModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative my-8 w-full max-w-2xl rounded-2xl bg-white shadow-2xl sm:my-0"
+        className="relative my-8 w-full max-w-4xl rounded-2xl bg-white shadow-2xl sm:my-0"
         onClick={(e) => e.stopPropagation()}
       >
         <button
