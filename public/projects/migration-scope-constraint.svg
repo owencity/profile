@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 490" role="img" style="color:#131A20"
+     aria-label="상품 기준으로만 갱신하면 다른 공급사 가격을 덮어쓰지만 상품과 공급사 기준으로 좁히면 대상이 0 또는 1행이 된다는 비교. 아래에는 두 개의 유일성 제약과 대표를 1순위로 정의한 이유, 허용 상태를 전부 자동 또는 전부 수동 둘로 좁힌 설계">
+  <rect width="900" height="490" fill="#F7F9FA"/>
+  <defs>
+    <marker id="msc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="mscr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#A63A2B"/>
+    </marker>
+    <marker id="mscg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0B8A73"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="44" font-family="ui-monospace, monospace" font-size="12" fill="currentColor">저장 스코프</text>
+
+  <rect x="40" y="56" width="180" height="48" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="130" y="86" text-anchor="middle" font-size="13" fill="currentColor">공급사 A가 저장</text>
+
+  <line x1="220" y1="80" x2="248" y2="80" stroke="#A63A2B" stroke-width="1.4" marker-end="url(#mscr)"/>
+
+  <rect x="248" y="56" width="230" height="48" fill="none" stroke="#A63A2B" stroke-width="1.8"/>
+  <text x="363" y="78" text-anchor="middle" font-size="13" fill="#A63A2B" font-weight="700">상품 기준으로만 갱신</text>
+  <text x="363" y="94" text-anchor="middle" font-size="11.5" font-family="ui-monospace, monospace" fill="#A63A2B">WHERE 상품 = ?</text>
+
+  <line x1="478" y1="80" x2="506" y2="80" stroke="#A63A2B" stroke-width="1.4" marker-end="url(#mscr)"/>
+
+  <rect x="506" y="56" width="354" height="48" fill="none" stroke="#A63A2B" stroke-width="1.8"/>
+  <text x="683" y="78" text-anchor="middle" font-size="13" fill="#A63A2B" font-weight="700">같은 상품의 다른 공급사 가격까지 덮어씀</text>
+  <text x="683" y="94" text-anchor="middle" font-size="11.5" fill="#A63A2B">오류가 아니므로 화면에는 성공으로 표시된다</text>
+
+  <rect x="40" y="122" width="180" height="48" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="130" y="152" text-anchor="middle" font-size="13" fill="currentColor">공급사 A가 저장</text>
+
+  <line x1="220" y1="146" x2="248" y2="146" stroke="#0B8A73" stroke-width="1.4" marker-end="url(#mscg)"/>
+
+  <rect x="248" y="122" width="230" height="48" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="363" y="144" text-anchor="middle" font-size="13" fill="#0B8A73" font-weight="700">상품 + 공급사 기준</text>
+  <text x="363" y="160" text-anchor="middle" font-size="11.5" fill="#0B8A73">대상이 0 또는 1행</text>
+
+  <line x1="478" y1="146" x2="506" y2="146" stroke="#0B8A73" stroke-width="1.4" marker-end="url(#mscg)"/>
+
+  <rect x="506" y="122" width="354" height="48" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="683" y="144" text-anchor="middle" font-size="13" fill="#0B8A73" font-weight="700">다른 공급사 값 보존</text>
+  <text x="683" y="160" text-anchor="middle" font-size="11.5" fill="#0B8A73">조회도 행별 공급사 기준으로 함께 교정</text>
+
+  <line x1="40" y1="200" x2="860" y2="200" stroke="currentColor" opacity=".2"/>
+  <text x="40" y="226" font-size="13" fill="currentColor">
+    <tspan font-weight="700">불변식은 스키마가 지킨다</tspan>
+    <tspan> — 코드가 매번 방어하는 대신, 잘못된 상태가 저장 자체를 거부당하게</tspan>
+  </text>
+
+  <rect x="40" y="240" width="265" height="92" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="56" y="264" font-size="12.5" font-family="ui-monospace, monospace" fill="currentColor">UNIQUE(상품, 공급사)</text>
+  <text x="56" y="284" font-size="12" fill="currentColor">한 상품에 같은 공급사가</text>
+  <text x="56" y="300" font-size="12" fill="currentColor">두 번 들어올 수 없다</text>
+  <text x="56" y="320" font-size="11.5" fill="currentColor" opacity=".65">덮어쓰기 결함의 재발 자체를 차단</text>
+
+  <rect x="320" y="240" width="265" height="92" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="336" y="264" font-size="12.5" font-family="ui-monospace, monospace" fill="currentColor">UNIQUE(상품, 순위)</text>
+  <text x="336" y="284" font-size="12" fill="currentColor">1순위가 둘일 수 없고,</text>
+  <text x="336" y="300" font-size="12" fill="currentColor">2순위가 둘인 상태도 막힌다</text>
+  <text x="336" y="320" font-size="11.5" fill="currentColor" opacity=".65">폴백 순서가 흔들리지 않는다</text>
+
+  <rect x="600" y="240" width="260" height="92" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="616" y="264" font-size="13" fill="#0B8A73" font-weight="700">대표 = 1순위</text>
+  <text x="616" y="284" font-size="12" fill="#0B8A73">대표 여부를 따로 두지 않는다</text>
+  <text x="616" y="300" font-size="12" fill="#0B8A73">대표인데 3순위라는 상태를</text>
+  <text x="616" y="320" font-size="12" fill="#0B8A73">애초에 표현할 수 없다</text>
+
+  <text x="40" y="368" font-size="13" fill="currentColor">
+    <tspan font-weight="700">허용 상태를 둘로 좁힌다</tspan>
+    <tspan> — 섞인 상태를 검사하는 대신, 만들지 않는다</tspan>
+  </text>
+
+  <rect x="40" y="382" width="250" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="56" y="404" font-size="13" fill="currentColor">전부 자동</text>
+  <text x="56" y="422" font-size="11.5" fill="currentColor" opacity=".65">순위 미지정 · 가격·등록순 규칙이 대표를 뽑는다</text>
+
+  <rect x="305" y="382" width="250" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="321" y="404" font-size="13" fill="currentColor">전부 수동</text>
+  <text x="321" y="422" font-size="11.5" fill="currentColor" opacity=".65">그 상품의 전체 공급사에 1부터 N까지 부여</text>
+
+  <rect x="570" y="382" width="290" height="54" fill="none" stroke="#A63A2B" stroke-width="1.4"
+        stroke-dasharray="5 4"/>
+  <text x="586" y="404" font-size="13" fill="#A63A2B">섞인 상태</text>
+  <text x="586" y="422" font-size="11.5" fill="#A63A2B" opacity=".85">일부만 지정하면 1순위가 비어 모호해진다</text>
+
+  <text x="40" y="462" font-size="12.5" fill="currentColor" opacity=".8">
+    순위를 건드리면 그 상품의 <tspan font-weight="700">전체를 다시 부여</tspan>합니다 — ① 대상 행 잠금 ② 순위 전부 비우기 ③ 순서대로 재부여, 한 트랜잭션에서.
+  </text>
+  <text x="40" y="480" font-size="12.5" fill="#A63A2B">
+    ②③을 뒤집으면 유일성 제약이 중간에 즉시 충돌합니다 — 그래서 순서 자체를 테스트로 고정했습니다.
+  </text>
+</svg>

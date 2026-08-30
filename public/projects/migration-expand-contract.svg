@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" style="color:#131A20"
+     aria-label="1단계에서 새 컬럼을 추가해 옛 컬럼과 공존시키고 양쪽에 쓰기, 2단계에서 읽기를 새 컬럼으로 전환, 3단계에서 옛 컬럼을 삭제하는 확장 후 수축 마이그레이션 도해">
+  <rect width="900" height="300" fill="#F7F9FA"/>
+  <defs>
+    <marker id="mec" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="48" font-family="ui-monospace, monospace" font-size="12" fill="currentColor">1 · 확장</text>
+  <rect x="40" y="60" width="230" height="132" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <rect x="60" y="82" width="88" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="104" y="104" text-anchor="middle" font-size="12" fill="currentColor">옛 컬럼</text>
+  <rect x="162" y="82" width="88" height="34" fill="none" stroke="#0B8A73" stroke-width="1.6"/>
+  <text x="206" y="104" text-anchor="middle" font-size="12" fill="#0B8A73">새 컬럼</text>
+  <text x="60" y="142" font-size="12" fill="currentColor">쓰기 → 양쪽 동시</text>
+  <text x="60" y="162" font-size="12" fill="currentColor">읽기 → 옛 컬럼</text>
+  <text x="60" y="182" font-size="11.5" font-family="ui-monospace, monospace" fill="#0B8A73">무중단</text>
+
+  <line x1="270" y1="126" x2="322" y2="126" stroke="currentColor" stroke-width="1.4" marker-end="url(#mec)"/>
+
+  <text x="322" y="48" font-family="ui-monospace, monospace" font-size="12" fill="currentColor">2 · 전환</text>
+  <rect x="322" y="60" width="230" height="132" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <rect x="342" y="82" width="88" height="34" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+  <text x="386" y="104" text-anchor="middle" font-size="12" fill="currentColor" opacity=".6">옛 컬럼</text>
+  <rect x="444" y="82" width="88" height="34" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="488" y="104" text-anchor="middle" font-size="12" fill="#0B8A73" font-weight="700">새 컬럼</text>
+  <text x="342" y="142" font-size="12" fill="currentColor">쓰기 → 양쪽 동시</text>
+  <text x="342" y="162" font-size="12" fill="#0B8A73">읽기 → 새 컬럼</text>
+  <text x="342" y="182" font-size="11.5" font-family="ui-monospace, monospace" fill="#0B8A73">언제든 되돌림 가능</text>
+
+  <line x1="552" y1="126" x2="604" y2="126" stroke="currentColor" stroke-width="1.4"
+        stroke-dasharray="5 4" marker-end="url(#mec)" opacity=".7"/>
+
+  <text x="604" y="48" font-family="ui-monospace, monospace" font-size="12" fill="currentColor">3 · 수축</text>
+  <rect x="604" y="60" width="230" height="132" fill="none" stroke="currentColor" stroke-width="1.4"
+        stroke-dasharray="5 4" opacity=".7"/>
+  <rect x="624" y="82" width="88" height="34" fill="none" stroke="#A63A2B" stroke-width="1.4" opacity=".8"/>
+  <line x1="624" y1="82" x2="712" y2="116" stroke="#A63A2B" stroke-width="1.4" opacity=".8"/>
+  <text x="668" y="104" text-anchor="middle" font-size="12" fill="#A63A2B">삭제</text>
+  <rect x="726" y="82" width="88" height="34" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="770" y="104" text-anchor="middle" font-size="12" fill="#0B8A73" font-weight="700">새 컬럼</text>
+  <text x="624" y="142" font-size="12" fill="currentColor">쓰기·읽기 → 새 컬럼만</text>
+  <text x="624" y="162" font-size="12" fill="currentColor" opacity=".65">충분히 관찰한 뒤 반영</text>
+
+  <line x1="40" y1="228" x2="834" y2="228" stroke="currentColor" opacity=".2"/>
+  <text x="40" y="256" font-size="13" fill="currentColor">
+    핵심은 <tspan font-weight="700">2단계에서 멈춰 있어도 시스템이 정상 동작한다</tspan>는 것입니다.
+  </text>
+  <text x="40" y="278" font-size="12.5" fill="currentColor" opacity=".72">
+    이름 변경을 한 번에 했다면 배포 순간 구·신 코드가 공존하는 몇 초 동안 한쪽이 없는 컬럼을 참조합니다.
+  </text>
+</svg>
