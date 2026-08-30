@@ -1,11 +1,66 @@
 import { useRef, useState } from 'react'
 import { profile } from '../profile'
-import { portfolio, CATEGORY_STYLES, STATUS_STYLES, formatCareerDuration } from './data'
+import { portfolio, STATUS_STYLES, formatCareerDuration } from './data'
 import { ProjectContent } from './ProjectContent'
 import { ProjectModal } from './ProjectModal'
 
 const LONG_PRESS_MS = 800
 const CAPTURE_SCALE = 2
+
+const CATEGORY_BANNER: Record<string, string> = {
+  아키텍처: 'bg-indigo-50 text-indigo-700',
+  '데이터 처리': 'bg-amber-50 text-amber-700',
+  마이그레이션: 'bg-purple-50 text-purple-700',
+  안정성: 'bg-rose-50 text-rose-700',
+}
+
+function CategoryIcon({ category }: { category: string }) {
+  const common = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2.2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+  switch (category) {
+    case '아키텍처':
+      return (
+        <svg {...common}>
+          <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+        </svg>
+      )
+    case '데이터 처리':
+      return (
+        <svg {...common}>
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5" />
+          <path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3" />
+        </svg>
+      )
+    case '마이그레이션':
+      return (
+        <svg {...common}>
+          <path d="M8 3 4 7l4 4" />
+          <path d="M4 7h16" />
+          <path d="M16 21l4-4-4-4" />
+          <path d="M20 17H4" />
+        </svg>
+      )
+    case '안정성':
+      return (
+        <svg {...common}>
+          <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
 
 export function PortfolioHome() {
   const [openSlug, setOpenSlug] = useState<string | null>(null)
@@ -189,8 +244,8 @@ export function PortfolioHome() {
             <p className="mt-2 text-base font-semibold text-zinc-900 sm:text-lg">
               {portfolio.career.company}
             </p>
-            <p className="mt-0.5 text-sm text-zinc-500">{portfolio.career.period}</p>
-            <ul className="mt-3 space-y-2 text-base leading-7 text-zinc-700">
+            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.career.period}</p>
+            <ul className="mt-3 space-y-2 text-base leading-7 text-zinc-900">
               {portfolio.career.bullets.map((bullet, i) => (
                 <li key={i} className="flex gap-2">
                   <span className="mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
@@ -201,15 +256,15 @@ export function PortfolioHome() {
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
-            <p className="text-sm font-semibold text-zinc-600">학력</p>
+            <p className="text-sm font-semibold text-zinc-900">학력</p>
             <p className="mt-2 text-base font-semibold text-zinc-900 sm:text-lg">
               {portfolio.education.school}
             </p>
-            <p className="mt-0.5 text-sm text-zinc-500">{portfolio.education.period}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-600">교육</p>
-            <p className="mt-1.5 text-base text-zinc-700">{portfolio.education.bootcamp}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-600">자격증</p>
-            <ul className="mt-1.5 space-y-1 text-base text-zinc-700">
+            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.education.period}</p>
+            <p className="mt-4 text-sm font-semibold text-zinc-900">교육</p>
+            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.bootcamp}</p>
+            <p className="mt-4 text-sm font-semibold text-zinc-900">자격증</p>
+            <ul className="mt-1.5 space-y-1 text-base text-zinc-900">
               {portfolio.education.certificates.map((c) => (
                 <li key={c}>{c}</li>
               ))}
@@ -234,52 +289,52 @@ export function PortfolioHome() {
               key={project.slug}
               type="button"
               onClick={() => setOpenSlug(project.slug)}
-              className="group flex flex-col items-start rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
+              className="group flex flex-col items-stretch overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
             >
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span
-                  className={`rounded-full border px-2.5 py-0.5 text-sm font-semibold ${
-                    CATEGORY_STYLES[project.category] ??
-                    'border-zinc-100 bg-zinc-50 text-zinc-600'
-                  }`}
-                >
-                  {project.category}
-                </span>
+              <div
+                className={`flex items-center gap-2 border-b border-black/5 px-5 py-3 text-sm font-semibold ${
+                  CATEGORY_BANNER[project.category] ?? 'bg-zinc-50 text-zinc-600'
+                }`}
+              >
+                <CategoryIcon category={project.category} />
+                {project.category}
+              </div>
+              <div className="flex flex-1 flex-col items-start p-5">
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${STATUS_STYLES[project.status]}`}
                 >
                   {project.status}
                 </span>
-              </div>
-              <h3 className="mt-3 text-base font-semibold leading-6 text-zinc-900">
-                {project.title}
-              </h3>
-              <p className="mt-2 text-sm leading-5 text-zinc-500">{project.org}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {project.techStack.slice(0, 4).map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600"
+                <h3 className="mt-3 text-base font-semibold leading-6 text-zinc-900">
+                  {project.title}
+                </h3>
+                <p className="mt-2 text-sm leading-5 text-zinc-900">{project.org}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {project.techStack.slice(0, 4).map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition group-hover:gap-1.5">
+                  자세히 보기
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {tag}
-                  </span>
-                ))}
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition group-hover:gap-1.5">
-                자세히 보기
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M13 5l7 7-7 7" />
-                </svg>
-              </span>
             </button>
           ))}
         </section>

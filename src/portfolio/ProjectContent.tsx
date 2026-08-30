@@ -39,26 +39,6 @@ export function ProjectContent({
         {project.title}
       </h1>
 
-      {project.summary.length > 0 ? (
-        <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-          <p className="text-xs font-semibold text-indigo-700">3줄 요약</p>
-          <ul className="mt-2 space-y-1.5 text-sm leading-6 text-zinc-900">
-            {project.summary.map((line, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-indigo-400" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <div className="mt-6 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm leading-6 text-zinc-900">
-            아직 상세 내용을 정리 중인 프로젝트입니다.
-          </p>
-        </div>
-      )}
-
       {project.diagram && (
         <DiagramFigure diagram={project.diagram} forPdf={forPdf} className="mt-6" />
       )}
@@ -122,6 +102,26 @@ export function ProjectContent({
             <p className="text-sm leading-6 text-zinc-900">{project.result.note}</p>
           )}
         </DetailSection>
+      )}
+
+      {project.summary.length > 0 ? (
+        <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+          <p className="text-xs font-semibold text-indigo-700">3줄 요약</p>
+          <ul className="mt-2 space-y-1.5 text-sm leading-6 text-zinc-900">
+            {project.summary.map((line, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-indigo-400" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-4">
+          <p className="text-sm leading-6 text-zinc-900">
+            아직 상세 내용을 정리 중인 프로젝트입니다.
+          </p>
+        </div>
       )}
 
       {project.techStack.length > 0 && (

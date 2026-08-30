@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" role="img" style="color:#131A20"
+     aria-label="종전에는 기준 열 왼쪽의 모든 컬럼이 삭제되어 상품코드가 유실됐고, 수정 후에는 헤더 텍스트로 매칭해 위치와 무관하게 모든 컬럼을 읽는다는 비교 도해">
+  <rect width="900" height="380" fill="#F7F9FA"/>
+  <defs>
+    <pattern id="stabHatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#A63A2B" stroke-width="2.2" opacity=".3"/>
+    </pattern>
+  </defs>
+
+  <text x="16" y="40" font-size="12" font-family="ui-monospace, monospace" fill="#A63A2B">종전</text>
+  <polyline points="96,38 96,28 546,28 546,38" fill="none" stroke="#A63A2B" stroke-width="1.2"/>
+  <text x="321" y="20" text-anchor="middle" font-size="12.5" fill="#A63A2B">기준 열 왼쪽 → 전부 삭제</text>
+
+  <rect x="96"  y="46" width="90" height="44" fill="url(#stabHatch)" stroke="#A63A2B" stroke-width="1.2"/>
+  <rect x="186" y="46" width="90" height="44" fill="url(#stabHatch)" stroke="#A63A2B" stroke-width="1.2"/>
+  <rect x="276" y="46" width="90" height="44" fill="url(#stabHatch)" stroke="#A63A2B" stroke-width="1.2"/>
+  <rect x="366" y="46" width="90" height="44" fill="url(#stabHatch)" stroke="#A63A2B" stroke-width="1.2"/>
+  <rect x="456" y="46" width="90" height="44" fill="url(#stabHatch)" stroke="#A63A2B" stroke-width="1.2"/>
+  <rect x="546" y="46" width="90" height="44" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <rect x="636" y="46" width="90" height="44" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="726" y="46" width="90" height="44" fill="none" stroke="currentColor" stroke-width="1.2"/>
+
+  <text x="141" y="73" text-anchor="middle" font-size="12" fill="#A63A2B">그룹코드</text>
+  <text x="231" y="73" text-anchor="middle" font-size="12" fill="#A63A2B" font-weight="700">상품코드</text>
+  <text x="321" y="73" text-anchor="middle" font-size="12" fill="#A63A2B">위치코드</text>
+  <text x="411" y="73" text-anchor="middle" font-size="12" fill="#A63A2B">사이즈</text>
+  <text x="501" y="73" text-anchor="middle" font-size="12" fill="#A63A2B">가격</text>
+  <text x="591" y="73" text-anchor="middle" font-size="12" fill="currentColor" font-weight="700">기준 열</text>
+  <text x="681" y="73" text-anchor="middle" font-size="12" fill="currentColor">단위</text>
+  <text x="771" y="73" text-anchor="middle" font-size="12" fill="currentColor">원산지</text>
+
+  <text x="591" y="108" text-anchor="middle" font-size="11.5" font-family="ui-monospace, monospace" fill="currentColor">앵커</text>
+  <text x="96" y="138" font-size="13" fill="#A63A2B">→ 저장은 성공하는데 상품코드가 빈 값</text>
+  <text x="96" y="158" font-size="13" fill="#A63A2B" font-weight="700">→ 106행 × 4회 전량 반려</text>
+
+  <line x1="16" y1="192" x2="884" y2="192" stroke="currentColor" opacity=".2"/>
+
+  <text x="16" y="256" font-size="12" font-family="ui-monospace, monospace" fill="#0B8A73">수정 후</text>
+  <polyline points="96,254 96,244 816,244 816,254" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <text x="456" y="236" text-anchor="middle" font-size="13" fill="#0B8A73">헤더 텍스트로 매칭 — 위치 무관</text>
+
+  <rect x="96"  y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="186" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <rect x="276" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="366" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="456" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="546" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="636" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+  <rect x="726" y="262" width="90" height="44" fill="none" stroke="#0B8A73" stroke-width="1.2"/>
+
+  <text x="141" y="289" text-anchor="middle" font-size="12" fill="currentColor">그룹코드</text>
+  <text x="231" y="289" text-anchor="middle" font-size="12" fill="currentColor" font-weight="700">상품코드</text>
+  <text x="321" y="289" text-anchor="middle" font-size="12" fill="currentColor">위치코드</text>
+  <text x="411" y="289" text-anchor="middle" font-size="12" fill="currentColor">사이즈</text>
+  <text x="501" y="289" text-anchor="middle" font-size="12" fill="currentColor">가격</text>
+  <text x="591" y="289" text-anchor="middle" font-size="12" fill="currentColor">기준 열</text>
+  <text x="681" y="289" text-anchor="middle" font-size="12" fill="currentColor">단위</text>
+  <text x="771" y="289" text-anchor="middle" font-size="12" fill="currentColor">원산지</text>
+
+  <text x="96" y="338" font-size="13" fill="#0B8A73" font-weight="700">→ 유실 0건 · 회귀 테스트로 사고 형상 고정</text>
+  <text x="96" y="360" font-size="12" fill="currentColor">열 채택 기준은 "헤더 이름이 정의된 컬럼과 일치하는가" 하나뿐</text>
+</svg>
