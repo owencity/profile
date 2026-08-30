@@ -1,4 +1,4 @@
-export type ProjectStatus = '완료' | '시작 전'
+export type ProjectStatus = '완료' | '진행 중' | '시작 전'
 
 export type ProjectDiagram = {
   src: string
@@ -25,6 +25,12 @@ export type ProjectResult = {
   note?: string
 }
 
+export type ProjectGroup = {
+  name: string
+  period?: string
+  projects: PortfolioProject[]
+}
+
 export type PortfolioProject = {
   slug: string
   title: string
@@ -46,10 +52,12 @@ export const CATEGORY_STYLES: Record<string, string> = {
   '데이터 처리': 'bg-amber-50 text-amber-700 border-amber-100',
   마이그레이션: 'bg-purple-50 text-purple-700 border-purple-100',
   안정성: 'bg-rose-50 text-rose-700 border-rose-100',
+  '사이드 프로젝트': 'bg-sky-50 text-sky-700 border-sky-100',
 }
 
 export const STATUS_STYLES: Record<ProjectStatus, string> = {
   완료: 'bg-emerald-100 text-emerald-800',
+  '진행 중': 'bg-blue-100 text-blue-800',
   '시작 전': 'bg-zinc-100 text-zinc-600',
 }
 
@@ -87,14 +95,16 @@ export const portfolio = {
     backend: ['Java', 'Spring Boot', 'JPA', 'PostgreSQL', 'MySQL', 'RabbitMQ'],
     tools: ['AWS', 'Docker', 'Git', 'OCI', 'Prometheus', 'Loki', 'Grafana'],
   },
-  projects: [
+  projectGroups: [{
+    name: '상품관리 시스템 고도화',
+    period: '2025.06 ~ 2026.08',
+    projects: [
     {
       slug: 'event-driven-integration',
       title: '외부 연동 비동기 아키텍처 전환',
       category: '아키텍처',
       status: '완료',
       org: '유통 상품 관리 시스템 고도화',
-      period: '2025.05 ~ 2026.07',
       techStack: ['Java', 'Spring Boot', 'RabbitMQ', 'Prometheus', 'Loki', 'Grafana'],
       summary: [
         '스케줄러 폴링 방식의 외부 연동을 RabbitMQ 기반 이벤트 발행 구조로 전환해 동기/비동기 처리를 분리했습니다.',
@@ -448,10 +458,24 @@ export const portfolio = {
       },
     },
   ] as PortfolioProject[],
+  }, {
+    name: '정산어택',
+    projects: [
+      {
+        slug: 'jeongsan-attack',
+        title: '정산어택',
+        category: '사이드 프로젝트',
+        status: '진행 중',
+        org: '개인 사이드 프로젝트',
+        techStack: [],
+        summary: [],
+      },
+    ] as PortfolioProject[],
+  }] as ProjectGroup[],
 }
 
 export function getProjectBySlug(slug: string): PortfolioProject | undefined {
-  return portfolio.projects.find((p) => p.slug === slug)
+  return portfolio.projectGroups.flatMap((g) => g.projects).find((p) => p.slug === slug)
 }
 
 export function formatCareerDuration(startDate: string): string {

@@ -12,6 +12,7 @@ const CATEGORY_BANNER: Record<string, string> = {
   '데이터 처리': 'bg-amber-50 text-amber-700',
   마이그레이션: 'bg-purple-50 text-purple-700',
   안정성: 'bg-rose-50 text-rose-700',
+  '사이드 프로젝트': 'bg-sky-50 text-sky-700',
 }
 
 function CategoryIcon({ category }: { category: string }) {
@@ -55,6 +56,13 @@ function CategoryIcon({ category }: { category: string }) {
       return (
         <svg {...common}>
           <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z" />
+        </svg>
+      )
+    case '사이드 프로젝트':
+      return (
+        <svg {...common}>
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
         </svg>
       )
     default:
@@ -283,61 +291,69 @@ export function PortfolioHome() {
         </section>
 
         <SectionHeading emoji="🚀" title="Projects" />
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {portfolio.projects.map((project) => (
-            <button
-              key={project.slug}
-              type="button"
-              onClick={() => setOpenSlug(project.slug)}
-              className="group flex flex-col items-stretch overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
-            >
-              <div
-                className={`flex items-center gap-2 border-b border-black/5 px-5 py-3 text-sm font-semibold ${
-                  CATEGORY_BANNER[project.category] ?? 'bg-zinc-50 text-zinc-600'
-                }`}
-              >
-                <CategoryIcon category={project.category} />
-                {project.category}
-              </div>
-              <div className="flex flex-1 flex-col items-start p-5">
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${STATUS_STYLES[project.status]}`}
+        {portfolio.projectGroups.map((group) => (
+          <div key={group.name} className="mb-10 last:mb-0">
+            <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <h3 className="text-lg font-bold text-zinc-900">{group.name}</h3>
+              {group.period && <span className="text-sm text-zinc-500">{group.period}</span>}
+            </div>
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.projects.map((project) => (
+                <button
+                  key={project.slug}
+                  type="button"
+                  onClick={() => setOpenSlug(project.slug)}
+                  className="group flex flex-col items-stretch overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
                 >
-                  {project.status}
-                </span>
-                <h3 className="mt-3 text-base font-semibold leading-6 text-zinc-900">
-                  {project.title}
-                </h3>
-                <p className="mt-2 text-sm leading-5 text-zinc-900">{project.org}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {project.techStack.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition group-hover:gap-1.5">
-                  자세히 보기
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <div
+                    className={`flex items-center gap-2 border-b border-black/5 px-5 py-3 text-sm font-semibold ${
+                      CATEGORY_BANNER[project.category] ?? 'bg-zinc-50 text-zinc-600'
+                    }`}
                   >
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </span>
-              </div>
-            </button>
-          ))}
-        </section>
+                    <CategoryIcon category={project.category} />
+                    {project.category}
+                  </div>
+                  <div className="flex flex-1 flex-col items-start p-5">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${STATUS_STYLES[project.status]}`}
+                    >
+                      {project.status}
+                    </span>
+                    <h3 className="mt-3 text-base font-semibold leading-6 text-zinc-900">
+                      {project.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-5 text-zinc-900">{project.org}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {project.techStack.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition group-hover:gap-1.5">
+                      자세히 보기
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </section>
+          </div>
+        ))}
 
         <div className="pb-10" />
       </div>
@@ -347,7 +363,7 @@ export function PortfolioHome() {
       {/* PDF 내보내기 전용 — 카드를 눌러야 보이는 모달 상세를 화면 밖에 항상 렌더해둔다 */}
       <div aria-hidden className="pointer-events-none fixed left-[-99999px] top-0">
         <div ref={pdfProjectPagesRef}>
-          {portfolio.projects.map((project) => (
+          {portfolio.projectGroups.flatMap((g) => g.projects).map((project) => (
             <div
               key={project.slug}
               data-pdf-project={project.slug}
