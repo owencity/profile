@@ -111,8 +111,15 @@ export const portfolio = {
         'MySQL 5→PostgreSQL 전환에서 pgloader로 옮긴 뒤 어긋난 타입과 GROUP BY 같은 SQL 문법 차이를 하나씩 교정했습니다.',
         '3개월 분석 후 작은 기능부터 검증하며 약 2개월간 마이그레이션을 실행해, 신규 기능 개발 기간을 1주일에서 2~3일로 줄였습니다.',
       ],
+      diagram: {
+        src: '/projects/legacy-infra-architecture.svg',
+        pdfSrc: '/projects/legacy-infra-architecture.png',
+        alt: '종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 IDC 온프레미스 서버에 자동 빌드·배포되며, React와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도',
+        caption:
+          '개발부터 배포까지 Git·Jenkins로 자동화하고, 클라이언트 요청 흐름과 외부 연동(RabbitMQ)을 분리했습니다. 인프라는 그대로 온프레미스(VMware→IDC)를 유지하면서, 수동 배포에서 자동 빌드·배포 파이프라인으로 바꿨습니다.',
+      },
       problem:
-        '입사 3개월 차에, 타사에서 인계받은 노후 소스코드(Java 1.6·Seasar2·MySQL 5)를 최신 스택으로 전환하는 마이그레이션을 홀로 맡았습니다. Seasar2는 서버사이드 렌더링 구조라 화면단을 React로 완전히 분리하는 아키텍처 전환이 필요했고, 기존과 똑같이 동작해야 한다는 제약 속에서 기능 하나 놓치지 않고 옮기는 게 과제였습니다.',
+        '입사 3개월 차에, 타사에서 인계받은 노후 소스코드(Java 1.6·Seasar2·MySQL 5)를 최신 스택으로 전환하는 마이그레이션을 맡았습니다. Seasar2는 서버사이드 렌더링 구조라 화면단을 React로 완전히 분리하는 아키텍처 전환이 필요했고, 기존과 똑같이 동작해야 한다는 제약 속에서 기능 하나 놓치지 않고 옮기는 게 과제였습니다.',
       solutionGroups: [
         {
           title: '프레임워크 전환 — SSR에서 React + Spring Boot로',
@@ -146,7 +153,7 @@ export const portfolio = {
           items: [
             {
               label: 'Jenkins · Docker 도입',
-              desc: '수동으로 진행하던 배포를 Jenkins·Docker 기반 자동화 파이프라인으로 바꿔, 배포 소요 시간을 20분에서 5분으로 줄였습니다.',
+              desc: '빌드·배포 로직을 셸 스크립트(sh)에 정리하고 Docker로 감싸, Jenkins가 이 스크립트를 실행해 IDC 서버에 한 번에 빌드·배포하는 파이프라인을 구성했습니다. 수동으로 진행하던 배포가 자동화되며 소요 시간이 20분에서 5분으로 줄었습니다.',
             },
           ],
         },
