@@ -63,6 +63,12 @@ export type GroupDetail = {
   name: string
   groupType: GroupType
   shareToken: string | null
+  /**
+   * 참가 비밀번호가 걸려 있나. **비밀번호 자체는 절대 내려보내지 않는다** —
+   * 링크는 단톡방에 뿌려지는 순간 아무나 보고, 검색은 이름만 알면 누구나 찾는다.
+   * 확인은 서버가 한다.
+   */
+  hasPassword: boolean
   members: GroupMember[]
   gatherings: GroupGathering[]
 }
@@ -75,8 +81,16 @@ export type Payout = {
 
 export type Participant = {
   id: Id
+  /** 로그인 계정. 목업에선 모임 멤버의 userId 와 맞춘다. */
+  userId: Id
   /** 참여자가 직접 적은 이름. 계정 닉네임은 기본값일 뿐이다. */
   name: string
+  /**
+   * 어떻게 들어왔나. **총무가 명단을 짜지 않는다** — 참여자가 술자리를 열어
+   * 스스로 정산에 참여한다(SELF). 총무가 굳이 고를 이유가 없고,
+   * 고르게 하면 빠뜨린 사람이 생긴다.
+   */
+  joinMode: JoinMode
   exempt: boolean
   responded: boolean
   paymentStatus: PaymentStatus
@@ -127,6 +141,14 @@ export type Gathering = {
   /** ISO date (YYYY-MM-DD) */
   date: string
   status: GatheringStatus
+  /** 이 술자리를 담은 모임. 모임 없이 열린 술자리면 null. */
+  groupId: Id | null
+  /**
+   * **이 술자리의 총무.** 모임 개설자와 다를 수 있다 —
+   * 이번엔 내가 계산하고 다음엔 네가 계산하는 게 실제 모습이다.
+   */
+  hostUserId: Id
+  hostName: string
   shareToken: string
   /** 본인 포함 예상 인원. 확정 전 인원 불일치 경고에만 쓰고 계산에는 쓰지 않는다. */
   expectedCount: number | null
@@ -211,4 +233,89 @@ export type GatheringSummary = {
   /** 확정 후에만 의미 있다. */
   paidCount: number
   payableCount: number
+}
+
+/* ══ 모임 참가 ═══════════════════════════════════════════════
+   참가 방법이 둘이다 — **검색해서** 들어오거나, **링크를 받아** 들어온다.
+   둘 다 비밀번호를 묻는다. 링크는 단톡방에 뿌려지는 순간 아무나 볼 수 있고,
+   검색은 이름만 알면 누구나 찾을 수 있기 때문이다. */
+
+/** 검색 결과 한 줄. 참가 전이라 멤버 명단은 안 보여준다. */
+export type GroupSearchResult = {
+  id: Id
+  name: string
+  groupType: GroupType
+  ownerName: string
+  memberCount: number
+  /** 마지막 술자리 날짜. 죽은 모임인지 가늠하는 단서. */
+  lastGatheringDate: string | null
+}
+
+/* ══ 술자리 총무 ═════════════════════════════════════════════
+   **총무는 모임이 아니라 술자리마다 정해진다.** 이번엔 내가 계산하고
+   다음엔 네가 계산하는 게 실제 모습이라, 모임 개설자에 총무를 묶으면 안 맞는다. */
+
+/** 술자리 참여 방식. 총무가 명단을 짜지 않고 **각자 들어온다**. */
+export type JoinMode = 'SELF' | 'INVITED'
+
+/* ══ 이의제기 ════════════════════════════════════════════════
+   참여자가 착각하거나 양심 없이 고를 수 있어서 총무가 걸 수 있고,
+   반대로 총무가 금액을 잘못 매겼을 수 있어서 참여자도 걸 수 있다.
+   **한쪽만 걸 수 있으면 힘의 균형이 무너진다.** */
+
+export type DisputeKind =
+  /** 총무 → 참여자. "1차 왔다면서 안 왔잖아" */
+  | 'ATTENDANCE'
+  /** 총무 → 참여자. 입금이 안 됐거나 금액이 모자람 */
+  | 'PAYMENT'
+  /** 참여자 → 총무. 나한테 매긴 금액이 이상하다 */
+  | 'AMOUNT'
+
+export type DisputeStatus = 'OPEN' | 'RESOLVED' | 'WITHDRAWN'
+
+export type Dispute = {
+  id: Id
+  gatheringId: Id
+  kind: DisputeKind
+  status: DisputeStatus
+  /** 건 사람 */
+  raisedBy: Id
+  /** 걸린 사람 */
+  against: Id
+  reason: string
+  createdAt: string
+  /** 이의제기 하나에 채팅방 하나. 조율은 여기서 한다. */
+  messages: ChatMessage[]
+}
+
+export type ChatMessage = {
+  id: Id
+  senderId: Id
+  senderName: string
+  text: string
+  createdAt: string
+}
+
+/* ══ 알림 ════════════════════════════════════════════════════
+   **정산은 금액이 나왔다고 끝이 아니라 입금까지 돼야 끝난다.**
+   그래서 알림이 두 번 이상 간다 — 금액 확정 때 한 번, 입금이 밀리면 또 한 번. */
+
+export type NotificationKind =
+  | 'GATHERING_OPENED'   // 모임에 새 술자리가 열림
+  | 'CHECK_REQUEST'      // 차수 체크해 달라
+  | 'SETTLED'            // 금액이 확정됐다
+  | 'PAYMENT_REMINDER'   // 아직 입금 안 했다
+  | 'DISPUTE_OPENED'     // 이의제기가 걸렸다
+  | 'DISPUTE_MESSAGE'    // 이의제기 채팅에 새 글
+  | 'PAYMENT_RECEIVED'   // 입금이 확인됐다
+
+export type AppNotification = {
+  id: Id
+  kind: NotificationKind
+  title: string
+  body: string
+  createdAt: string
+  read: boolean
+  /** 눌렀을 때 갈 곳. */
+  link: string
 }

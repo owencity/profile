@@ -12,12 +12,17 @@ import { digitsOnly, signedWon, won } from '../api'
 import { FixedNotice, Shell, Url } from '../ui'
 
 export function MyResultPage({
-  g, me, s, onViewAll,
+  g, me, s, onViewAll, onDispute,
 }: {
   g: Gathering
   me: Participant
   s: Settlement
   onViewAll: () => void
+  /**
+   * 금액이 이상할 때 총무에게 건다.
+   * **총무만 이의제기할 수 있으면 힘의 균형이 무너진다** — 참여자도 걸 수 있어야 한다.
+   */
+  onDispute?: () => void
 }) {
   const b = s.breakdown[me.id]
   if (!b) return null
@@ -181,6 +186,12 @@ export function MyResultPage({
       )}
 
       <FixedNotice unit={g.roundingUnit} />
+
+      {onDispute && (
+        <button className="js-cta2" style={{ marginTop: 10 }} onClick={onDispute}>
+          금액이 이상해요 — 총무에게 물어보기
+        </button>
+      )}
 
       <button className="js-cta2" onClick={onViewAll}>
         전체 내역 보기

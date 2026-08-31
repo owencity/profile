@@ -14,19 +14,27 @@
  *                     미참여+COLLECTING → W0-1/W0-2 · 미참여+CONFIRMED → W0-차단
  *                     참여+COLLECTING   → W1      · 참여+CONFIRMED    → W2
  *   /g/:token/all   W3 전체 내역
+ *   /gr/:token      모임 참여 — 술자리가 아니라 **모임**의 멤버가 된다
+ *   /jungsan/search        모임 검색해서 참가 (비밀번호)
+ *   /jungsan/alerts        알림함
+ *   /jungsan/dispute/:id   이의제기 채팅
  *
  * 백엔드가 붙기 전에는 mock 으로 돈다. 개발용 전환 바로 화면을 오갈 수 있다.
  */
 import { useEffect, useMemo, useState } from 'react'
 import './jeongsan.css'
 import { fetchGathering, fetchGroup, fetchMe, fetchMyGroups, fetchPreview, isMock, kakaoLoginUrl } from './api'
-import { mockGathering, mockGroupDetails, mockGroups, mockSettlement, MOCK_IDS } from './mock'
-import type { Gathering, Id, Me, Settlement } from './types'
+import {
+  makeDispute, makeGathering, makeGroup, makeToken, mockDisputes, mockGathering,
+  mockGatherings, mockGroupDetails, mockGroups, mockNotifications, mockSettlement, MOCK_IDS,
+} from './mock'
+import type { AppNotification, Dispute, Gathering, GroupDetail, Id, Me, Settlement } from './types'
 import { GroupHomePage } from './host/GroupHomePage'
 import { CreateGroupPage } from './host/CreateGroupPage'
 import { GroupDetailPage } from './host/GroupDetailPage'
 import { CreatePage } from './host/CreatePage'
 import { AmountPage } from './host/AmountPage'
+import { DrinkInputPage } from './host/DrinkInputPage'
 import { CollectPage } from './host/CollectPage'
 import { ConfirmPage } from './host/ConfirmPage'
 import { RosterPage } from './host/RosterPage'
@@ -35,6 +43,10 @@ import { JoinPage } from './participant/JoinPage'
 import { CheckPage } from './participant/CheckPage'
 import { MyResultPage } from './participant/MyResultPage'
 import { AllPage } from './participant/AllPage'
+import { JoinGroupPage } from './participant/JoinGroupPage'
+import { SearchGroupPage } from './participant/SearchGroupPage'
+import { DisputePage } from './DisputePage'
+import { NotificationPage } from './NotificationPage'
 import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
@@ -46,10 +58,27 @@ type Props = {
 }
 
 export default function JeongsanApp({ route, navigate }: Props) {
-  const [g, setG] = useState<Gathering>(mockGathering)
   const [s, setS] = useState<Settlement>(mockSettlement)
   const [groups, setGroups] = useState(mockGroups)
-  const [groupDetail, setGroupDetail] = useState(mockGroupDetails[100])
+
+  // 목업이지만 **만든 것이 남아야** 흐름을 끝까지 걸을 수 있다. 그래서 단일 값이 아니라
+  // id 로 찾는 보관함으로 둔다 — 예전엔 술자리를 무엇을 열든 mockGathering 하나가
+  // 나와서, 모임 상세의 술자리 3개가 전부 같은 화면이었다.
+  const [groupDetails, setGroupDetails] = useState<Record<number, GroupDetail>>(mockGroupDetails)
+  const [gatherings, setGatherings] = useState<Record<number, Gathering>>(mockGatherings)
+
+  // 지금 보고 있는 술자리. 라우트의 id 로 고르고, 없으면 목업 기본값으로 떨어진다.
+  const [currentGid, setCurrentGid] = useState<Id>(1)
+  const g = gatherings[currentGid] ?? mockGathering
+  const setG = (next: Gathering) => setGatherings((m) => ({ ...m, [next.id]: next }))
+
+  // 이의제기와 알림. 목업이라도 **주고받은 게 남아야** 조율 흐름을 걸어볼 수 있다.
+  const [disputes, setDisputes] = useState<Dispute[]>(mockDisputes)
+  const [notifications, setNotifications] = useState<AppNotification[]>(mockNotifications)
+
+  // 방금 연 모임. 술자리를 만들 때 "어느 모임에 넣을지" 알아야 한다.
+  const [currentGroupId, setCurrentGroupId] = useState<number>(100)
+  const groupDetail = groupDetails[currentGroupId] ?? mockGroupDetails[100]
 
   // 개발용 — 어떤 참여자 시점으로 볼지, 그리고 상태를 강제로 바꿔본다
   const [asId, setAsId] = useState<Id>(MOCK_IDS.재훈)
@@ -95,19 +124,18 @@ export default function JeongsanApp({ route, navigate }: Props) {
     const m = route.match(/^\/jungsan\/group\/(\d+)$/)
     if (!m) return
     const id = Number(m[1])
-    if (isMock()) {
-      setGroupDetail(mockGroupDetails[id] ?? mockGroupDetails[100])
-      return
-    }
-    void fetchGroup(id).then(setGroupDetail).catch(() => {})
+    setCurrentGroupId(id)
+    if (isMock()) return   // 목업은 이미 보관함에 있다
+    void fetchGroup(id).then((d) => setGroupDetails((s) => ({ ...s, [id]: d }))).catch(() => {})
   }, [route])
 
   useEffect(() => {
-    if (isMock()) return
-    const m = route.match(/^\/jungsan\/(\d+)/)
+    const m = route.match(/^\/jungsan\/(\d+)\//)
     if (!m) return
     const id = Number(m[1])
-    void fetchGathering(id).then(setG).catch(() => {})
+    setCurrentGid(id)          // 목업에서도 **어느 술자리인지**를 반영해야 한다
+    if (isMock()) return
+    void fetchGathering(id).then((x) => setGatherings((s) => ({ ...s, [id]: x }))).catch(() => {})
     void fetchPreview(id).then(setS).catch(() => {})
   }, [route])
 
@@ -139,6 +167,39 @@ export default function JeongsanApp({ route, navigate }: Props) {
     </div>
   )
 
+  /**
+   * 이의제기를 걸고 그 채팅방으로 보낸다.
+   * **거는 순간 방이 열린다** — 사유가 곧 첫 메시지라 따로 또 쓰게 하지 않는다.
+   */
+  const openDispute = (v: {
+    against: Id
+    againstName: string
+    kind: Dispute['kind']
+    reason: string
+  }) => {
+    const meUserId = authUser?.id ?? MOCK_IDS.동규
+    const d = makeDispute({
+      gatheringId: g.id,
+      kind: v.kind,
+      raisedBy: meUserId,
+      raisedByName: g.participants.find((p) => p.userId === meUserId)?.name ?? '나',
+      against: v.against,
+      reason: v.reason,
+    })
+    setDisputes((prev) => [d, ...prev])
+    // 걸린 사람에게 알림이 간다. 방만 열어두고 안 알리면 아무도 안 들어온다.
+    setNotifications((prev) => [{
+      id: Date.now(),
+      kind: 'DISPUTE_OPENED',
+      title: '확인 요청이 왔어요',
+      body: `${g.name} · ${v.reason}`,
+      createdAt: new Date().toISOString(),
+      read: false,
+      link: `/jungsan/dispute/${d.id}`,
+    }, ...prev])
+    navigate(`/jungsan/dispute/${d.id}`)
+  }
+
   // 화면 공통 껍데기. rootClass 는 화면별 변형이 필요할 때만 쓴다.
   //
   // **로그인 화면만 도트 도시를 화면 전체 배경으로 쓴다(js-login-mode).**
@@ -161,6 +222,122 @@ export default function JeongsanApp({ route, navigate }: Props) {
     </div>
   )
 
+  // ── 알림함 ───────────────────────────────────
+  // **정산은 금액이 나왔다고 끝이 아니라 입금까지 돼야 끝난다.**
+  // 그래서 알림이 한 번으로 안 끝나고, 볼 곳이 따로 필요하다.
+  if (route === '/jungsan/alerts') {
+    return wrap(
+      <NotificationPage
+        items={notifications}
+        onReadAll={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+        onOpen={(n) => {
+          setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))
+          navigate(n.link)
+        }}
+        onBack={() => navigate('/jungsan')}
+      />,
+    )
+  }
+
+  // ── 이의제기 채팅 ─────────────────────────────
+  const disputeRoute = route.match(/^\/jungsan\/dispute\/(\d+)$/)
+  if (disputeRoute) {
+    const did = Number(disputeRoute[1])
+    const d = disputes.find((x) => x.id === did)
+    if (d) {
+      const meUserId = authUser?.id ?? MOCK_IDS.동규
+      const otherId = d.raisedBy === meUserId ? d.against : d.raisedBy
+      const other = g.participants.find((p) => p.userId === otherId)
+      return wrap(
+        <DisputePage
+          dispute={d}
+          meId={meUserId}
+          counterpartName={other?.name ?? '상대방'}
+          onSend={(text) =>
+            setDisputes((prev) => prev.map((x) =>
+              x.id !== did ? x : {
+                ...x,
+                messages: [...x.messages, {
+                  id: Date.now(),
+                  senderId: meUserId,
+                  senderName: g.participants.find((p) => p.userId === meUserId)?.name ?? '나',
+                  text,
+                  createdAt: new Date().toISOString(),
+                }],
+              }))
+          }
+          onResolve={() =>
+            setDisputes((prev) => prev.map((x) =>
+              x.id === did ? { ...x, status: 'RESOLVED' } : x))
+          }
+          onBack={() => navigate(`/jungsan/${d.gatheringId}/result`)}
+        />,
+      )
+    }
+  }
+
+  // ── 모임 검색해서 참가 ────────────────────────
+  // 링크와 나란히 있는 **두 번째 입구**다. 뒤늦게 합류하는 사람은 링크를 못 받는다.
+  if (route === '/jungsan/search') {
+    return wrap(
+      <SearchGroupPage
+        onJoin={(found) => {
+          // 목업 — 서버가 붙으면 POST /groups/{id}/join 응답으로 상세를 받는다.
+          const detail: GroupDetail = {
+            id: found.id, name: found.name, groupType: found.groupType,
+            shareToken: null, hasPassword: true,
+            members: [
+              { userId: 900, nickname: found.ownerName, role: 'OWNER' },
+              { userId: authUser?.id ?? 1, nickname: authUser?.nickname ?? '동규', role: 'MEMBER' },
+            ],
+            gatherings: [],
+          }
+          setGroupDetails((prev) => ({ ...prev, [found.id]: detail }))
+          setGroups((prev) => [{
+            id: found.id, name: found.name, groupType: found.groupType,
+            role: 'MEMBER', ownerName: found.ownerName,
+            memberCount: found.memberCount + 1, gatheringCount: 0,
+          }, ...prev])
+          navigate(`/jungsan/group/${found.id}`)
+        }}
+        onBack={() => navigate('/jungsan')}
+      />,
+    )
+  }
+
+  // ── 모임 참여 (/gr/{token}) ───────────────────
+  // **술자리 참여(/g/)와 다른 화면이다.** 저쪽은 "이번 정산에 낄게",
+  // 이쪽은 "이 모임의 멤버가 될게"다 — API.md §3-b.4.
+  const groupInvite = route.match(/^\/gr\/([^/]+)$/)
+  if (groupInvite) {
+    const inviteToken = groupInvite[1]
+    const target = Object.values(groupDetails).find((d) => d.shareToken === inviteToken)
+    if (target) {
+      return wrap(
+        <JoinGroupPage
+          group={target}
+          onJoin={(name) => {
+            // 목업이라도 멤버가 실제로 늘어야 총무 화면에서 확인할 수 있다.
+            const userId = Date.now() % 100000
+            setGroupDetails((prev) => ({
+              ...prev,
+              [target.id]: {
+                ...prev[target.id],
+                members: [...prev[target.id].members, { userId, nickname: name, role: 'MEMBER' }],
+              },
+            }))
+            setGroups((prev) => prev.map((x) =>
+              x.id === target.id ? { ...x, memberCount: x.memberCount + 1 } : x))
+          }}
+          onOpenGathering={(gid) => {
+            const target2 = gatherings[gid]
+            if (target2) navigate(`/g/${target2.shareToken}`)
+          }}
+        />,
+      )
+    }
+  }
+
   // ── 참여자 웹 ────────────────────────────────
   const share = route.match(/^\/g\/([^/]+)(\/all)?$/)
   if (share) {
@@ -178,10 +355,36 @@ export default function JeongsanApp({ route, navigate }: Props) {
       )
     }
     if (g.status === 'COLLECTING') {
-      return wrap(<CheckPage g={g} me={me!} onSubmit={() => alert('제출 완료 (mock)')} />)
+      return wrap(
+        <CheckPage
+          g={g}
+          me={me!}
+          onSubmit={() => {
+            // 제출하면 **응답 완료로 바뀌어야** 총무의 수집 현황에 반영된다.
+            setG({
+              ...g,
+              participants: g.participants.map((p) =>
+                p.id === asId ? { ...p, responded: true } : p),
+            })
+          }}
+        />,
+      )
     }
     return wrap(
-      <MyResultPage g={g} me={me!} s={s} onViewAll={() => navigate(`/g/${token}/all`)} />,
+      <MyResultPage
+        g={g}
+        me={me!}
+        s={s}
+        onViewAll={() => navigate(`/g/${token}/all`)}
+        onDispute={() =>
+          openDispute({
+            against: g.hostUserId,
+            againstName: g.hostName,
+            kind: 'AMOUNT',
+            reason: `제 금액이 맞는지 확인 부탁드려요.`,
+          })
+        }
+      />,
     )
   }
 
@@ -206,11 +409,20 @@ export default function JeongsanApp({ route, navigate }: Props) {
     return wrap(
       <CreateGroupPage
         onCreate={(v) => {
-          // TODO 서버 연동: POST /api/v1/groups → 응답의 id 로 이동한다.
-          //      지금은 목업이라 첫 모임 상세로 보낸다.
-          alert(`모임 생성 (mock)
-${v.groupType} · ${v.name}`)
-          navigate('/jungsan/group/100')
+          // 목업이라도 **만든 모임이 실제로 남아야** 한다 — 그래야 목록으로 돌아왔을 때
+          // 방금 만든 게 보이고 흐름이 이어진다. 서버가 붙으면 POST 응답이 이 자리를 대신한다.
+          const { summary, detail, gathering } = makeGroup({
+            name: v.name,
+            groupType: v.groupType,
+            ownerName: authUser?.nickname ?? '동규',
+            gatheringDate: v.gatheringDate,
+            expectedCount: v.expectedCount,
+          })
+          setGroups((prev) => [summary, ...prev])
+          setGroupDetails((prev) => ({ ...prev, [detail.id]: detail }))
+          // 번개면 술자리도 같이 생긴다(FLASH 는 딱 하나) — 보관함에 함께 넣는다.
+          if (gathering) setGatherings((prev) => ({ ...prev, [gathering.id]: gathering }))
+          navigate(`/jungsan/group/${detail.id}`)
         }}
         onBack={() => navigate('/jungsan')}
       />,
@@ -228,7 +440,44 @@ ${v.groupType} · ${v.name}`)
         isOwner={summary ? summary.role === 'OWNER' : true}
         onOpenGathering={(id) => navigate(`/jungsan/${id}/collect`)}
         onNewGathering={() => navigate('/jungsan/gathering/new')}
-        onInvite={() => alert('초대 링크 복사 (mock)')}
+        gatheringInfo={(gid) => {
+          const gt = gatherings[gid]
+          if (!gt) return undefined
+          const meUserId = authUser?.id ?? MOCK_IDS.동규
+          return {
+            hostName: gt.hostName,
+            joined: gt.participants.some((p) => p.userId === meUserId),
+          }
+        }}
+        onSelfJoin={(gid) => {
+          const gt = gatherings[gid]
+          if (!gt) return
+          const meUserId = authUser?.id ?? MOCK_IDS.동규
+          const myName = authUser?.nickname ?? '동규'
+          setGatherings((prev) => ({
+            ...prev,
+            [gid]: {
+              ...gt,
+              participants: [...gt.participants, {
+                id: Date.now() % 100000,
+                userId: meUserId,
+                name: myName,
+                // **스스로 들어왔다.** 총무가 부른 게 아니다.
+                joinMode: 'SELF',
+                exempt: false, responded: false,
+                paymentStatus: 'NONE', paidAmount: null,
+                isHost: false, provider: 'kakao',
+              }],
+            },
+          }))
+          navigate(`/g/${gt.shareToken}`)
+        }}
+        onInvite={() => {
+          // 목업에선 링크를 복사해도 확인할 길이 없다. 참여자가 보는 화면으로 직접 넘어가
+          // 흐름을 이어서 걸을 수 있게 한다.
+          const t = groupDetail.shareToken
+          if (t) navigate(`/gr/${t}`)
+        }}
         onBack={() => navigate('/jungsan')}
       />,
     )
@@ -236,7 +485,71 @@ ${v.groupType} · ${v.name}`)
 
   // 술자리 만들기 (모임 안에서)
   if (route === '/jungsan/gathering/new') {
-    return wrap(<CreatePage onNext={() => navigate('/jungsan/1/amount')} onBack={() => navigate('/jungsan')} />)
+    return wrap(
+      <CreatePage
+        onNext={(v) => {
+          // 새 술자리를 **지금 보고 있는 모임 안에** 넣는다. 예전엔 무엇을 만들든
+          // /jungsan/1/amount 로 점프해서, 만든 것과 다음 화면이 아무 상관이 없었다.
+          const created = makeGathering({
+            name: v.name, date: v.date, hostName: v.myName,
+            expectedCount: v.expectedCount,
+            payout: { bankName: v.bank, accountNo: v.account, accountHolder: v.myName },
+          })
+          setGatherings((prev) => ({ ...prev, [created.id]: created }))
+          setGroupDetails((prev) => {
+            const gd = prev[currentGroupId]
+            if (!gd) return prev
+            return {
+              ...prev,
+              [currentGroupId]: {
+                ...gd,
+                gatherings: [
+                  { id: created.id, name: created.name, date: created.date, status: created.status },
+                  ...gd.gatherings,
+                ],
+              },
+            }
+          })
+          setGroups((prev) => prev.map((x) =>
+            x.id === currentGroupId ? { ...x, gatheringCount: x.gatheringCount + 1 } : x))
+          navigate(`/jungsan/${created.id}/amount`)
+        }}
+        onBack={() => navigate(`/jungsan/group/${currentGroupId}`)}
+      />,
+    )
+  }
+
+  // 차수별 술 입력 — 총무가 영수증 보고 종류·병수·단가를 적는다
+  const drinkRoute = route.match(/^\/jungsan\/(\d+)\/drink\/(\d+)$/)
+  if (drinkRoute) {
+    const gid = Number(drinkRoute[1])
+    const rid = Number(drinkRoute[2])
+    const target = gatherings[gid] ?? g
+    const round = target.rounds.find((r) => r.id === rid)
+    if (round) {
+      return wrap(
+        <DrinkInputPage
+          roundLabel={round.label}
+          total={round.total}
+          initial={round.drinkItems ?? []}
+          onSave={(items) => {
+            // 술값 합계가 곧 그 차수의 alcohol 이다 — CALC_RULES 가 정한 규칙이라
+            // 프론트가 따로 계산하지 않고 합계만 넘긴다.
+            const alcohol = items.reduce((n, d) => n + d.bottleCount * d.unitPrice, 0)
+            setGatherings((prev) => ({
+              ...prev,
+              [gid]: {
+                ...target,
+                rounds: target.rounds.map((r) =>
+                  r.id === rid ? { ...r, drinkItems: items, alcohol } : r),
+              },
+            }))
+            navigate(`/jungsan/${gid}/amount`)
+          }}
+          onBack={() => navigate(`/jungsan/${gid}/amount`)}
+        />,
+      )
+    }
   }
 
   const host = route.match(/^\/jungsan\/(\d+)\/(\w+)$/)
@@ -247,7 +560,12 @@ ${v.groupType} · ${v.name}`)
     switch (page) {
       case 'amount':
         return wrap(
-          <AmountPage g={g} onNext={() => navigate(`/jungsan/${id}/collect`)} onBack={() => navigate('/jungsan')} />,
+          <AmountPage
+            g={g}
+            onNext={() => navigate(`/jungsan/${id}/collect`)}
+            onBack={() => navigate('/jungsan')}
+            onEditDrinks={(rid) => navigate(`/jungsan/${id}/drink/${rid}`)}
+          />,
         )
       case 'collect':
         return wrap(
@@ -255,7 +573,7 @@ ${v.groupType} · ${v.name}`)
             g={g}
             onConfirm={() => navigate(`/jungsan/${id}/confirm`)}
             onRoster={() => navigate(`/jungsan/${id}/roster`)}
-            onShare={() => alert('카카오톡 공유 (mock)')}
+            onShare={() => navigate(`/g/${g.shareToken}`)}
             onBack={() => navigate('/jungsan')}
           />,
         )
@@ -269,12 +587,21 @@ ${v.groupType} · ${v.name}`)
               navigate(`/jungsan/${id}/result`)
             }}
             onRoster={() => navigate(`/jungsan/${id}/roster`)}
-            onShare={() => alert('카카오톡 공유 (mock)')}
+            onShare={() => navigate(`/g/${g.shareToken}`)}
             onBack={back}
           />,
         )
       case 'roster':
-        return wrap(<RosterPage g={g} onBack={back} onReissue={() => alert('링크 재발급 (mock)')} />)
+        return wrap(
+          <RosterPage
+            g={g}
+            onBack={back}
+            onReissue={() => {
+              // 링크를 새로 뽑으면 예전 링크는 죽어야 한다 — 그게 재발급의 목적이다.
+              setG({ ...g, shareToken: makeToken() })
+            }}
+          />,
+        )
       case 'result':
         return wrap(
           <ResultPage
@@ -286,7 +613,29 @@ ${v.groupType} · ${v.name}`)
               navigate(`/jungsan/${id}/collect`)
             }}
             onBack={() => navigate('/jungsan')}
-            onShare={() => alert('카카오톡 공유 (mock)')}
+            onShare={() => navigate(`/g/${g.shareToken}`)}
+            onRemind={() => {
+              // 미입금자에게 재촉 알림. 정산은 입금까지 돼야 끝난다.
+              const owing = g.participants.filter((p) => p.paymentStatus !== 'RECEIVED' && !p.isHost)
+              setNotifications((prev) => [{
+                id: Date.now(),
+                kind: 'PAYMENT_REMINDER',
+                title: '아직 입금이 안 됐어요',
+                body: `${g.name} · ${owing.length}명에게 알림을 보냈습니다`,
+                createdAt: new Date().toISOString(),
+                read: false,
+                link: `/jungsan/${g.id}/result`,
+              }, ...prev])
+            }}
+            onDispute={(pid, name) => {
+              const p = g.participants.find((x) => x.id === pid)
+              openDispute({
+                against: p?.userId ?? pid,
+                againstName: name,
+                kind: 'PAYMENT',
+                reason: `${name}님, 입금이 아직 확인되지 않았습니다. 확인 부탁드려요.`,
+              })
+            }}
           />,
         )
     }
@@ -298,8 +647,11 @@ ${v.groupType} · ${v.name}`)
     <GroupHomePage
       groups={groups}
       meName={authUser?.nickname}
+      unread={notifications.filter((n) => !n.read).length}
       onOpen={(id) => navigate(`/jungsan/group/${id}`)}
       onCreate={() => navigate('/jungsan/new')}
+      onSearch={() => navigate('/jungsan/search')}
+      onAlerts={() => navigate('/jungsan/alerts')}
     />,
   )
 }

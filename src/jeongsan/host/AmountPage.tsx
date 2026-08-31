@@ -11,11 +11,13 @@ import { won } from '../api'
 import { Bar, Card, KV, Radio, Shell } from '../ui'
 
 export function AmountPage({
-  g, onNext, onBack,
+  g, onNext, onBack, onEditDrinks,
 }: {
   g: Gathering
   onNext: () => void
   onBack: () => void
+  /** 이 차수의 술 종류를 적으러 간다. */
+  onEditDrinks?: (roundId: number) => void
 }) {
   const [allMine, setAllMine] = useState(false)
   const nameOf = (id: number) => g.participants.find((p) => p.id === id)?.name ?? '?'
@@ -41,6 +43,13 @@ export function AmountPage({
             </>
           ) : (
             <KV k="그중 술값" v={won(r.alcohol)} />
+          )}
+          {/* 종류별로 적어야 나중에 "이게 왜 이 금액이냐"에 답할 수 있다.
+              소주와 위스키를 "술값 12만원"으로 합치면 근거가 사라진다. */}
+          {onEditDrinks && (
+            <button className="js-mini" style={{ marginTop: 8 }} onClick={() => onEditDrinks(r.id)}>
+              {r.drinkItems?.length ? '술 종류 수정' : '술 종류 적기'}
+            </button>
           )}
         </Card>
       ))}

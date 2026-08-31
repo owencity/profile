@@ -13,9 +13,12 @@
  *   → 합계 220,000원 · 대표결제자 동규
  */
 import type {
+  AppNotification,
+  Dispute,
   Gathering,
   GatheringSummary,
   GroupDetail,
+  GroupSearchResult,
   GroupSummary,
   Id,
   Participant,
@@ -29,17 +32,20 @@ const E = { 택시비: 101 } as const
 
 const participants: Participant[] = [
   {
-    id: P.동규, name: '동규', exempt: false, responded: true,
+    id: P.동규, userId: P.동규, name: '동규', joinMode: 'INVITED',
+    exempt: false, responded: true,
     paymentStatus: 'NONE', paidAmount: null, isHost: true, provider: 'kakao',
     payout: { bankName: '국민은행', accountNo: '123456-78-901234', accountHolder: '김동규' },
   },
   {
-    id: P.민지, name: '민지', exempt: false, responded: true,
+    id: P.민지, userId: P.민지, name: '민지', joinMode: 'INVITED',
+    exempt: false, responded: true,
     paymentStatus: 'NONE', paidAmount: null, isHost: false, provider: 'kakao',
     payout: { bankName: '신한은행', accountNo: '110-234-567890', accountHolder: '박민지' },
   },
   {
-    id: P.재훈, name: '재훈', exempt: false, responded: true,
+    id: P.재훈, userId: P.재훈, name: '재훈', joinMode: 'SELF',
+    exempt: false, responded: true,
     // 구글 로그인을 감춰둔 동안은 구글 참여자가 생길 수 없다. RosterPage 가
     // provider 를 "카카오 / 구글" 로 찍으므로 google 로 두면 없는 상태가 보인다.
     // 구글을 켜면 여기 하나를 google 로 되돌려 그 분기도 다시 확인할 것.
@@ -47,11 +53,13 @@ const participants: Participant[] = [
     payout: { bankName: '카카오뱅크', accountNo: '3333-01-2345678', accountHolder: '이재훈' },
   },
   {
-    id: P.수아, name: '수아', exempt: false, responded: true,
+    id: P.수아, userId: P.수아, name: '수아', joinMode: 'INVITED',
+    exempt: false, responded: true,
     paymentStatus: 'RECEIVED', paidAmount: 40_300, isHost: false, provider: 'kakao',
   },
   {
-    id: P.지원, name: '지원', exempt: false, responded: true,
+    id: P.지원, userId: P.지원, name: '지원', joinMode: 'SELF',
+    exempt: false, responded: true,
     paymentStatus: 'NONE', paidAmount: null, isHost: false, provider: 'kakao',
   },
 ]
@@ -81,6 +89,11 @@ export const mockGathering: Gathering = {
   name: '8월 팀 회식',
   date: '2026-08-14',
   status: 'CONFIRMED',
+  groupId: 100,
+  // 이 술자리의 총무는 동규다. 아래 mockGatherings 를 보면 **자리마다 총무가 다르다** —
+  // 모임 개설자에 총무를 묶지 않는다는 걸 목데이터로 먼저 보여준다.
+  hostUserId: P.동규,
+  hostName: '동규',
   shareToken: 'k3f9dq2',
   expectedCount: 5,
   roundingUnit: 10,
@@ -234,7 +247,7 @@ export const mockGroups: GroupSummary[] = [
  */
 export const mockGroupDetails: Record<number, GroupDetail> = {
   100: {
-    id: 100, name: '신림팸', groupType: 'RECURRING', shareToken: 'aB3xY9kL2mNp',
+    id: 100, name: '신림팸', groupType: 'RECURRING', shareToken: 'aB3xY9kL2mNp', hasPassword: true,
     members: [
       { userId: 1, nickname: '동규', role: 'OWNER' },
       { userId: 2, nickname: '민지', role: 'MEMBER' },
@@ -249,7 +262,7 @@ export const mockGroupDetails: Record<number, GroupDetail> = {
     ],
   },
   101: {
-    id: 101, name: '8월 26일 번개', groupType: 'FLASH', shareToken: 'kR7mQ2vXwZ1t',
+    id: 101, name: '8월 26일 번개', groupType: 'FLASH', shareToken: 'kR7mQ2vXwZ1t', hasPassword: true,
     members: [
       { userId: 1, nickname: '동규', role: 'OWNER' },
       { userId: 3, nickname: '재훈', role: 'MEMBER' },
@@ -259,7 +272,7 @@ export const mockGroupDetails: Record<number, GroupDetail> = {
     gatherings: [{ id: 9, name: '8월 26일 번개', date: '2026-08-26', status: 'COLLECTING' }],
   },
   102: {
-    id: 102, name: '대학 동기 모임', groupType: 'RECURRING', shareToken: null,
+    id: 102, name: '대학 동기 모임', groupType: 'RECURRING', shareToken: null, hasPassword: false,
     members: [
       { userId: 7, nickname: '태현', role: 'OWNER' },
       { userId: 1, nickname: '동규', role: 'MEMBER' },
@@ -267,7 +280,7 @@ export const mockGroupDetails: Record<number, GroupDetail> = {
     gatherings: [{ id: 11, name: '연말 모임', date: '2026-12-20', status: 'COLLECTING' }],
   },
   103: {
-    id: 103, name: '수요일 번개', groupType: 'FLASH', shareToken: null,
+    id: 103, name: '수요일 번개', groupType: 'FLASH', shareToken: null, hasPassword: false,
     members: [
       { userId: 8, nickname: '해린', role: 'OWNER' },
       { userId: 1, nickname: '동규', role: 'MEMBER' },
@@ -277,3 +290,262 @@ export const mockGroupDetails: Record<number, GroupDetail> = {
 }
 
 export const MOCK_IDS = P
+
+/* ── 목업 팩토리 ──────────────────────────────────────────────
+   백엔드가 없어도 **만든 것이 실제로 남아야** 흐름을 끝까지 걸어볼 수 있다.
+   여기 함수들이 새 모임·술자리를 만들어 주고, JeongsanApp 이 그걸 상태에 넣는다.
+   서버가 붙으면 이 자리를 POST 응답이 대신한다. */
+
+/** 목업 id 발급기. 기존 데이터와 안 겹치게 넉넉히 띄운 값에서 시작한다. */
+let seq = 900
+const nextId = () => ++seq
+
+/** 12자 공유 토큰. 서버의 ShareToken.generate() 와 모양만 맞춘다. */
+export function makeToken(): string {
+  const A = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  return Array.from({ length: 12 }, () => A[Math.floor(Math.random() * A.length)]).join('')
+}
+
+/** 방금 만든 술자리 — 아직 아무도 안 들어왔고 차수도 없다. */
+export function makeGathering(v: {
+  name: string
+  date: string
+  hostName: string
+  expectedCount: number | null
+  /** 어느 모임 안의 술자리인가. 모임 없이 열리면 생략. */
+  groupId?: Id | null
+  payout?: Participant['payout']
+}): Gathering {
+  const hostId = nextId()
+  return {
+    id: nextId(),
+    name: v.name,
+    date: v.date,
+    status: 'COLLECTING',
+    groupId: v.groupId ?? null,
+    hostUserId: hostId,
+    hostName: v.hostName,
+    shareToken: makeToken(),
+    expectedCount: v.expectedCount,
+    roundingUnit: 10,
+    revision: 1,
+    hostParticipantId: hostId,
+    // 총무 혼자 있는 상태에서 시작한다. 나머지는 링크로 들어온다.
+    participants: [{
+      id: hostId, userId: hostId, name: v.hostName, joinMode: 'INVITED',
+      exempt: false, responded: true,
+      paymentStatus: 'NONE', paidAmount: null, isHost: true, provider: 'kakao',
+      payout: v.payout,
+    }],
+    rounds: [],
+    extras: [],
+    attendance: {},
+  }
+}
+
+/** 방금 만든 모임. 번개면 술자리 1개가 같이 생긴다(FLASH 는 딱 하나). */
+export function makeGroup(v: {
+  name: string
+  groupType: GroupSummary['groupType']
+  ownerName: string
+  gatheringDate?: string
+  expectedCount?: number
+  /** 참가 비밀번호. 목업이라 평문으로 두지만 **서버에서는 해시로만 저장한다.** */
+  password?: string
+}): { summary: GroupSummary; detail: GroupDetail; gathering: Gathering | null } {
+  const id = nextId()
+  const flash = v.groupType === 'FLASH'
+
+  // 번개는 모임을 만드는 순간 술자리가 같이 만들어진다 — API.md §3-b.2 와 같은 규칙.
+  const gathering = flash
+    ? makeGathering({
+        name: v.name,
+        date: v.gatheringDate ?? new Date().toISOString().slice(0, 10),
+        hostName: v.ownerName,
+        expectedCount: v.expectedCount ?? null,
+        groupId: id,
+      })
+    : null
+
+  const detail: GroupDetail = {
+    id,
+    name: v.name,
+    groupType: v.groupType,
+    shareToken: makeToken(),
+    hasPassword: Boolean(v.password),
+    members: [{ userId: 1, nickname: v.ownerName, role: 'OWNER' }],
+    gatherings: gathering
+      ? [{ id: gathering.id, name: gathering.name, date: gathering.date, status: gathering.status }]
+      : [],
+  }
+
+  const summary: GroupSummary = {
+    id, name: v.name, groupType: v.groupType, role: 'OWNER', ownerName: v.ownerName,
+    memberCount: 1,
+    gatheringCount: gathering ? 1 : 0,
+  }
+
+  return { summary, detail, gathering }
+}
+
+/** 기존 목업 술자리들. 모임 상세의 술자리를 열면 **각자 다른 데이터**가 나와야 한다. */
+export const mockGatherings: Record<number, Gathering> = {
+  1: mockGathering,
+  // **총무가 자리마다 다르다.** 신림팸(100)의 세 자리를 동규·민지·재훈이 나눠 맡는다 —
+  // 모임 개설자는 동규 하나지만 총무는 돌아가며 한다.
+  2: {
+    ...mockGathering, id: 2, name: '7월 환영회', date: '2026-07-22',
+    shareToken: 'p7q2ms4', groupId: 100, hostUserId: P.민지, hostName: '민지',
+  },
+  3: {
+    ...mockGathering, id: 3, name: '6월 첫 모임', date: '2026-06-15',
+    status: 'COLLECTING', shareToken: 'z9w1kt6',
+    groupId: 100, hostUserId: P.재훈, hostName: '재훈',
+  },
+  9: {
+    ...mockGathering, id: 9, name: '8월 26일 번개', date: '2026-08-26',
+    status: 'COLLECTING', shareToken: 'kR7mQ2vXwZ1t',
+    groupId: 101, hostUserId: P.동규, hostName: '동규',
+  },
+  11: {
+    ...mockGathering, id: 11, name: '연말 모임', date: '2026-12-20',
+    status: 'COLLECTING', shareToken: 'c4v8bn2',
+    groupId: 102, hostUserId: 7, hostName: '태현',
+  },
+  12: {
+    ...mockGathering, id: 12, name: '수요일 번개', date: '2026-08-19',
+    shareToken: 'h5j3lp9', groupId: 103, hostUserId: 8, hostName: '해린',
+  },
+}
+
+/* ══ 검색으로 찾는 모임 ══════════════════════════════════════
+   내가 안 속한 모임들. 이름으로 찾아 비밀번호를 넣고 들어간다. */
+export const mockSearchable: GroupSearchResult[] = [
+  {
+    id: 200, name: '신림 볼링 모임', groupType: 'RECURRING',
+    ownerName: '준호', memberCount: 12, lastGatheringDate: '2026-08-21',
+  },
+  {
+    id: 201, name: '신림동 맛집탐방', groupType: 'RECURRING',
+    ownerName: '서연', memberCount: 6, lastGatheringDate: '2026-08-09',
+  },
+  {
+    id: 202, name: '신림 러닝크루', groupType: 'RECURRING',
+    ownerName: '민수', memberCount: 23, lastGatheringDate: null,
+  },
+  {
+    id: 203, name: '금요일 한잔', groupType: 'FLASH',
+    ownerName: '지훈', memberCount: 4, lastGatheringDate: '2026-08-28',
+  },
+]
+
+/** 검색은 서버가 한다. 목업에선 이름 부분일치로 흉내만 낸다. */
+export function searchGroups(q: string): GroupSearchResult[] {
+  const k = q.trim()
+  if (k.length < 2) return []   // 두 글자는 받아야 검색이 의미 있다
+  return mockSearchable.filter((g) => g.name.includes(k))
+}
+
+/* ══ 이의제기 ════════════════════════════════════════════════ */
+export const mockDisputes: Dispute[] = [
+  {
+    id: 500, gatheringId: 1, kind: 'ATTENDANCE', status: 'OPEN',
+    raisedBy: P.동규, against: P.지원,
+    reason: '2차 불참으로 찍혀 있는데, 호프집에서 같이 나온 것 같아서요. 확인 부탁해요.',
+    createdAt: '2026-08-15T21:10:00+09:00',
+    messages: [
+      {
+        id: 5001, senderId: P.동규, senderName: '동규',
+        text: '지원아 2차 불참으로 돼 있는데 맞아? 나올 때 같이 나온 기억이 있어서',
+        createdAt: '2026-08-15T21:10:00+09:00',
+      },
+      {
+        id: 5002, senderId: P.지원, senderName: '지원',
+        text: '아 맞다 2차 잠깐 있다가 먼저 갔어요. 술은 안 마셨고요',
+        createdAt: '2026-08-15T21:14:00+09:00',
+      },
+      {
+        id: 5003, senderId: P.동규, senderName: '동규',
+        text: '그럼 2차 참석 + 논알콜로 고칠게. 금액 다시 뽑아서 알려줄게',
+        createdAt: '2026-08-15T21:15:00+09:00',
+      },
+    ],
+  },
+  {
+    id: 501, gatheringId: 1, kind: 'AMOUNT', status: 'OPEN',
+    raisedBy: P.수아, against: P.동규,
+    reason: '택시비가 저한테 붙어 있는데 저는 택시 안 탔어요.',
+    createdAt: '2026-08-16T10:02:00+09:00',
+    messages: [
+      {
+        id: 5011, senderId: P.수아, senderName: '수아',
+        text: '택시비 21,000원 부담자에 제가 들어가 있는데 저는 지하철 탔어요',
+        createdAt: '2026-08-16T10:02:00+09:00',
+      },
+    ],
+  },
+]
+
+/* ══ 알림 ════════════════════════════════════════════════════
+   **입금까지 끝나야 정산이 끝난다.** 그래서 금액 확정(SETTLED) 뒤에도
+   PAYMENT_REMINDER 가 남아 있다. */
+export const mockNotifications: AppNotification[] = [
+  {
+    id: 700, kind: 'PAYMENT_REMINDER',
+    title: '아직 입금이 안 됐어요',
+    body: '8월 팀 회식 · 29,470원 · 동규에게 보내면 됩니다',
+    createdAt: '2026-08-17T09:00:00+09:00', read: false, link: '/jungsan/1/result',
+  },
+  {
+    id: 701, kind: 'DISPUTE_MESSAGE',
+    title: '이의제기에 답이 왔어요',
+    body: '동규 · "그럼 2차 참석 + 논알콜로 고칠게"',
+    createdAt: '2026-08-15T21:15:00+09:00', read: false, link: '/jungsan/dispute/500',
+  },
+  {
+    id: 702, kind: 'SETTLED',
+    title: '정산 금액이 나왔어요',
+    body: '8월 팀 회식 · 총 220,000원 · 내 몫 29,470원',
+    createdAt: '2026-08-15T20:40:00+09:00', read: true, link: '/jungsan/1/result',
+  },
+  {
+    id: 703, kind: 'CHECK_REQUEST',
+    title: '차수를 체크해 주세요',
+    body: '6월 첫 모임 · 재훈이 정산을 시작했습니다',
+    createdAt: '2026-08-14T23:30:00+09:00', read: true, link: '/g/z9w1kt6',
+  },
+  {
+    id: 704, kind: 'GATHERING_OPENED',
+    title: '새 술자리가 열렸어요',
+    body: '신림팸 · 8월 26일 번개',
+    createdAt: '2026-08-13T18:00:00+09:00', read: true, link: '/jungsan/group/101',
+  },
+]
+
+let disputeSeq = 600
+/** 이의제기를 건다. 거는 순간 채팅방이 하나 열린다. */
+export function makeDispute(v: {
+  gatheringId: Id
+  kind: Dispute['kind']
+  raisedBy: Id
+  raisedByName: string
+  against: Id
+  reason: string
+}): Dispute {
+  const now = new Date().toISOString()
+  return {
+    id: ++disputeSeq,
+    gatheringId: v.gatheringId,
+    kind: v.kind,
+    status: 'OPEN',
+    raisedBy: v.raisedBy,
+    against: v.against,
+    reason: v.reason,
+    createdAt: now,
+    // 이의제기 사유가 곧 첫 메시지다. 따로 또 쓰게 하면 같은 말을 두 번 시킨다.
+    messages: [{
+      id: ++disputeSeq, senderId: v.raisedBy, senderName: v.raisedByName,
+      text: v.reason, createdAt: now,
+    }],
+  }
+}

@@ -46,13 +46,17 @@ function GroupCard({ g, onOpen }: { g: GroupSummary; onOpen: (id: number) => voi
 }
 
 export function GroupHomePage({
-  groups, meName, onOpen, onCreate,
+  groups, meName, unread = 0, onOpen, onCreate, onSearch, onAlerts,
 }: {
   groups: GroupSummary[]
   /** 로그인한 사람의 닉네임. mock 모드에서는 없다. */
   meName?: string
+  /** 안 읽은 알림 수. 0이면 배지를 안 띄운다. */
+  unread?: number
   onOpen: (id: number) => void
   onCreate: () => void
+  onSearch: () => void
+  onAlerts: () => void
 }) {
   const owned = groups.filter((g) => g.role === 'OWNER')
   const joined = groups.filter((g) => g.role === 'MEMBER')
@@ -61,9 +65,23 @@ export function GroupHomePage({
     <Shell>
       <Bar title="내 모임" step={meName} />
 
-      <button className="js-add" style={{ padding: 14, fontSize: 14 }} onClick={onCreate}>
-        + 새 모임 만들기
+      {/* 알림은 홈에서 바로 보여야 한다 — **정산은 입금까지 가야 끝나서**
+          "아직 안 냈다"는 재촉이 계속 오고, 놓치면 정산이 그대로 멈춘다. */}
+      <button className="js-alertbtn" onClick={onAlerts}>
+        알림
+        {unread > 0 && <span className="n">{unread}</span>}
       </button>
+
+      {/* 모임에 들어오는 길이 둘이다 — 링크를 받거나, 이름으로 찾거나.
+          링크는 단톡방에 있어야 하는데 뒤늦게 합류하면 그 링크를 못 받는다. */}
+      <div className="js-row2" style={{ marginTop: 4 }}>
+        <button className="js-add" style={{ padding: 14, fontSize: 14, marginBottom: 0 }} onClick={onCreate}>
+          + 새 모임
+        </button>
+        <button className="js-add alt" style={{ padding: 14, fontSize: 14, marginBottom: 0 }} onClick={onSearch}>
+          모임 찾기
+        </button>
+      </div>
 
       {groups.length === 0 && (
         <div className="js-gempty">

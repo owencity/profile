@@ -19,7 +19,7 @@ function statusLabel(s: GroupDetail['gatherings'][number]['status']) {
 }
 
 export function GroupDetailPage({
-  group, isOwner, onOpenGathering, onNewGathering, onInvite, onBack,
+  group, isOwner, onOpenGathering, onNewGathering, onInvite, onBack, gatheringInfo, onSelfJoin,
 }: {
   group: GroupDetail
   isOwner: boolean
@@ -27,6 +27,10 @@ export function GroupDetailPage({
   onNewGathering: () => void
   onInvite: () => void
   onBack: () => void
+  /** 술자리별 총무와 내 참여 여부. 목록 API 에 없는 값이라 따로 넘긴다. */
+  gatheringInfo?: (id: number) => { hostName: string; joined: boolean } | undefined
+  /** 참여자가 스스로 정산에 들어간다. */
+  onSelfJoin?: (gatheringId: number) => void
 }) {
   const flash = group.groupType === 'FLASH'
 
@@ -69,13 +73,41 @@ export function GroupDetailPage({
       <div className="js-glist">
         {group.gatherings.map((g) => {
           const st = statusLabel(g.status)
+          const info = gatheringInfo?.(g.id)
           return (
             <button key={g.id} className="js-gcard" onClick={() => onOpenGathering(g.id)}>
               <div className="gh">
                 <span className="gn">{g.name}</span>
                 <span className={`js-tag ${st.cls}`}>{st.text}</span>
               </div>
-              <div className="gm">{dateLabel(g.date)}</div>
+              <div className="gm">
+                {dateLabel(g.date)}
+                {/* **총무는 술자리마다 다르다.** 모임 개설자가 아니라 이 자리를 맡은 사람이다 —
+                    이번엔 내가, 다음엔 네가 계산하는 게 실제 모습이다. */}
+                {info && (
+                  <>
+                    <span className="sep">·</span>
+                    총무 <b className="own">{info.hostName}</b>
+                  </>
+                )}
+                {info && !info.joined && g.status === 'COLLECTING' && (
+                  <>
+                    <span className="sep">·</span>
+                    <span style={{ color: 'var(--acc-strong)', fontWeight: 800 }}>참여 안 함</span>
+                  </>
+                )}
+              </div>
+              {/* **총무가 명단을 짜지 않는다.** 참여자가 스스로 들어온다 —
+                  총무가 고르게 하면 반드시 빠뜨린 사람이 생기고, 그 사람은 정산에서 누락된다. */}
+              {info && !info.joined && g.status === 'COLLECTING' && onSelfJoin && (
+                <span
+                  className="js-mini"
+                  style={{ marginTop: 8, display: 'inline-block' }}
+                  onClick={(e) => { e.stopPropagation(); onSelfJoin(g.id) }}
+                >
+                  이 술자리 정산에 참여하기
+                </span>
+              )}
             </button>
           )
         })}

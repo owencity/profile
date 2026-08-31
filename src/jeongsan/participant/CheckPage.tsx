@@ -70,17 +70,30 @@ export function CheckPage({
         </div>
       </div>
 
+      {/* **묻는 단위는 "이 술자리에 왔냐"가 아니라 "몇 차에 있었냐"다.**
+          1차만 있다 간 사람과 끝까지 남은 사람이 같은 금액을 내면 안 된다.
+          그래서 차수마다 따로 묻고, 문구도 "참석"이 아니라 "1차 참석"으로 박는다. */}
       {g.rounds.map((r) => (
         <div key={r.id}>
           <div className="js-lab">{r.label}</div>
-          <Toggle label="참석했어요" on={att[r.id].attended} onToggle={() => toggleAttend(r.id)} />
           <Toggle
+            label={`${r.label} 참석`}
+            on={att[r.id].attended}
+            onToggle={() => toggleAttend(r.id)}
+          />
+          <Toggle
+            // 논알콜이면 술값을 안 나눠 갖는다. 이 한 칸이 금액을 크게 가른다.
             label="술 마셨어요"
             on={att[r.id].drank}
             onToggle={() => toggleDrank(r.id)}
             sub
             disabled={!att[r.id].attended}
           />
+          {att[r.id].attended && !att[r.id].drank && (
+            <div className="js-hint" style={{ marginLeft: 16, marginTop: -2 }}>
+              논알콜로 처리돼 <b>{r.label} 술값은 빠집니다</b>.
+            </div>
+          )}
         </div>
       ))}
 

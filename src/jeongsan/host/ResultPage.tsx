@@ -7,12 +7,12 @@
  * 확정 후 뒤늦게 참여를 요청한 사람이 있으면 배너로 뜬다 (v8 ⑮).
  * [되돌리고 추가] 는 상태 전이와 참여자 생성을 한 번에 한다.
  */
-import type { Gathering, Settlement } from '../types'
+import type { Gathering, Id, Settlement } from '../types'
 import { won } from '../api'
 import { Bar, PersonRow, Progress, Shell, WarnBox } from '../ui'
 
 export function ResultPage({
-  g, s, joinRequest, onReopen, onBack, onShare,
+  g, s, joinRequest, onReopen, onBack, onShare, onRemind, onDispute,
 }: {
   g: Gathering
   s: Settlement
@@ -21,6 +21,10 @@ export function ResultPage({
   onReopen: () => void
   onBack: () => void
   onShare: () => void
+  /** 미입금자 전원에게 알림을 보낸다. */
+  onRemind?: () => void
+  /** 특정 참여자에게 이의제기를 건다 — 채팅방이 열린다. */
+  onDispute?: (participantId: Id, name: string) => void
 }) {
   const payers = g.participants.filter((p) => (s.breakdown[p.id]?.netAmount ?? 0) > 0)
   const debtors = g.participants.filter((p) => (s.breakdown[p.id]?.netAmount ?? 0) < 0)
@@ -74,14 +78,30 @@ export function ResultPage({
           right={
             p.paymentStatus === 'RECEIVED' ? (
               <span className="js-tag done">확인됨</span>
-            ) : p.paymentStatus === 'SENT' ? (
-              <span className="js-tag wait">보냈다고 함</span>
             ) : (
-              <span className="js-tag acc">미입금</span>
+              <span className="js-row-actions">
+                <span className={`js-tag ${p.paymentStatus === 'SENT' ? 'wait' : 'acc'}`}>
+                  {p.paymentStatus === 'SENT' ? '보냈다고 함' : '미입금'}
+                </span>
+                {/* 금액이 안 맞거나 안 들어왔을 때 **이 사람에게만** 물어본다.
+                    단톡방에서 "누구누구 아직 안 냈어요" 하면 아무도 말을 안 꺼낸다. */}
+                {onDispute && (
+                  <button className="js-mini" onClick={() => onDispute(p.id, p.name)}>
+                    확인 요청
+                  </button>
+                )}
+              </span>
             )
           }
         />
       ))}
+
+      {/* **정산은 금액이 나왔다고 끝이 아니라 입금까지 돼야 끝난다.** */}
+      {onRemind && paid < debtors.length && (
+        <button className="js-cta2" style={{ marginTop: 10 }} onClick={onRemind}>
+          아직 안 낸 {debtors.length - paid}명에게 알림 보내기
+        </button>
+      )}
 
       {diffs.length > 0 && (
         <>

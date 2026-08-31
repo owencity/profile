@@ -29,8 +29,19 @@ const SITE_META: Record<string, { title: string; description: string; image: str
   },
 }
 
-function ogMetaPlugin(appTarget: string): Plugin {
-  const meta = SITE_META[appTarget] ?? SITE_META.default
+/**
+ * @param isDev 개발 서버인가.
+ *
+ * **개발 서버에서는 항상 default 를 쓴다.** 이 태그들은 카톡·구글 크롤러를 위한
+ * 것인데, 크롤러는 localhost 를 못 긁는다. 반면 로컬에서는 포트폴리오와 정산어택이
+ * 한 오리진(localhost:5173)을 공유해서, 정산어택 제목을 박아버리면 포트폴리오
+ * 화면의 탭에도 "정산어택"이 뜬다. 실제로 그렇게 보였다.
+ *
+ * 그래서 로컬에서는 정적 태그를 중립(포트폴리오)으로 두고, 정산어택 경로의 제목은
+ * JeongsanApp 이 런타임에 바꾸게 맡긴다. 배포 빌드는 지금까지와 똑같다.
+ */
+function ogMetaPlugin(appTarget: string, isDev: boolean): Plugin {
+  const meta = (isDev ? SITE_META.default : SITE_META[appTarget]) ?? SITE_META.default
   return {
     name: 'og-meta',
     transformIndexHtml(html) {
@@ -44,9 +55,9 @@ function ogMetaPlugin(appTarget: string): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
-    plugins: [react(), tailwindcss(), ogMetaPlugin(env.VITE_APP_TARGET ?? '')],
+    plugins: [react(), tailwindcss(), ogMetaPlugin(env.VITE_APP_TARGET ?? '', command === 'serve')],
   }
 })

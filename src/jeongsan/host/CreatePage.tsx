@@ -10,7 +10,22 @@ import { useState } from 'react'
 import { Bar, Shell } from '../ui'
 import { DatePicker, toISO } from '../DatePicker'
 
-export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+/** 이 화면이 모은 값. 예전엔 onNext 가 아무것도 안 받아서 입력이 전부 버려졌다. */
+export type NewGathering = {
+  name: string
+  date: string
+  myName: string
+  bank: string
+  account: string
+  expectedCount: number
+}
+
+export function CreatePage({
+  onNext, onBack,
+}: {
+  onNext: (v: NewGathering) => void
+  onBack: () => void
+}) {
   const [name, setName] = useState('8월 팀 회식')
   const [date, setDate] = useState(() => toISO(new Date()))
   const [myName, setMyName] = useState('동규')
@@ -21,12 +36,12 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
 
   return (
     <Shell narrow>
-      <Bar title="새 모임" onBack={onBack} step="1 / 2" />
+      <Bar title="새 술자리" onBack={onBack} step="1 / 2" />
 
-      <div className="js-lab">모임 이름</div>
+      <div className="js-lab">술자리 이름</div>
       <input className="js-inp" value={name} onChange={(e) => setName(e.target.value)} />
 
-      <div className="js-lab">모임 날짜</div>
+      <div className="js-lab">술자리 날짜</div>
       <DatePicker value={date} onChange={setDate} />
 
       <div className="js-lab">
@@ -82,10 +97,17 @@ export function CreatePage({ onNext, onBack }: { onNext: () => void; onBack: () 
 
       <button
         className="js-cta js-bottom"
-        onClick={onNext}
+        onClick={() =>
+          onNext({
+            name: name.trim() || '새 술자리',
+            date, myName: myName.trim() || '나',
+            bank, account, expectedCount: Number(count),
+          })
+        }
+        disabled={!valid}
         style={valid ? undefined : { opacity: 0.45 }}
       >
-        모임 만들고 링크 받기
+        술자리 만들고 링크 받기
       </button>
       {!valid && (
         <div className="js-hint" style={{ textAlign: 'center', color: 'var(--warn)' }}>

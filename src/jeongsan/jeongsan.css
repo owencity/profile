@@ -373,6 +373,9 @@
   cursor: pointer; font-family: inherit;
 }
 .js-chip.on { background: var(--p600); color: #fff; border-color: var(--p600); }
+/* 총무 칩 — 초대 화면에서 "누가 부른 건지"가 한눈에 보여야 한다 */
+.js-chip.own { border-color: var(--acc); }
+.js-chip.own b { color: var(--acc-strong); font-weight: 800; }
 
 .js-dp-value {
   margin-top: 9px; font-size: 15px; font-weight: 800; color: var(--ink);
@@ -625,8 +628,9 @@
     object-position: bottom;
   }
   .js-side-l { left: 0; }
-  /* 오른쪽은 좌우 반전 — 같은 그림이 두 번 보이는 티를 줄인다 */
-  .js-side-r { right: 0; transform: scaleX(-1); }
+  /* 좌우가 **다른 그림**이다(왼쪽 골목 · 오른쪽 강변) — 그래서 뒤집지 않는다.
+     예전엔 같은 그림을 좌우 반전해 썼는데, 대칭이라 "하나를 두 번 붙였다"로 읽혔다. */
+  .js-side-r { right: 0; }
 
   /* 본문은 배경 위로. 흰 배경이 있어야 글씨가 읽힌다. */
   .js-shell { position: relative; z-index: 1; }
@@ -707,3 +711,121 @@
 .js-login-mode .js-cta2 {
   background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.22); color: #fff;
 }
+
+/* ── 이의제기 채팅 ─────────────────────────────
+   단톡방에서 돈 얘기를 하면 아무도 말을 못 꺼낸다. 둘만의 방으로 뺀다. */
+
+.js-dispute-head {
+  border: var(--bd); box-shadow: var(--sh-sm);
+  background: #FFF8EC; padding: 11px 13px; margin-top: 4px;
+}
+.js-dispute-head.done { background: var(--bg2); }
+.js-dispute-head .k { display: flex; gap: 6px; align-items: center; }
+.js-dispute-head .r {
+  font-size: 13.5px; font-weight: 700; color: var(--ink);
+  margin-top: 7px; line-height: 1.55; word-break: keep-all;
+}
+.js-dispute-head .d { font-size: 11.5px; font-weight: 600; color: var(--ink3); margin-top: 5px; }
+
+.js-chat {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 2px; min-height: 180px;
+}
+.js-msg { display: flex; flex-direction: column; align-items: flex-start; }
+.js-msg.mine { align-items: flex-end; }
+.js-msg .who { font-size: 11.5px; font-weight: 700; color: var(--ink3); margin-bottom: 3px; }
+.js-msg .row { display: flex; align-items: flex-end; gap: 5px; max-width: 82%; }
+.js-msg.mine .row { flex-direction: row-reverse; }
+.js-msg .bub {
+  border: var(--bd); box-shadow: var(--sh-sm); background: #fff;
+  padding: 8px 11px; font-size: 13.5px; font-weight: 600;
+  line-height: 1.55; color: var(--ink); word-break: keep-all;
+}
+.js-msg.mine .bub { background: var(--p50); border-color: var(--p600); }
+.js-msg .t { font-size: 10.5px; font-weight: 600; color: var(--ink3); white-space: nowrap; }
+
+.js-chatbar { display: flex; gap: 7px; align-items: stretch; }
+.js-chatbar .js-inp { margin: 0; flex: 1; }
+.js-send {
+  border: var(--bd); box-shadow: var(--sh-sm); background: var(--p600); color: #fff;
+  font-size: 13px; font-weight: 800; padding: 0 15px; white-space: nowrap;
+  cursor: pointer; transition: transform .06s steps(2), box-shadow .06s steps(2);
+}
+.js-send:active { transform: translate(2px, 2px); box-shadow: none; }
+.js-send:disabled { opacity: .45; cursor: default; }
+
+/* ── 알림함 ────────────────────────────────────
+   시간 순서를 흔들지 않는다. 대신 안 읽은 것에 점을 찍는다. */
+
+.js-alerts { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.js-alert {
+  display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;
+  border: var(--bd); box-shadow: var(--sh-sm); background: #fff;
+  padding: 11px 12px; cursor: pointer;
+  transition: transform .06s steps(2), box-shadow .06s steps(2);
+}
+.js-alert:active { transform: translate(2px, 2px); box-shadow: none; }
+.js-alert.unread { background: var(--p50); }
+.js-alert.warn.unread { background: #FFF3E0; }
+.js-alert.ok.unread { background: #EAF7EE; }
+.js-alert .ic { font-size: 17px; line-height: 1.2; }
+.js-alert .body { flex: 1; min-width: 0; }
+.js-alert .body .t {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13.5px; font-weight: 800; color: var(--ink);
+}
+.js-alert .body .b {
+  display: block; font-size: 12px; font-weight: 600; color: var(--ink3);
+  margin-top: 4px; line-height: 1.5; word-break: keep-all;
+}
+.js-alert .dot {
+  width: 6px; height: 6px; background: var(--acc-strong); flex: none;
+}
+.js-alert .ago { font-size: 11px; font-weight: 600; color: var(--ink3); white-space: nowrap; }
+
+/* 태그 변형 — 이의제기·해결 상태 */
+.js-tag.warn { background: #FFF3E0; color: #B25E00; border-color: #E8A33D; }
+.js-tag.done { background: #EAF7EE; color: #1E7A3C; border-color: #4FA96A; }
+
+/* 빈 상태 — 검색 결과 없음 등 */
+.js-empty { text-align: center; padding: 8px 12px; }
+.js-empty .t { font-size: 15px; font-weight: 800; color: var(--ink); }
+.js-empty .s {
+  font-size: 12.5px; font-weight: 600; color: var(--ink3);
+  margin-top: 8px; line-height: 1.65; word-break: keep-all;
+}
+
+/* 행 안의 액션 묶음 — 태그와 작은 버튼을 나란히 */
+.js-row-actions { display: flex; align-items: center; gap: 6px; }
+.js-mini {
+  border: var(--bd-l); box-shadow: var(--sh-l); background: #fff;
+  font-size: 11px; font-weight: 800; color: var(--ink2);
+  padding: 4px 8px; cursor: pointer; font-family: inherit; white-space: nowrap;
+  transition: transform .06s steps(2), box-shadow .06s steps(2);
+}
+.js-mini:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* 홈 상단 알림 버튼 */
+.js-alertbtn {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  border: var(--bd-l); box-shadow: var(--sh-l); background: #fff;
+  padding: 10px 13px; font-size: 13px; font-weight: 800; color: var(--ink2);
+  cursor: pointer; font-family: inherit; margin-bottom: 10px;
+  transition: transform .06s steps(2), box-shadow .06s steps(2);
+}
+.js-alertbtn:active { transform: translate(2px, 2px); box-shadow: none; }
+.js-alertbtn .n {
+  margin-left: auto; background: var(--acc-strong); color: #fff;
+  font-size: 11px; font-weight: 800; padding: 2px 7px; min-width: 20px; text-align: center;
+}
+/* 보조 액션 — 만들기(주)와 찾기(부)를 구분한다 */
+.js-add.alt { border-color: var(--line); color: var(--ink2); background: var(--bg2, #f6f9fe); }
+
+/* 술 입력 행 — 종류·병수·금액이 한 줄에 */
+.js-drow {
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--line); padding: 9px 2px; font-size: 13px;
+}
+.js-drow b { font-weight: 800; color: var(--ink); }
+.js-drow .q { font-size: 11.5px; font-weight: 600; color: var(--ink3); }
+.js-drow .a { margin-left: auto; font-weight: 800; color: var(--ink); }

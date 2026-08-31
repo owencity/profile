@@ -36,6 +36,24 @@ function App() {
   const is24hoursAppRoute = window.location.pathname === '/24hours/app'
   // 정산어택 독립 배포 — 포트폴리오로 넘어가지 않는다
   const isJeongsanStandalone = appTarget === 'jeongsan'
+
+  /**
+   * **로컬에서는 가두지 않는다.**
+   *
+   * 배포에서는 도메인이 두 사이트를 갈라준다 — jungsan.devkdk.com 은 정산어택만,
+   * www.devkdk.com 은 포트폴리오만 서비스한다. 그래서 정산어택 배포에서는 밖으로
+   * 나가는 길을 다 막는 게 맞다.
+   *
+   * 그런데 로컬은 오리진이 localhost:5173 하나뿐이라 도메인으로 나눌 수가 없다.
+   * 잠금을 그대로 걸면 `/` 로 가도 `/jungsan` 으로 튕겨서 포트폴리오를 못 본다 —
+   * 둘을 같이 띄워놓고 작업할 방법이 없어진다.
+   *
+   * 그래서 **가두는 것은 실제 배포에서만** 한다. 로컬에서는 VITE_APP_TARGET=jeongsan
+   * 이 "정산어택을 여기서 서비스한다"는 뜻만 갖고, 포트폴리오는 그대로 열려 있다.
+   * (dev 서버와 `vite preview` 를 모두 덮으려고 DEV 플래그가 아니라 호스트로 본다)
+   */
+  const isLocalHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)
+  const lockToJeongsan = isJeongsanStandalone && !isLocalHost
   // ⚠ isAppLikeMode 에 isJeongsanStandalone 을 넣지 말 것.
   //   아래 한 곳에서만 쓰이는데 거기서 24시간이모자라를 렌더한다.
   //   넣으면 정산어택 분기보다 먼저 걸려서 URL 이 /24hours/app 으로 바뀐다.
@@ -44,7 +62,7 @@ function App() {
   const [route, setRoute] = useState(() => {
     const path = window.location.pathname || '/'
     if (is24hoursStandalone) return '/24hours/app'
-    if (isJeongsanStandalone && !isJeongsanAllowed(path)) return '/jungsan'
+    if (lockToJeongsan && !isJeongsanAllowed(path)) return '/jungsan'
     return path
   })
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -70,7 +88,7 @@ function App() {
   const navigate = (to: string) => {
     if (is24hoursStandalone && to !== '/24hours/app') return
     // 독립 배포에서는 정산어택 밖으로 나가지 않는다 (소개 페이지로 넘어가지 않게)
-    if (isJeongsanStandalone && !isJeongsanAllowed(to)) return
+    if (lockToJeongsan && !isJeongsanAllowed(to)) return
     if (to === route) return
     window.history.pushState({}, '', to)
     setRoute(to)
@@ -80,7 +98,7 @@ function App() {
   if (is24hoursStandalone && window.location.pathname !== '/24hours/app') {
     window.history.replaceState({}, '', '/24hours/app')
   }
-  if (isJeongsanStandalone && !isJeongsanAllowed(window.location.pathname || '/')) {
+  if (lockToJeongsan && !isJeongsanAllowed(window.location.pathname || '/')) {
     window.history.replaceState({}, '', '/jungsan')
   }
 
@@ -99,6 +117,26 @@ function App() {
     const intervalId = window.setInterval(update, 60_000)
     return () => window.clearInterval(intervalId)
   }, [])
+
+  /**
+   * 탭 제목·파비콘을 **지금 보고 있는 화면에 맞춘다.**
+   *
+   * `index.html` 의 `<title>` 은 빌드 시점에 VITE_APP_TARGET 으로 한 번 박힌다 —
+   * 카톡 크롤러가 JS 를 안 돌리기 때문에 정적 태그가 필요하다(vite.config.ts 의 ogMetaPlugin).
+   *
+   * 그런데 로컬에서는 포트폴리오와 정산어택이 한 오리진을 쓴다. 정산어택으로 빌드하면
+   * "정산어택" 제목이 포트폴리오 화면에도 그대로 붙어버린다.
+   *
+   * 그래서 정산어택 경로가 **아닐 때** 포트폴리오 쪽으로 되돌린다.
+   * 정산어택 경로의 제목·아이콘은 JeongsanApp 이 자기 안에서 바꾼다(거기서 되돌리기도 한다).
+   */
+  useEffect(() => {
+    if (isJeongsanPath(route)) return
+    // vite.config.ts 의 SITE_META.default 와 같은 값으로 맞춘다
+    document.title = '김동규 | Backend Developer'
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (icon) icon.href = '/brand.png'
+  }, [route])
 
   const pageTitle = useMemo(() => {
     if (route === '/valkyriefs') return 'ValkyrieFS'
@@ -149,6 +187,17 @@ function App() {
   // 정상 작동하는 앱으로 넘어간다.
   if (isJeongsanPath(route)) {
     if (!isJeongsanStandalone) {
+      // 로컬에서 튕기면 로컬 정산어택을 볼 방법이 없다. .env.local 에
+      // VITE_APP_TARGET=jeongsan 을 켜라고 알려주고 멈춘다.
+      if (isLocalHost) {
+        return (
+          <div style={{ padding: 40, fontFamily: 'monospace', lineHeight: 1.8 }}>
+            <b>정산어택이 이 빌드에 없습니다.</b>
+            <br />
+            <code>.env.local</code> 에 <code>VITE_APP_TARGET=jeongsan</code> 을 켜고 다시 띄우세요.
+          </div>
+        )
+      }
       window.location.replace(`https://jungsan.devkdk.com${route}`)
       return null
     }
