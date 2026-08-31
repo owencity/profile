@@ -100,6 +100,64 @@ export const portfolio = {
     period: '2025.06 ~ 2026.08',
     projects: [
     {
+      slug: 'legacy-stack-migration',
+      title: '레거시 스택 마이그레이션',
+      category: '마이그레이션',
+      status: '완료',
+      org: '유통 상품 관리 시스템 고도화',
+      techStack: ['Java', 'Spring Boot', 'React', 'PostgreSQL', 'Jenkins', 'Docker'],
+      summary: [
+        'Seasar2 서버사이드 렌더링 구조를 React+Spring Boot로 분리하며, AI 코드 변환 지원을 받아 프레임워크 전환보다 기능 검수에 더 많은 시간을 썼습니다.',
+        'MySQL 5→PostgreSQL 전환에서 pgloader로 옮긴 뒤 어긋난 타입과 GROUP BY 같은 SQL 문법 차이를 하나씩 교정했습니다.',
+        '3개월 분석 후 작은 기능부터 검증하며 약 2개월간 마이그레이션을 실행해, 신규 기능 개발 기간을 1주일에서 2~3일로 줄였습니다.',
+      ],
+      problem:
+        '입사 3개월 차에, 타사에서 인계받은 노후 소스코드(Java 1.6·Seasar2·MySQL 5)를 최신 스택으로 전환하는 마이그레이션을 홀로 맡았습니다. Seasar2는 서버사이드 렌더링 구조라 화면단을 React로 완전히 분리하는 아키텍처 전환이 필요했고, 기존과 똑같이 동작해야 한다는 제약 속에서 기능 하나 놓치지 않고 옮기는 게 과제였습니다.',
+      solutionGroups: [
+        {
+          title: '프레임워크 전환 — SSR에서 React + Spring Boot로',
+          items: [
+            {
+              label: 'AI 보조 코드 변환 + 꼼꼼한 기능 검수',
+              desc: 'Seasar2의 서버사이드 렌더링 구조를 React(프론트)와 Spring Boot(백엔드)로 분리하는 전환이었습니다. 프레임워크 자체의 코드 변환은 AI 도구의 코드 분석·변환 지원으로 크게 어렵지 않았지만, 마이그레이션 후에도 기존과 동일하게 동작해야 했기 때문에 기능 하나하나를 검수하며 발견되는 차이를 고치는 데 가장 많은 시간을 썼습니다. 난이도보다는 시간이 드는 작업이었습니다.',
+            },
+          ],
+        },
+        {
+          title: 'DB 전환 — MySQL 5 → PostgreSQL',
+          items: [
+            {
+              label: 'pgloader 변환 후 타입·SQL 수동 교정',
+              desc: 'pgloader로 1차 변환했지만 두 DB의 타입 체계가 완전히 일치하지 않아, 어긋난 데이터 타입을 하나씩 검수하며 수정했습니다. SQL도 다수 손봤는데, 예를 들어 MySQL은 GROUP BY에 없는 컬럼도 느슨하게 SELECT를 허용하지만 PostgreSQL은 이를 엄격히 막아, 해당 쿼리들을 전부 표준에 맞게 고쳤습니다.',
+            },
+          ],
+        },
+        {
+          title: '전환 전략 — 분석 → 소규모 검증 → 실행',
+          items: [
+            {
+              label: '3개월 분석 후 작은 기능으로 먼저 검증',
+              desc: '인계받은 코드를 3개월간 분석하며 시스템 흐름과 기능을 익혔고, 작은 기능 하나를 먼저 마이그레이션해 실현 가능성을 확인한 뒤 본격적으로 전환을 진행했습니다. 실제 마이그레이션 실행에는 약 2개월이 걸렸습니다.',
+            },
+          ],
+        },
+        {
+          title: '배포 자동화',
+          items: [
+            {
+              label: 'Jenkins · Docker 도입',
+              desc: '수동으로 진행하던 배포를 Jenkins·Docker 기반 자동화 파이프라인으로 바꿔, 배포 소요 시간을 20분에서 5분으로 줄였습니다.',
+            },
+          ],
+        },
+      ],
+      result: {
+        before: '신규 기능 개발 1주일',
+        after: '2~3일',
+        note: '배포도 Jenkins·Docker 도입으로 20분에서 5분으로 줄었습니다. 별도로 측정한 수치가 아니라 실무를 진행하며 직접 확인한 수치입니다.',
+      },
+    },
+    {
       slug: 'event-driven-integration',
       title: '외부 연동 비동기 아키텍처 전환',
       category: '아키텍처',
