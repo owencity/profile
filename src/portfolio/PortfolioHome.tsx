@@ -269,6 +269,8 @@ export function PortfolioHome() {
               {portfolio.education.school}
             </p>
             <p className="mt-0.5 text-sm text-zinc-900">{portfolio.education.period}</p>
+            <p className="mt-4 text-sm font-semibold text-zinc-900">학사 학위</p>
+            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.degree}</p>
             <p className="mt-4 text-sm font-semibold text-zinc-900">교육</p>
             <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.bootcamp}</p>
             <p className="mt-4 text-sm font-semibold text-zinc-900">자격증</p>
