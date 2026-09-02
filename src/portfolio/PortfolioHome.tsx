@@ -295,8 +295,17 @@ export function PortfolioHome() {
         <SectionHeading emoji="🚀" title="Projects" />
         {portfolio.projectGroups.map((group) => (
           <div key={group.name} className="mb-10 last:mb-0">
-            <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
               <h3 className="text-lg font-bold text-zinc-900">{group.name}</h3>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  group.kind === '회사 프로젝트'
+                    ? 'bg-zinc-100 text-zinc-700'
+                    : 'bg-sky-50 text-sky-700'
+                }`}
+              >
+                {group.kind}
+              </span>
               {group.period && <span className="text-sm text-zinc-500">{group.period}</span>}
             </div>
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

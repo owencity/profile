@@ -27,6 +27,7 @@ export type ProjectResult = {
 
 export type ProjectGroup = {
   name: string
+  kind: '회사 프로젝트' | '사이드 프로젝트'
   period?: string
   projects: PortfolioProject[]
 }
@@ -62,7 +63,7 @@ export const STATUS_STYLES: Record<ProjectStatus, string> = {
 }
 
 export const portfolio = {
-  headline: '백엔드 개발자 김동규 포트폴리오',
+  headline: '백엔드 개발자 김동규',
   photoUrl: '/portfolio-avatar.jpg',
   mascotUrl: '/brand.png',
   introParagraphs: [
@@ -98,6 +99,7 @@ export const portfolio = {
   },
   projectGroups: [{
     name: '상품관리 시스템 고도화',
+    kind: '회사 프로젝트',
     period: '2025.06 ~ 2026.08',
     projects: [
     {
@@ -526,6 +528,7 @@ export const portfolio = {
   ] as PortfolioProject[],
   }, {
     name: '정산어택',
+    kind: '사이드 프로젝트',
     projects: [
       {
         slug: 'jeongsan-attack',
@@ -533,8 +536,28 @@ export const portfolio = {
         category: '사이드 프로젝트',
         status: '진행 중',
         org: '개인 사이드 프로젝트',
-        techStack: [],
-        summary: [],
+        techStack: ['React', 'Kotlin', 'Spring Boot'],
+        summary: [
+          '카카오톡 등 기존 정산 기능은 N분의 1만 지원해, 참여 형태가 제각각인 술자리 같은 모임은 총무가 일일이 수기로 계산해야 했습니다.',
+          '누가 마셨는지, 몇 차까지 참여했는지 같은 세부 조건까지 반영해 정산할 수 있는 웹앱을 혼자 기획·개발하고 있습니다.',
+          '정산을 총무 혼자 떠안는 게 아니라 참여자들이 함께 입력하는 구조로 만들어, 모임 이후의 피로를 줄이는 게 목표입니다.',
+        ],
+        problem:
+          '카카오톡이나 기존 정산 앱들은 전체 금액을 인원수로 나누는 N분의 1 계산만 지원합니다. 하지만 실제 술자리는 술을 마시는 사람과 안 마시는 사람이 섞여 있고, 1차·2차마다 참여 인원이 달라지는 등 훨씬 세분화된 정산이 필요합니다. 이 복잡한 계산과 취합을 총무 한 사람이 다 떠안아야 해서, 모임이 끝난 뒤에도 총무만 피곤한 구조였습니다.',
+        solutionGroups: [
+          {
+            title: '기획 방향',
+            items: [
+              {
+                label: '세분화된 정산 + 참여형 입력',
+                desc: '술을 마신 사람과 안 마신 사람, 1차·2차 등 라운드별로 참여자가 달라지는 상황까지 반영해 정산할 수 있게 설계하고 있습니다. 총무 혼자 계산해서 공지하는 방식이 아니라, 참여자들이 각자 자기 몫을 직접 입력하는 구조로 만들어 정산 부담을 나누는 게 목표입니다.',
+              },
+            ],
+          },
+        ],
+        result: {
+          note: '프론트엔드 목업은 완성했고, 현재 React·Kotlin·Spring Boot로 백엔드를 개발하고 있습니다. 백엔드 개발이 끝나면 기술적 의사결정을 다루는 카드를 추가할 예정입니다.',
+        },
       },
     ] as PortfolioProject[],
   }] as ProjectGroup[],
