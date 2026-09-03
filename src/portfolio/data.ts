@@ -63,7 +63,6 @@ export const STATUS_STYLES: Record<ProjectStatus, string> = {
 }
 
 export const portfolio = {
-  headline: '백엔드 개발자 김동규',
   photoUrl: '/portfolio-avatar.jpg',
   mascotUrl: '/brand.png',
   introParagraphs: [

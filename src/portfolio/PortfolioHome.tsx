@@ -214,10 +214,7 @@ export function PortfolioHome() {
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-                {portfolio.headline}
-              </h1>
-              <div className="mt-4 space-y-4 text-base leading-7 text-zinc-700 sm:text-lg sm:leading-8">
+              <div className="space-y-4 text-base leading-7 text-zinc-700 sm:text-lg sm:leading-8">
                 {portfolio.introParagraphs.map((paragraph, i) => (
                   <p key={i} className={i === 0 ? 'font-bold text-zinc-900' : undefined}>
                     {paragraph}
