@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" role="img" style="color:#131A20"
+     aria-label="단순 조회 1.65배, 동시 쓰기 1.22배, insert 3.88배, 대규모 JOIN 4.73배, 대규모 분석 68.6배로 항목별 PostgreSQL 우위 배율을 로그 스케일로 정리한 막대 그래프">
+  <rect width="720" height="340" fill="#F7F9FA"/>
+
+  <text x="20" y="30" font-family="ui-monospace, monospace" font-size="12.5" fill="currentColor" opacity=".7">PostgreSQL이 MySQL보다 몇 배 빨랐는가 (log 스케일)</text>
+
+  <line x1="200" y1="55" x2="200" y2="295" stroke="currentColor" opacity=".25"/>
+  <line x1="440" y1="55" x2="440" y2="295" stroke="currentColor" opacity=".15" stroke-dasharray="3 4"/>
+  <line x1="680" y1="55" x2="680" y2="295" stroke="currentColor" opacity=".15" stroke-dasharray="3 4"/>
+
+  <text x="200" y="312" text-anchor="middle" font-size="11" font-family="ui-monospace, monospace" fill="currentColor" opacity=".6">10⁰</text>
+  <text x="440" y="312" text-anchor="middle" font-size="11" font-family="ui-monospace, monospace" fill="currentColor" opacity=".6">10¹</text>
+  <text x="680" y="312" text-anchor="middle" font-size="11" font-family="ui-monospace, monospace" fill="currentColor" opacity=".6">10²</text>
+
+  <text x="190" y="76" text-anchor="end" font-size="12" fill="currentColor">③ 대규모 분석 Q4</text>
+  <rect x="200" y="65" width="441" height="20" fill="#0B8A73"/>
+  <text x="651" y="80" font-size="13" font-weight="700" fill="#0B8A73">68.6×</text>
+
+  <text x="190" y="126" text-anchor="end" font-size="12" fill="currentColor">② 7테이블 JOIN</text>
+  <rect x="200" y="115" width="162" height="20" fill="#0B8A73"/>
+  <text x="372" y="130" font-size="13" font-weight="700" fill="#0B8A73">4.73×</text>
+
+  <text x="190" y="176" text-anchor="end" font-size="12" fill="currentColor">① insert</text>
+  <rect x="200" y="165" width="141" height="20" fill="#0B8A73"/>
+  <text x="351" y="180" font-size="13" font-weight="700" fill="#0B8A73">3.88×</text>
+
+  <text x="190" y="226" text-anchor="end" font-size="12" fill="currentColor">① point_select</text>
+  <rect x="200" y="215" width="52" height="20" fill="#0B8A73"/>
+  <text x="262" y="230" font-size="13" font-weight="700" fill="#0B8A73">1.65×</text>
+
+  <text x="190" y="276" text-anchor="end" font-size="12" fill="currentColor">④ 동시 쓰기</text>
+  <rect x="200" y="265" width="21" height="20" fill="#0B8A73"/>
+  <text x="231" y="280" font-size="13" font-weight="700" fill="#0B8A73">1.22×</text>
+</svg>

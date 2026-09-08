@@ -290,7 +290,10 @@ export function PortfolioHome() {
         </section>
 
         <SectionHeading emoji="🚀" title="Projects" />
-        {portfolio.projectGroups.map((group) => (
+        {portfolio.projectGroups.map((group) => {
+          const visibleProjects = group.projects.filter((project) => !project.hidden)
+          if (visibleProjects.length === 0) return null
+          return (
           <div key={group.name} className="mb-10 last:mb-0">
             <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
               <h3 className="text-lg font-bold text-zinc-900">{group.name}</h3>
@@ -306,7 +309,7 @@ export function PortfolioHome() {
               {group.period && <span className="text-sm text-zinc-500">{group.period}</span>}
             </div>
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {group.projects.map((project) => (
+              {visibleProjects.map((project) => (
                 <button
                   key={project.slug}
                   type="button"
@@ -361,7 +364,8 @@ export function PortfolioHome() {
               ))}
             </section>
           </div>
-        ))}
+          )
+        })}
 
         <div className="pb-10" />
       </div>
@@ -371,7 +375,10 @@ export function PortfolioHome() {
       {/* PDF 내보내기 전용 — 카드를 눌러야 보이는 모달 상세를 화면 밖에 항상 렌더해둔다 */}
       <div aria-hidden className="pointer-events-none fixed left-[-99999px] top-0">
         <div ref={pdfProjectPagesRef}>
-          {portfolio.projectGroups.flatMap((g) => g.projects).map((project) => (
+          {portfolio.projectGroups
+            .flatMap((g) => g.projects)
+            .filter((project) => !project.hidden)
+            .map((project) => (
             <div
               key={project.slug}
               data-pdf-project={project.slug}

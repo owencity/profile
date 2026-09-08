@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" style="color:#131A20"
+     aria-label="집계·정렬 중심 분석 쿼리 4종의 실행시간 비교(log 스케일). 월별집계 7배, 상품누적 38배, 고객상위 21배, 최대 테이블(1300만 행) 입출고 이력 69배로 PostgreSQL이 빠르다">
+  <rect width="720" height="300" fill="#F7F9FA"/>
+
+  <rect x="40" y="18" width="12" height="12" fill="currentColor" opacity=".45"/>
+  <text x="58" y="28" font-size="11.5" fill="currentColor" opacity=".75">MySQL 8.4</text>
+  <rect x="150" y="18" width="12" height="12" fill="#0B8A73"/>
+  <text x="168" y="28" font-size="11.5" fill="#0B8A73">PostgreSQL 16</text>
+
+  <line x1="40" y1="220" x2="700" y2="220" stroke="currentColor" opacity=".3"/>
+
+  <!-- Q1: 5.5s / 0.8s, 7x -->
+  <rect x="96" y="140" width="30" height="80" fill="currentColor" opacity=".45"/>
+  <text x="111" y="133" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".8">5.5s</text>
+  <rect x="130" y="217" width="30" height="3" fill="#0B8A73"/>
+  <text x="145" y="212" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B8A73">0.8s</text>
+  <text x="128" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">7×</text>
+  <text x="128" y="258" text-anchor="middle" font-size="11" fill="currentColor" opacity=".65">Q1 월별집계</text>
+
+  <!-- Q2: 39.8s / 1.1s, 38x -->
+  <rect x="286" y="58" width="30" height="162" fill="currentColor" opacity=".45"/>
+  <text x="301" y="51" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".8">39.8s</text>
+  <rect x="320" y="207" width="30" height="13" fill="#0B8A73"/>
+  <text x="335" y="202" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B8A73">1.1s</text>
+  <text x="318" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">38×</text>
+  <text x="318" y="258" text-anchor="middle" font-size="11" fill="currentColor" opacity=".65">Q2 상품누적</text>
+
+  <!-- Q3: 20.6s / 1.0s, 21x -->
+  <rect x="476" y="86" width="30" height="134" fill="currentColor" opacity=".45"/>
+  <text x="491" y="79" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".8">20.6s</text>
+  <rect x="510" y="210" width="30" height="10" fill="#0B8A73"/>
+  <text x="525" y="204" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B8A73">1.0s</text>
+  <text x="508" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">21×</text>
+  <text x="508" y="258" text-anchor="middle" font-size="11" fill="currentColor" opacity=".65">Q3 고객상위</text>
+
+  <!-- Q4: 59.6s / 0.9s, 69x -->
+  <rect x="606" y="42" width="30" height="178" fill="currentColor" opacity=".45"/>
+  <text x="621" y="35" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".8">59.6s</text>
+  <rect x="640" y="215" width="30" height="5" fill="#0B8A73"/>
+  <text x="655" y="208" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B8A73">0.9s</text>
+  <text x="638" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">69×</text>
+  <text x="638" y="258" text-anchor="middle" font-size="11" fill="currentColor" opacity=".65">Q4 입출고 13M</text>
+
+  <text x="40" y="284" font-size="11.5" fill="currentColor" opacity=".75">막대 높이는 log 스케일 · PostgreSQL은 4개 쿼리 모두 병렬 워커로 처리, MySQL은 단일 스레드 — 테이블이 클수록 격차 확대</text>
+</svg>

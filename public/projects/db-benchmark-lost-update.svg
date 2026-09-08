@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 320" role="img" style="color:#131A20"
+     aria-label="동일 REPEATABLE READ 조건에서 동시 재고차감을 반복했을 때 MySQL은 257건의 과다판매가 발생했고 PostgreSQL은 0건이었다는 막대 비교">
+  <rect width="700" height="320" fill="#F7F9FA"/>
+
+  <text x="20" y="32" font-family="ui-monospace, monospace" font-size="12.5" fill="currentColor" opacity=".7">동시 재고차감 시 과다판매(Lost Update) 발생 건수</text>
+
+  <line x1="60" y1="260" x2="640" y2="260" stroke="currentColor" opacity=".3"/>
+
+  <rect x="150" y="76" width="110" height="184" fill="#A63A2B" opacity=".85"/>
+  <text x="205" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#A63A2B">257건</text>
+  <text x="205" y="284" text-anchor="middle" font-size="12.5" fill="currentColor">MySQL 8.4</text>
+  <text x="205" y="300" text-anchor="middle" font-size="11" fill="currentColor" opacity=".6">REPEATABLE READ</text>
+
+  <rect x="440" y="257" width="110" height="3" fill="#0B8A73"/>
+  <text x="495" y="246" text-anchor="middle" font-size="16" font-weight="700" fill="#0B8A73">0건</text>
+  <text x="495" y="284" text-anchor="middle" font-size="12.5" fill="currentColor">PostgreSQL 16</text>
+  <text x="495" y="300" text-anchor="middle" font-size="11" fill="currentColor" opacity=".6">REPEATABLE READ</text>
+
+  <text x="495" y="228" text-anchor="middle" font-size="10.5" fill="#0B8A73" opacity=".85">직렬화 오류로 거부 → 재시도 유도</text>
+</svg>

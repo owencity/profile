@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 300" role="img" style="color:#131A20"
+     aria-label="로컬 Docker 환경에서 PostgreSQL 16과 MySQL 8.4를 버퍼 1.5GB로 개발·반복하지만 자원을 공유해 검증력이 약하고, 동일 compose에 OCI 오버라이드를 적용해 OCI 4vCPU·24GB 전용 환경(버퍼 6GB)에서 같은 사양으로 한 번 더 측정한다. GitHub Actions가 workflow_dispatch로 SSH·rsync를 통해 OCI에서 run_all.sh를 실행시키고 결과를 아티팩트로 회수하는 구성도">
+  <rect width="900" height="300" fill="#F7F9FA"/>
+  <defs>
+    <marker id="dbi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- LOCAL box -->
+  <rect x="20" y="30" width="270" height="220" rx="8" fill="none" stroke="currentColor" opacity=".35"/>
+  <text x="40" y="55" font-size="13" font-weight="700" fill="currentColor">로컬 Docker</text>
+  <text x="40" y="72" font-size="11" fill="currentColor" opacity=".6">개발 · 반복</text>
+
+  <!-- local cylinder 1: PostgreSQL -->
+  <ellipse cx="95" cy="108" rx="45" ry="8" fill="#F7F9FA" stroke="currentColor" opacity=".8"/>
+  <path d="M50,108 L50,178 A45,8 0 0 0 140,178 L140,108" fill="none" stroke="currentColor" opacity=".8"/>
+  <text x="95" y="200" text-anchor="middle" font-size="11.5" fill="currentColor">PostgreSQL 16</text>
+  <text x="95" y="215" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".6">buffer 1.5GB</text>
+
+  <!-- local cylinder 2: MySQL -->
+  <ellipse cx="215" cy="108" rx="45" ry="8" fill="#F7F9FA" stroke="currentColor" opacity=".8"/>
+  <path d="M170,108 L170,178 A45,8 0 0 0 260,178 L260,108" fill="none" stroke="currentColor" opacity=".8"/>
+  <text x="215" y="200" text-anchor="middle" font-size="11.5" fill="currentColor">MySQL 8.4</text>
+  <text x="215" y="215" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".6">buffer 1.5GB</text>
+
+  <!-- OCI box -->
+  <rect x="340" y="30" width="270" height="220" rx="8" fill="none" stroke="#0B8A73" stroke-width="1.4"/>
+  <text x="360" y="55" font-size="13" font-weight="700" fill="#0B8A73">OCI 4vCPU · 24GB</text>
+  <text x="360" y="72" font-size="11" fill="#0B8A73" opacity=".75">최종 측정</text>
+
+  <!-- OCI cylinder 1: PostgreSQL -->
+  <ellipse cx="415" cy="108" rx="45" ry="8" fill="#F7F9FA" stroke="#0B8A73"/>
+  <path d="M370,108 L370,178 A45,8 0 0 0 460,178 L460,108" fill="none" stroke="#0B8A73"/>
+  <text x="415" y="200" text-anchor="middle" font-size="11.5" fill="currentColor">PostgreSQL 16</text>
+  <text x="415" y="215" text-anchor="middle" font-size="10.5" fill="#0B8A73">buffer 6GB</text>
+
+  <!-- OCI cylinder 2: MySQL -->
+  <ellipse cx="535" cy="108" rx="45" ry="8" fill="#F7F9FA" stroke="#0B8A73"/>
+  <path d="M490,108 L490,178 A45,8 0 0 0 580,178 L580,108" fill="none" stroke="#0B8A73"/>
+  <text x="535" y="200" text-anchor="middle" font-size="11.5" fill="currentColor">MySQL 8.4</text>
+  <text x="535" y="215" text-anchor="middle" font-size="10.5" fill="#0B8A73">buffer 6GB</text>
+
+  <!-- GHA box -->
+  <rect x="680" y="30" width="220" height="220" rx="8" fill="none" stroke="currentColor" opacity=".35"/>
+  <text x="700" y="55" font-size="13" font-weight="700" fill="currentColor">GitHub Actions</text>
+  <text x="700" y="72" font-size="11" fill="currentColor" opacity=".6">리모컨</text>
+
+  <rect x="695" y="95" width="190" height="100" fill="none" stroke="currentColor" opacity=".4" stroke-dasharray="4 3"/>
+  <text x="710" y="118" font-family="ui-monospace, monospace" font-size="11" fill="currentColor">workflow_dispatch</text>
+  <text x="710" y="138" font-family="ui-monospace, monospace" font-size="11" fill="currentColor" opacity=".8">checkout → rsync</text>
+  <text x="710" y="158" font-family="ui-monospace, monospace" font-size="11" fill="currentColor" opacity=".8">→ run_all.sh</text>
+  <text x="710" y="178" font-family="ui-monospace, monospace" font-size="11" fill="currentColor" opacity=".8">→ 결과 회수</text>
+
+  <!-- Arrow: LOCAL -> OCI (동일 compose) -->
+  <line x1="292" y1="140" x2="338" y2="140" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#dbi)"/>
+  <text x="315" y="128" text-anchor="middle" font-size="10" fill="currentColor" opacity=".75">동일 compose</text>
+  <text x="315" y="160" text-anchor="middle" font-size="10" fill="currentColor" opacity=".75">(+OCI 오버라이드)</text>
+
+  <!-- Arrow: GHA -> OCI (SSH/rsync, control) -->
+  <line x1="678" y1="105" x2="612" y2="105" stroke="currentColor" stroke-width="2.2" marker-end="url(#dbi)"/>
+  <text x="645" y="93" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">SSH / rsync</text>
+
+  <!-- Arrow: OCI -> GHA (results artifact) -->
+  <line x1="612" y1="175" x2="678" y2="175" stroke="#0B8A73" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#dbi)"/>
+  <text x="645" y="190" text-anchor="middle" font-size="10" fill="#0B8A73">results/</text>
+  <text x="645" y="202" text-anchor="middle" font-size="10" fill="#0B8A73">아티팩트</text>
+
+  <text x="20" y="278" font-size="11.5" fill="currentColor" opacity=".7">로컬은 다른 프로세스와 자원을 공유해 검증력이 약해, OCI 전용 서버에서 같은 사양으로 한 번 더 측정했습니다.</text>
+</svg>
