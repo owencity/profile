@@ -263,11 +263,12 @@ export function PortfolioHome() {
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
             <p className="text-sm font-semibold text-zinc-900">학력</p>
             <p className="mt-2 text-base font-semibold text-zinc-900 sm:text-lg">
-              {portfolio.education.school}
+              {portfolio.education.degree}
             </p>
-            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.education.period}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-900">학사 학위</p>
-            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.degree}</p>
+            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.education.degreePeriod}</p>
+            <p className="mt-4 text-sm font-semibold text-zinc-900">이전 학력</p>
+            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.priorSchool}</p>
+            <p className="mt-1.5 text-sm text-zinc-900">{portfolio.education.priorSchoolPeriod}</p>
             <p className="mt-4 text-sm font-semibold text-zinc-900">교육</p>
             <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.bootcamp}</p>
             <p className="mt-4 text-sm font-semibold text-zinc-900">자격증</p>
