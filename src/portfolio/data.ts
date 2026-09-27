@@ -46,6 +46,7 @@ export type PortfolioProject = {
   solutions?: ProjectSolution[]
   solutionGroups?: ProjectSolutionGroup[]
   result?: ProjectResult
+  links?: { label: string; url: string }[]
   /** true면 화면·PDF에는 노출하지 않되 데이터는 남겨둔다(재정리 예정 등) */
   hidden?: boolean
 }
@@ -83,12 +84,6 @@ export const portfolio = {
     startDate: '2025-03-01',
     company: '유통업 · Backend Developer',
     period: '2025.03 ~ 재직 중 · 정규직 · 개발팀',
-    bullets: [
-      '레거시 시스템(Java 1.6 · Seasar2 · MySQL 5) → Java 21 · Spring Boot · PostgreSQL 마이그레이션',
-      '대용량 데이터 처리 성능 개선(청크 분할+커밋) — 10만 행 기준 30분+(미완료) → 23초로 단축',
-      '스케줄러 폴링 → RabbitMQ 이벤트 기반 비동기 연동 아키텍처 전환, Prometheus·Loki·Grafana 모니터링 체계 구축',
-      '비동기 메시지 처리 중 브로커 재배달로 인한 무한 재시도 발견 — 청크·처리예산·배달확인 시간을 3중 타임아웃으로 설계해 재발 차단',
-    ],
   },
   education: {
     degree: '컴퓨터공학 학사 (학점은행제 · 국가평생교육진흥원)',
@@ -99,8 +94,8 @@ export const portfolio = {
     certificates: ['정보처리기사 · 2024.12'],
   },
   skills: {
-    backend: ['Java', 'Spring Boot', 'JPA', 'PostgreSQL', 'MySQL', 'RabbitMQ'],
-    tools: ['AWS', 'Docker', 'Git', 'OCI', 'Prometheus', 'Loki', 'Grafana'],
+    backend: ['Java', 'Kotlin', 'Spring Boot', 'JPA', 'PostgreSQL', 'MySQL', 'RabbitMQ', 'Kafka'],
+    tools: ['Docker', 'Jenkins', 'Git', 'OCI', 'Prometheus', 'Loki', 'Grafana'],
   },
   projectGroups: [{
     name: '상품 마스터 데이터 관리 시스템(PIM/MDM) 구축',
@@ -109,7 +104,7 @@ export const portfolio = {
     projects: [
     {
       slug: 'legacy-stack-migration',
-      title: '레거시 스택 마이그레이션',
+      title: '레거시 마이그레이션 주도',
       category: '마이그레이션',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
@@ -294,10 +289,13 @@ export const portfolio = {
       result: {
         note: '복잡 조인은 4.7배, 대규모 분석은 최대 69배 PostgreSQL이 빨랐고, 단순 조회의 지연시간만 MySQL이 더 안정적이었습니다. 배율이 아니라 이 정합성 결과가 최종 선택을 갈랐습니다.',
       },
+      links: [
+        { label: '측정 코드 · 결과 저장소', url: 'https://github.com/owencity/PostgreSQL_MySQL' },
+      ],
     },
     {
       slug: 'event-driven-integration',
-      title: '외부 연동 비동기 아키텍처 전환',
+      title: '자사몰 연동 비동기 전환',
       category: '아키텍처',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
@@ -396,7 +394,7 @@ export const portfolio = {
     },
     {
       slug: 'chunk-batch-optimization',
-      title: '대용량 청크 처리 최적화',
+      title: '대량 상품 검증 성능 개선',
       category: '데이터 처리',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
@@ -477,7 +475,7 @@ export const portfolio = {
     },
     {
       slug: 'excel-upload-pipeline',
-      title: '엑셀 업로드 파이프라인',
+      title: '대량 엑셀 업로드 메모리 최적화',
       category: '데이터 처리',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
@@ -529,7 +527,7 @@ export const portfolio = {
     },
     {
       slug: 'excel-sync-automation',
-      title: '상품 데이터 반영 자동화 — 수정이력 기반 동기화',
+      title: 'PIM/MDM 도입 효과 — 업무 프로세스 단축',
       category: '아키텍처',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
@@ -606,6 +604,7 @@ export const portfolio = {
       title: '무중단 스키마 마이그레이션',
       category: '마이그레이션',
       status: '완료',
+      hidden: true,
       org: '유통 상품 마스터 데이터 관리 시스템',
       techStack: ['PostgreSQL'],
       summary: [
@@ -660,6 +659,7 @@ export const portfolio = {
       title: '장애 대응 & 데이터 정합성',
       category: '안정성',
       status: '완료',
+      hidden: true,
       org: '유통 상품 마스터 데이터 관리 시스템',
       techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
       summary: [
@@ -752,7 +752,7 @@ export const portfolio = {
             '실제 구축한 n8n 워크플로입니다. Kafka에서 PR 이벤트를 받아 diff와 설계 문서를 모으고, 로컬 모델과 Gemini를 거쳐 GitHub 댓글·Slack 알림까지 15개 노드로 이어집니다.',
         },
         problem:
-          '회사는 Git을 쓰지만 PR 리뷰 절차가 없어 코드가 검토 없이 머지되는 상태였습니다. 바로 사내 도입을 제안하기보다 개인 프로젝트에 먼저 적용해 쓸 만한지 확인한 뒤 제안하기로 했습니다. 다만 LLM에 diff만 던지면 네이밍·널 체크 같은 일반론만 쏟아내기 때문에, 프로젝트의 설계 규칙을 읽고 판단하게 만드는 게 과제였습니다.',
+          '회사에서 Git은 쓰지만 Git workflow와 PR 리뷰 문화가 없고, 리뷰에 쓸 시간을 내기 어렵다는 현실적인 문제도 있었습니다. PR을 AI가 먼저 훑어주면 리뷰에 드는 시간을 많이 아낄 수 있겠다고 판단해 시작한 프로젝트입니다. 다만 LLM에 diff만 던지면 네이밍·널 체크 같은 일반론만 쏟아내기 때문에, 프로젝트의 설계 규칙을 읽고 판단하게 만드는 게 과제였습니다.',
         solutionGroups: [
           {
             title: '설계 한눈에 보기',
@@ -817,7 +817,7 @@ export const portfolio = {
           },
         ],
         result: {
-          note: '리뷰는 GitHub PR 댓글로, 학습 가이드는 Slack으로 나눠 전송됩니다. 개인 저장소에서 검증을 마쳤고, 사내 도입 제안이 다음 단계입니다.',
+          note: '리뷰는 GitHub PR 댓글로, 학습 가이드는 Slack으로 나눠 전송됩니다. 개인 저장소에서 검증을 마쳤습니다.',
         },
       },
       {

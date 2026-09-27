@@ -241,7 +241,7 @@ export function PortfolioHome() {
         </section>
 
         <SectionHeading emoji="🔍" title="Profile" />
-        <section className="grid gap-4 sm:grid-cols-2">
+        <section className="grid items-start gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 sm:p-6">
             <p className="text-sm font-semibold text-blue-700">
               경력 ({formatCareerDuration(portfolio.career.startDate)})
@@ -250,14 +250,6 @@ export function PortfolioHome() {
               {portfolio.career.company}
             </p>
             <p className="mt-0.5 text-sm text-zinc-900">{portfolio.career.period}</p>
-            <ul className="mt-3 space-y-2 text-base leading-7 text-zinc-900">
-              {portfolio.career.bullets.map((bullet, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">

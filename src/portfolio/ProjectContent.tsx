@@ -104,6 +104,22 @@ export function ProjectContent({
         </DetailSection>
       )}
 
+      {project.links && project.links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
+          {project.links.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+            >
+              🔗 {link.label}
+            </a>
+          ))}
+        </div>
+      )}
+
       {project.summary.length > 0 ? (
         <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
           <p className="text-xs font-semibold text-indigo-700">3줄 요약</p>
