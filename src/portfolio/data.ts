@@ -113,28 +113,28 @@ export const portfolio = {
       category: '마이그레이션',
       status: '완료',
       org: '유통 상품 마스터 데이터 관리 시스템',
-      techStack: ['Java', 'Spring Boot', 'React', 'PostgreSQL', 'Jenkins', 'Docker'],
+      techStack: ['Java', 'Spring Boot', 'PostgreSQL', 'Jenkins', 'Docker'],
       summary: [
-        'Seasar2 SSR 구조를 React+Spring Boot로 분리하며, AI 코드 변환 지원으로 프레임워크 전환보다 기능 검수에 더 많은 시간을 썼습니다.',
+        'Seasar2 SSR 구조를 프론트엔드와 Spring Boot API로 분리하며, AI 코드 변환 지원으로 프레임워크 전환보다 기능 검수에 더 많은 시간을 썼습니다.',
         'MySQL 5→PostgreSQL 전환에서 pgloader로 옮긴 뒤 타입·SQL 문법 차이를 하나씩 교정했습니다.',
         '3개월 분석 후 작은 기능부터 검증하며 전환을 진행해 2개월 만에 1차 개발을 완료, 신규 기능 개발 기간을 1주일에서 2~3일로 줄였습니다.',
       ],
       diagram: {
         src: '/projects/legacy-infra-architecture.svg',
         pdfSrc: '/projects/legacy-infra-architecture.png',
-        alt: '종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 Staging(dev)에서 먼저 검증한 뒤 IDC 온프레미스 서버(Prod)에 자동 빌드·배포되며, React와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도',
+        alt: '종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 Staging(dev)에서 먼저 검증한 뒤 IDC 온프레미스 서버(Prod)에 자동 빌드·배포되며, 프론트엔드와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도',
         caption:
           '개발부터 배포까지 Git·Jenkins로 자동화하고, 클라이언트 요청 흐름과 외부 연동(RabbitMQ)을 분리했습니다. 인프라는 그대로 온프레미스(VMware→IDC)를 유지하면서, 수동 배포 대신 Git→Staging(dev) 검증→Prod(IDC 서버) 순으로 넘어가는 자동 빌드·배포 파이프라인으로 바꿨습니다.',
       },
       problem:
-        '입사 3개월 차에 인계받은 노후 소스코드(Java 1.6·Seasar2·MySQL 5)로 신규 기능을 추가할 때마다 프레임워크 한계에 부딪혀, 직접 마이그레이션을 제안·PoC 검증 후 전환을 주도했습니다. 기존과 동일하게 동작해야 한다는 제약 속에서 기능 하나 놓치지 않고 React+Spring Boot로 옮기는 게 과제였습니다.',
+        '입사 3개월 차에 인계받은 노후 소스코드(Java 1.6·Seasar2·MySQL 5)로 신규 기능을 추가할 때마다 프레임워크 한계에 부딪혀, 직접 마이그레이션을 제안·PoC 검증 후 전환을 주도했습니다. 기존과 동일하게 동작해야 한다는 제약 속에서 기능 하나 놓치지 않고 프론트엔드와 Spring Boot API로 옮기는 게 과제였습니다.',
       solutionGroups: [
         {
-          title: '프레임워크 전환 — SSR에서 React + Spring Boot로',
+          title: '프레임워크 전환 — SSR에서 프론트엔드 + Spring Boot로',
           items: [
             {
               label: 'AI 보조 코드 변환 + 꼼꼼한 기능 검수',
-              desc: 'Seasar2 SSR 구조를 React+Spring Boot로 분리하는 전환으로, 프레임워크 코드 변환 자체는 AI 도구 지원으로 수월했지만 기존과 동일하게 동작해야 해 기능 하나하나 검수·교정하는 데 가장 많은 시간을 썼습니다.',
+              desc: 'Seasar2 SSR 구조를 프론트엔드와 Spring Boot API로 분리하는 전환으로, 프레임워크 코드 변환 자체는 AI 도구 지원으로 수월했지만 기존과 동일하게 동작해야 해 기능 하나하나 검수·교정하는 데 가장 많은 시간을 썼습니다.',
             },
           ],
         },
@@ -810,7 +810,7 @@ export const portfolio = {
         category: '사이드 프로젝트',
         status: '진행 중',
         org: '개인 사이드 프로젝트',
-        techStack: ['React', 'Kotlin', 'Spring Boot'],
+        techStack: ['Kotlin', 'Spring Boot'],
         summary: [
           '카카오톡 등 기존 정산 기능은 N분의 1만 지원해, 참여 형태가 제각각인 술자리 같은 모임은 총무가 일일이 수기로 계산해야 했습니다.',
           '누가 마셨는지, 몇 차까지 참여했는지 같은 세부 조건까지 반영해 정산할 수 있는 웹앱을 혼자 기획·개발하고 있습니다.',
@@ -830,7 +830,7 @@ export const portfolio = {
           },
         ],
         result: {
-          note: '프론트엔드 목업은 완성했고, 현재 React·Kotlin·Spring Boot로 백엔드를 개발하고 있습니다. 백엔드 개발이 끝나면 기술적 의사결정을 다루는 카드를 추가할 예정입니다.',
+          note: '현재 Kotlin·Spring Boot로 백엔드를 개발하고 있습니다. 백엔드 개발이 끝나면 기술적 의사결정을 다루는 카드를 추가할 예정입니다.',
         },
       },
     ] as PortfolioProject[],

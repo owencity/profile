@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" role="img" style="color:#131A20"
-     aria-label="종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 Staging(dev)에서 먼저 검증한 뒤 IDC 온프레미스 서버(Prod)에 자동 빌드·배포되며, React와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도">
+     aria-label="종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 Staging(dev)에서 먼저 검증한 뒤 IDC 온프레미스 서버(Prod)에 자동 빌드·배포되며, 프론트엔드와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도">
   <rect width="900" height="470" fill="#F7F9FA"/>
   <defs>
     <marker id="lia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
@@ -70,7 +70,7 @@
   <line x1="200" y1="323" x2="230" y2="323" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
 
   <rect x="230" y="296" width="110" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="285" y="328" text-anchor="middle" font-size="12.5" fill="currentColor">React</text>
+  <text x="285" y="328" text-anchor="middle" font-size="12.5" fill="currentColor">프론트엔드</text>
 
   <line x1="340" y1="323" x2="370" y2="323" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
 
