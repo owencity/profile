@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" role="img" style="color:#131A20"
+     aria-label="GitHub PR 이벤트가 Kafka 토픽에 쌓이고 n8n이 컨슈머로 가져와 PR 메타데이터를 정규화한 뒤, PR 번호로 GitHub에서 diff를 조회하고 변경 영역에 맞는 설계 문서를 골라 읽는다. 이후 로컬 Qwen 모델이 리뷰 후보를 추리고 Gemini가 최종 판정해 GitHub PR 댓글과 Slack 학습 가이드로 전송하는 파이프라인 구성도">
+  <rect width="920" height="420" fill="#F7F9FA"/>
+  <defs>
+    <marker id="prp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="prpg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0B8A73"/>
+    </marker>
+  </defs>
+
+  <!-- ── row 1: 수집 ── -->
+  <text x="20" y="32" font-family="ui-monospace, monospace" font-size="12" fill="currentColor" opacity=".6">① 수집</text>
+
+  <rect x="20" y="46" width="150" height="54" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="95" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">Kafka</text>
+  <text x="95" y="85" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">github.pr.events</text>
+
+  <line x1="170" y1="73" x2="196" y2="73" stroke="currentColor" stroke-width="1.4" marker-end="url(#prp)"/>
+
+  <rect x="196" y="46" width="150" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="271" y="68" text-anchor="middle" font-size="12" fill="currentColor">이벤트 필터 · 정규화</text>
+  <text x="271" y="85" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">opened · synchronize</text>
+
+  <line x1="346" y1="73" x2="372" y2="73" stroke="currentColor" stroke-width="1.4" marker-end="url(#prp)"/>
+
+  <rect x="372" y="46" width="150" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="447" y="68" text-anchor="middle" font-size="12" fill="currentColor">GitHub diff 조회</text>
+  <text x="447" y="85" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">PR 번호로 재조회</text>
+
+  <line x1="522" y1="73" x2="548" y2="73" stroke="currentColor" stroke-width="1.4" marker-end="url(#prp)"/>
+
+  <rect x="548" y="46" width="170" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="633" y="68" text-anchor="middle" font-size="12" fill="currentColor">설계 문서 선택 · 로딩</text>
+  <text x="633" y="85" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">변경 영역별로 선별</text>
+
+  <!-- 주석 -->
+  <text x="20" y="124" font-size="10.5" fill="#A63A2B">Webhook 직결이 아니라 Kafka 경유 — n8n이 꺼져 있던 동안의 이벤트도 consumer group으로 이어서 처리</text>
+  <text x="20" y="140" font-size="10.5" fill="#A63A2B">메시지엔 PR 번호만 — 재처리가 늦어져도 낡은 diff로 리뷰하지 않음</text>
+  <text x="548" y="156" font-size="10.5" fill="currentColor" opacity=".7">전체 문서를 매번 넣지 않고</text>
+  <text x="548" y="170" font-size="10.5" fill="currentColor" opacity=".7">건드린 경로에 맞는 문서만</text>
+
+  <line x1="20" y1="192" x2="900" y2="192" stroke="currentColor" opacity=".2" stroke-dasharray="3 5"/>
+
+  <!-- ── row 2: 리뷰 ── -->
+  <text x="20" y="220" font-family="ui-monospace, monospace" font-size="12" fill="currentColor" opacity=".6">② 2단 리뷰</text>
+
+  <rect x="20" y="234" width="180" height="58" fill="none" stroke="#0B8A73" stroke-width="1.6"/>
+  <text x="110" y="256" text-anchor="middle" font-size="12" font-weight="700" fill="#0B8A73">로컬 Qwen</text>
+  <text x="110" y="272" text-anchor="middle" font-size="10" fill="#0B8A73" opacity=".85">qwen2.5-coder:14b</text>
+  <text x="110" y="286" text-anchor="middle" font-size="10" fill="#0B8A73" opacity=".85">리뷰 후보 탐색</text>
+
+  <line x1="200" y1="263" x2="226" y2="263" stroke="#0B8A73" stroke-width="1.4" marker-end="url(#prpg)"/>
+
+  <rect x="226" y="234" width="180" height="58" fill="none" stroke="#0B8A73" stroke-width="1.9"/>
+  <text x="316" y="256" text-anchor="middle" font-size="12" font-weight="700" fill="#0B8A73">Gemini</text>
+  <text x="316" y="272" text-anchor="middle" font-size="10" fill="#0B8A73" opacity=".85">후보 + diff 재검증</text>
+  <text x="316" y="286" text-anchor="middle" font-size="10" fill="#0B8A73" opacity=".85">최종 리뷰 판정</text>
+
+  <polyline points="406,263 432,263 432,238 458,238" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#prp)"/>
+  <polyline points="406,263 432,263 432,288 458,288" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#prp)"/>
+
+  <rect x="458" y="216" width="165" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="540" y="243" text-anchor="middle" font-size="11.5" fill="currentColor">GitHub PR 댓글</text>
+
+  <rect x="458" y="266" width="165" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="540" y="293" text-anchor="middle" font-size="11.5" fill="currentColor">Slack 학습 가이드</text>
+
+  <text x="650" y="243" font-size="10.5" fill="currentColor" opacity=".7">무료 API 한도·비용을 고려해</text>
+  <text x="650" y="258" font-size="10.5" fill="currentColor" opacity=".7">로컬이 먼저 추리고</text>
+  <text x="650" y="273" font-size="10.5" fill="currentColor" opacity=".7">클라우드가 판정</text>
+
+  <text x="20" y="330" font-size="10.5" fill="#0B8A73">로컬 모델 결과는 참고자료 — 프롬프트에 "그대로 믿지 말고 diff를 다시 검증하라"고 명시</text>
+
+  <line x1="20" y1="352" x2="900" y2="352" stroke="currentColor" opacity=".2"/>
+
+  <text x="20" y="376" font-size="11.5" fill="currentColor" opacity=".8">
+    <tspan font-weight="700">실패 처리는 단계마다 다르게</tspan> — 로컬 모델 응답은 파싱에 실패해도 참고용이라 계속 진행하고,
+  </text>
+  <text x="20" y="394" font-size="11.5" fill="currentColor" opacity=".8">
+    Gemini 결과는 실제로 전송되는 내용이라 응답 잘림·빈 본문·필수 필드 누락을 검사해 하나라도 어긋나면 보내지 않습니다.
+  </text>
+</svg>
