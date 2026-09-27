@@ -84,6 +84,7 @@ export const portfolio = {
     startDate: '2025-03-01',
     company: '유통업 · Backend Developer',
     period: '2025.03 ~ 재직 중 · 정규직 · 개발팀',
+    project: '상품 마스터 데이터 관리 시스템(PIM/MDM) 구축·운영',
   },
   education: {
     degree: '컴퓨터공학 학사 (학점은행제 · 국가평생교육진흥원)',

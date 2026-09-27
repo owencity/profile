@@ -250,6 +250,9 @@ export function PortfolioHome() {
               {portfolio.career.company}
             </p>
             <p className="mt-0.5 text-sm text-zinc-900">{portfolio.career.period}</p>
+            <p className="mt-3 text-base leading-7 text-zinc-900">
+              {portfolio.career.project}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
