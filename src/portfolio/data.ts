@@ -745,15 +745,31 @@ export const portfolio = {
           'GitHub Webhook을 직접 받지 않고 Kafka를 거치게 해, 파이프라인이 꺼져 있던 동안 들어온 PR 이벤트도 유실 없이 이어서 처리합니다.',
         ],
         diagram: {
-          src: '/projects/pr-review-pipeline.svg',
-          pdfSrc: '/projects/pr-review-pipeline.png',
-          alt: 'GitHub PR 이벤트가 Kafka 토픽에 쌓이고 n8n이 컨슈머로 가져와 PR 메타데이터를 정규화한 뒤, PR 번호로 GitHub에서 diff를 조회하고 변경 영역에 맞는 설계 문서를 골라 읽는다. 이후 로컬 Qwen 모델이 리뷰 후보를 추리고 Gemini가 최종 판정해 GitHub PR 댓글과 Slack 학습 가이드로 전송하는 파이프라인 구성도',
+          src: '/projects/pr-review-n8n-flow.png',
+          pdfSrc: '/projects/pr-review-n8n-flow.png',
+          alt: 'Kafka Trigger로 시작해 Switch, PR 메타데이터 정규화, GitHub PR 파일 조회, 리뷰 컨텍스트 선택, 프로젝트 문서 읽기와 텍스트 추출, 후보 프롬프트 생성, 로컬 Ollama 후보 탐색, 응답 파싱, Gemini 프롬프트 생성과 리뷰 호출, 결과 파싱, GitHub PR 댓글 작성, Slack 학습 가이드 전송까지 15개 노드로 이어지는 실제 n8n 워크플로 화면',
           caption:
-            '수집 단계에서 이벤트 유실과 낡은 diff를 막고, 리뷰 단계는 로컬 모델이 후보를 추린 뒤 Gemini가 판정하는 2단 구조입니다. 실패 처리는 단계마다 다르게 설계했습니다.',
+            '실제 구축한 n8n 워크플로입니다. Kafka에서 PR 이벤트를 받아 diff와 설계 문서를 모으고, 로컬 모델과 Gemini를 거쳐 GitHub 댓글·Slack 알림까지 15개 노드로 이어집니다.',
         },
         problem:
           '회사는 Git을 쓰지만 PR 리뷰 절차가 없어 코드가 검토 없이 머지되는 상태였습니다. 바로 사내 도입을 제안하기보다 개인 프로젝트에 먼저 적용해 쓸 만한지 확인한 뒤 제안하기로 했습니다. 다만 LLM에 diff만 던지면 네이밍·널 체크 같은 일반론만 쏟아내기 때문에, 프로젝트의 설계 규칙을 읽고 판단하게 만드는 게 과제였습니다.',
         solutionGroups: [
+          {
+            title: '설계 한눈에 보기',
+            items: [
+              {
+                label: '수집과 리뷰, 두 단계로 나눈 구조',
+                desc: '노드 하나하나보다 어떤 판단을 했는지가 중요해, 파이프라인을 수집 단계와 2단 리뷰 단계로 나눠 정리하면 이렇습니다. 각 결정의 이유는 아래에 이어집니다.',
+                diagram: {
+                  src: '/projects/pr-review-pipeline.svg',
+                  pdfSrc: '/projects/pr-review-pipeline.png',
+                  alt: 'GitHub PR 이벤트가 Kafka 토픽에 쌓이고 n8n이 컨슈머로 가져와 PR 메타데이터를 정규화한 뒤, PR 번호로 GitHub에서 diff를 조회하고 변경 영역에 맞는 설계 문서를 골라 읽는다. 이후 로컬 Qwen 모델이 리뷰 후보를 추리고 Gemini가 최종 판정해 GitHub PR 댓글과 Slack 학습 가이드로 전송하는 파이프라인 구성도',
+                  caption:
+                    '수집 단계에서 이벤트 유실과 낡은 diff를 막고, 리뷰 단계는 로컬 모델이 후보를 추린 뒤 Gemini가 판정하는 2단 구조입니다. 실패 처리는 단계마다 다르게 설계했습니다.',
+                },
+              },
+            ],
+          },
           {
             title: '이벤트 유실 방지 — Webhook 직결 대신 Kafka 경유',
             items: [
