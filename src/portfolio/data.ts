@@ -96,7 +96,7 @@ export const portfolio = {
   },
   skills: {
     backend: ['Java', 'Kotlin', 'Spring Boot', 'JPA', 'PostgreSQL', 'MySQL', 'RabbitMQ', 'Kafka'],
-    tools: ['Docker', 'Jenkins', 'Git', 'OCI', 'Prometheus', 'Loki', 'Grafana'],
+    tools: ['Docker', 'Jenkins', 'GitHub Actions', 'n8n', 'Git', 'OCI', 'Prometheus', 'Loki', 'Grafana'],
   },
   projectGroups: [{
     name: '상품 마스터 데이터 관리 시스템(PIM/MDM) 구축',
