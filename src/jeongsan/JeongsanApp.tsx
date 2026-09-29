@@ -50,6 +50,8 @@ import { NotificationPage } from './NotificationPage'
 import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
+import { AppV3 } from './v3/AppV3'
+import { isV3Route } from './v3/routes'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -221,6 +223,9 @@ export default function JeongsanApp({ route, navigate }: Props) {
       {node}
     </div>
   )
+
+  // v3(일회용 술자리) 화면은 새 라우터가 맡는다. 다 옮기면 이 파일의 옛 라우팅은 지운다.
+  if (isV3Route(route)) return <AppV3 route={route} navigate={navigate} />
 
   // ── 알림함 ───────────────────────────────────
   // **정산은 금액이 나왔다고 끝이 아니라 입금까지 돼야 끝난다.**
