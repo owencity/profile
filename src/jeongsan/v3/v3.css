@@ -58,13 +58,58 @@
 .js-pdot.sent { color: var(--acc-strong); }
 
 /* ── 차수 요약 ── */
-.js-rounds {
-  display: flex; flex-wrap: wrap; gap: 6px 14px; width: 100%; text-align: left; font-family: inherit;
-  background: #fff; border: var(--bd-l); padding: 9px 12px; font-size: 13.5px; color: var(--ink);
-  cursor: pointer; font-variant-numeric: tabular-nums;
+.js-rounds { display: flex; flex-wrap: wrap; gap: 6px; }
+.js-round {
+  font-family: inherit; font-size: 13.5px; color: var(--ink); background: #fff; border: var(--bd-l);
+  padding: 7px 11px; font-variant-numeric: tabular-nums;
 }
-.js-rounds:disabled { cursor: default; }
-.js-rounds em { font-style: normal; font-weight: 800; color: var(--p600); margin-right: 3px; }
+button.js-round { cursor: pointer; }
+button.js-round:hover { border-color: var(--p500); }
+.js-round em { font-style: normal; font-weight: 800; color: var(--p600); margin-right: 3px; }
+.js-round.add { color: var(--p600); font-weight: 800; border-style: dashed; }
+
+/* ── R2 차수 편집 ── */
+.js-r2 { gap: 18px; }
+.js-field { display: flex; flex-direction: column; gap: 8px; }
+.js-field .js-lab small { font-weight: 500; color: var(--ink3); margin-left: 6px; }
+.js-amount { display: flex; align-items: baseline; gap: 6px; border: var(--bd); box-shadow: var(--sh-sm); padding: 10px 14px; background: #fff; }
+.js-amount input {
+  flex: 1; min-width: 0; border: 0; outline: 0; font-family: inherit; font-size: 28px; font-weight: 800;
+  color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; background: transparent;
+}
+.js-amount span { font-size: 17px; font-weight: 800; color: var(--ink2); }
+.js-amount:focus-within { border-color: var(--p600); }
+.js-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.js-preset {
+  font-family: inherit; font-size: 13.5px; font-weight: 800; padding: 8px 12px; cursor: pointer;
+  background: var(--p50); color: var(--p700); border: 2px solid var(--p400);
+}
+.js-preset:active { transform: translate(1px, 1px); }
+.js-preset.ghost { background: #fff; color: var(--ink2); border-color: var(--line); border-style: dashed; }
+.js-drinks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.js-drink { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 6px; border: var(--bd-l); padding: 6px 8px; background: #fff; }
+.js-drink .nm { min-width: 0; border: 0; font-family: inherit; font-size: 14px; font-weight: 700; padding: 6px 4px; }
+.js-drink .nm:focus { outline: 2px solid var(--p500); }
+.js-drink .pr {
+  font-family: inherit; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink2);
+  background: var(--p50); border: 1px dashed var(--p400); padding: 5px 8px; cursor: pointer; width: 88px; text-align: right;
+}
+.js-drink input.pr { cursor: text; }
+.js-qty { display: flex; align-items: center; border: 2px solid var(--ink); }
+.js-qty button { width: 32px; height: 32px; font-size: 17px; font-weight: 900; border: 0; background: #fff; cursor: pointer; font-family: inherit; }
+.js-qty button:disabled { color: var(--line); cursor: default; }
+.js-qty b { min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; }
+.js-drink .rm { width: 28px; height: 28px; border: 0; background: none; color: var(--ink3); font-size: 18px; cursor: pointer; }
+.js-drinksum { text-align: right; font-size: 13px; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.js-drinksum b { color: var(--ink); }
+.js-payers { display: flex; flex-wrap: wrap; gap: 6px; }
+.js-payer { font-family: inherit; font-size: 14px; font-weight: 700; padding: 8px 14px; cursor: pointer; background: #fff; border: 2px solid var(--line); color: var(--ink2); }
+.js-payer.on { background: var(--p600); border-color: var(--ink); color: #fff; box-shadow: var(--sh-sm); }
+.js-errs { background: var(--warn-bg); border: 2px solid var(--warn); color: var(--warn); font-size: 13.5px; font-weight: 700; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+.js-r2btns { display: flex; flex-direction: column; margin-top: auto; }
+.js-del { margin-top: 14px; background: none; border: 0; color: var(--ink3); font-family: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; align-self: center; padding: 6px; }
+.js-del.armed { color: var(--warn); font-weight: 800; }
+.js-preset:focus-visible, .js-payer:focus-visible, .js-qty button:focus-visible, .js-round:focus-visible, .js-del:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 
 /* ── 받을 돈 ── */
 .js-incoming { display: flex; flex-direction: column; gap: 6px; }

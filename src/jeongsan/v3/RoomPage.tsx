@@ -17,15 +17,19 @@ type Props = {
   meUserId: Id
   onBack: () => void
   onAction: (kind: ActionKind) => void
+  onEditRound: (roundId: Id) => void
+  onAddRound: () => void
   onSend: (text: string) => void
   onConfirm: (transferId: Id) => void
   onNotReceived: (transferId: Id) => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onSend, onConfirm, onNotReceived }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived }: Props) {
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
   const isHost = g.hostUserId === meUserId
+  // 정산하기 이후엔 계산 입력이 고정이라 차수를 고칠 수 없다
+  const canEditRounds = isHost && g.status === 'OPEN'
   const act = nextAction(g, meUserId)
   const incoming = me ? g.transfers.filter((t) => t.toParticipantId === me.id && t.status !== 'CONFIRMED') : []
 
@@ -58,11 +62,18 @@ export function RoomPage({ g, meUserId, onBack, onAction, onSend, onConfirm, onN
       <People g={g} />
 
       {g.rounds.length > 0 && (
-        <button className="js-rounds" onClick={() => isHost && onAction('EDIT_FIRST_ROUND')} disabled={!isHost}>
-          {g.rounds.map((r) => (
-            <span key={r.id}><em>{r.label}</em> {r.total.toLocaleString('ko-KR')}</span>
-          ))}
-        </button>
+        <section className="js-rounds" aria-label="차수">
+          {g.rounds.map((r) =>
+            canEditRounds ? (
+              <button key={r.id} className="js-round" onClick={() => onEditRound(r.id)} aria-label={`${r.label} 고치기`}>
+                <em>{r.label}</em> {r.total.toLocaleString('ko-KR')}
+              </button>
+            ) : (
+              <span key={r.id} className="js-round"><em>{r.label}</em> {r.total.toLocaleString('ko-KR')}</span>
+            ),
+          )}
+          {canEditRounds && <button className="js-round add" onClick={onAddRound}>+ 차수</button>}
+        </section>
       )}
 
       {incoming.length > 0 && (

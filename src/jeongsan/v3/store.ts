@@ -7,6 +7,8 @@ import { create } from 'zustand'
 import type { Gathering, Id, TimelineEntry, User } from './model'
 import { hostOf, nameOf, participantOfUser } from './model'
 import { ME, MOCK_ROOMS } from './mock'
+import type { RoundDraft } from './round'
+import { relabel } from './round'
 
 type State = {
   me: User
@@ -16,6 +18,9 @@ type State = {
   markSent: (roomId: Id, transferId: Id) => void
   confirmIncoming: (roomId: Id, transferId: Id) => void
   notReceived: (roomId: Id, transferId: Id) => void
+  /** 새 차수면 만든 차수의 id, 거부되면 null */
+  saveRound: (roomId: Id, draft: RoundDraft) => Id | null
+  deleteRound: (roomId: Id, roundId: Id) => void
 }
 
 const now = () => new Date().toISOString()
@@ -39,7 +44,7 @@ function completeIfDone(g: Gathering): Gathering {
   return push(done, { type: 'SYSTEM', body: '모두 입금 완료! 🎉' })
 }
 
-export const useV3 = create<State>((set) => {
+export const useV3 = create<State>((set, get) => {
   const update = (roomId: Id, fn: (g: Gathering, meId: Id) => Gathering) =>
     set((s) => {
       const g = s.rooms[roomId]
@@ -95,6 +100,40 @@ export const useV3 = create<State>((set) => {
           transfers: g.transfers.map((x) => (x.id === transferId ? { ...x, status: 'WAITING' as const, notReceivedAt: now() } : x)),
         }
         return push(next, { type: 'SYSTEM', body: `${nameOf(g, meId)}님이 아직 ${nameOf(g, t.fromParticipantId)}님 입금을 확인 못 했어요` })
+      }),
+
+    // 차수 입력은 총무만, 정산 전에만 — 정산하기 이후 계산 입력은 고정이다(REQUIREMENTS 불변식 5)
+    saveRound: (roomId, draft) => {
+      let created: Id | null = null
+      update(roomId, (g) => {
+        if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
+        const exists = draft.id !== undefined && g.rounds.some((r) => r.id === draft.id)
+        const fields = { total: draft.total, drinks: draft.drinks, payerParticipantId: draft.payerParticipantId }
+        let rounds
+        if (exists) {
+          rounds = g.rounds.map((r) => (r.id === draft.id ? { ...r, ...fields } : r))
+        } else {
+          created = Math.max(0, ...g.rounds.map((r) => r.id)) + 1
+          rounds = relabel([...g.rounds, { id: created, seq: g.rounds.length + 1, label: '', ...fields }])
+        }
+        const label = rounds.find((r) => r.id === (exists ? draft.id : created))!.label
+        const next = { ...g, rounds, inputRevision: g.inputRevision + 1 }
+        return push(next, { type: 'SYSTEM', body: `${label} ${draft.total.toLocaleString('ko-KR')}원을 ${exists ? '고쳤어요' : '넣었어요'}` })
+      })
+      return created
+    },
+
+    deleteRound: (roomId, roundId) =>
+      update(roomId, (g) => {
+        const target = g.rounds.find((r) => r.id === roundId)
+        if (!target || g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
+        const next = {
+          ...g,
+          rounds: relabel(g.rounds.filter((r) => r.id !== roundId)),
+          responses: g.responses.filter((r) => r.roundId !== roundId),
+          inputRevision: g.inputRevision + 1,
+        }
+        return push(next, { type: 'SYSTEM', body: `${target.label}를 지웠어요` })
       }),
   }
 })

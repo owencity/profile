@@ -85,6 +85,49 @@ describe('송금 상태', () => {
   })
 })
 
+describe('차수 입력 (총무, 정산 전에만)', () => {
+  const draft = { total: 50_000, drinks: [], payerParticipantId: 11 }
+
+  it('새 차수는 다음 번호로 붙고, 입력 버전이 오르고, 타임라인에 남는다', () => {
+    const rev = s().rooms[OPEN].inputRevision
+    const id = s().saveRound(OPEN, draft)
+    const g = s().rooms[OPEN]
+    expect(id).not.toBeNull()
+    expect(g.rounds.at(-1)).toMatchObject({ id, label: '3차', total: 50_000 })
+    expect(g.inputRevision).toBe(rev + 1)
+    expect(g.timeline.at(-1)?.body).toBe('3차 50,000원을 넣었어요')
+  })
+
+  it('기존 차수를 고치면 번호는 그대로고 값만 바뀐다', () => {
+    s().saveRound(OPEN, { ...draft, id: 2, total: 99_000 })
+    const r = s().rooms[OPEN].rounds.find((x) => x.id === 2)!
+    expect(r).toMatchObject({ label: '2차', total: 99_000 })
+    expect(s().rooms[OPEN].rounds).toHaveLength(2)
+  })
+
+  it('중간 차수를 지우면 그 차수의 응답도 지워지고 뒤 차수가 당겨진다', () => {
+    s().saveRound(OPEN, draft) // 3차 추가
+    s().deleteRound(OPEN, 2)
+    const g = s().rooms[OPEN]
+    expect(g.rounds.map((r) => r.label)).toEqual(['1차', '2차'])
+    expect(g.responses.some((r) => r.roundId === 2)).toBe(false)
+  })
+
+  it('총무가 아니면 차수를 넣을 수 없다', () => {
+    actAs(2)
+    expect(s().saveRound(OPEN, draft)).toBeNull()
+    expect(s().rooms[OPEN].rounds).toHaveLength(2)
+  })
+
+  it('정산한 뒤에는 차수를 넣거나 지울 수 없다 — 계산 입력은 고정이다', () => {
+    actAs(2) // 102의 총무 민지
+    const before = s().rooms[SETTLING]
+    s().saveRound(SETTLING, { ...draft, payerParticipantId: 21 })
+    s().deleteRound(SETTLING, 11)
+    expect(s().rooms[SETTLING]).toBe(before)
+  })
+})
+
 describe('타임라인 메시지', () => {
   it('보낸 사람이 나로 기록된다', () => {
     s().sendMessage(OPEN, '다들 고생했어요')
