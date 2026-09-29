@@ -86,16 +86,29 @@ describe('송금 중', () => {
     expect(nextAction(room(SETTLING), 3).action?.kind).toBe('REGISTER_ACCOUNT')
   })
 
-  it('보낼 돈을 다 처리한 총무에게 [보냈어요] 받은 건이 있으면 확인을 요청한다', () => {
-    const g = room(SETTLING)
-    g.transfers.find((x) => x.id === 5)!.status = 'CONFIRMED' // 민지 → 재훈 처리됨
-    const a = nextAction(g, 2)
+  it('남을 막고 있는 일이 먼저다 — 총무에게 보낼 돈이 남아 있어도 [보냈어요] 받은 확인이 먼저 뜬다', () => {
+    // 민지(총무)는 재훈에게 보낼 24,000원이 있지만, 재훈이 보낸 29,000원이 확인을 기다린다
+    const a = nextAction(room(SETTLING), 2)
     expect(a.banner).toBe('재훈님이 보냈대요. 확인해주세요')
     expect(a.action?.kind).toBe('CONFIRM_INCOMING')
   })
 
-  it('보낼 돈이 받는 확인보다 먼저다 — 총무도 다른 결제자에게 보낼 돈이 있으면 그게 먼저 뜬다', () => {
-    expect(nextAction(room(SETTLING), 2).banner).toBe('재훈님께 24,000원을 보내주세요')
+  it('확인할 게 없으면 총무도 다른 결제자에게 보낼 돈을 안내받는다', () => {
+    const g = room(SETTLING)
+    g.transfers.find((x) => x.id === 3)!.status = 'CONFIRMED' // 재훈 → 민지 확인 끝
+    expect(nextAction(g, 2).banner).toBe('재훈님께 24,000원을 보내주세요')
+  })
+
+  it('결제자에게도 같은 원칙 — [보냈어요] 받은 확인이 내 송금의 [아직 안 들어왔어요]보다 먼저다', () => {
+    const g = room(SETTLING)
+    g.participants.find((p) => p.id === 23)!.payout = { bank: '국민', accountNo: '1', holder: '재훈' }
+    const fromMe = g.transfers.find((x) => x.id === 2)!
+    fromMe.status = 'SENT' // 동규 → 재훈 보냄
+    fromMe.sentAt = new Date().toISOString()
+    const bounced = g.transfers.find((x) => x.id === 3)! // 재훈 → 민지: 안 들어왔대요
+    bounced.status = 'WAITING'
+    bounced.notReceivedAt = new Date().toISOString()
+    expect(nextAction(g, 3).banner).toBe('동규님이 보냈대요. 확인해주세요')
   })
 
   it('내 송금이 모두 확인되면 총무에게 한 스푼을 권하고, 이미 줬으면 권하지 않는다', () => {

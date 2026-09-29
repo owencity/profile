@@ -61,9 +61,18 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
   }
 
   // ── SETTLING ──
+  // 순서 원칙: 남을 막고 있는 일이 먼저다(SCREENS.md §4). [보냈어요]를 누른 사람은 내 확인만
+  // 기다리며 멈춰 있지만, 내가 보낼 돈은 나만 늦어진다.
   const outgoing = g.transfers.filter((t) => t.fromParticipantId === me.id)
   const incoming = g.transfers.filter((t) => t.toParticipantId === me.id)
 
+  const sentIn = incoming.find((t) => t.status === 'SENT')
+  if (sentIn) {
+    return {
+      banner: `${nameOf(g, sentIn.fromParticipantId)}님이 보냈대요. 확인해주세요`,
+      tone: 'todo', action: { kind: 'CONFIRM_INCOMING', label: '입금 확인하기' },
+    }
+  }
   const bounced = outgoing.find((t) => t.status === 'WAITING' && t.notReceivedAt)
   if (bounced) {
     return {
@@ -76,13 +85,6 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
     return {
       banner: `${nameOf(g, toSend.toParticipantId)}님께 ${won(toSend.amount)}을 보내주세요`,
       note: autoNote, tone: 'todo', action: { kind: 'VIEW_PAY', label: '보낼 돈 보기' },
-    }
-  }
-  const sentIn = incoming.find((t) => t.status === 'SENT')
-  if (sentIn) {
-    return {
-      banner: `${nameOf(g, sentIn.fromParticipantId)}님이 보냈대요. 확인해주세요`,
-      tone: 'todo', action: { kind: 'CONFIRM_INCOMING', label: '입금 확인하기' },
     }
   }
   const waitingIn = incoming.filter((t) => t.status === 'WAITING').length
