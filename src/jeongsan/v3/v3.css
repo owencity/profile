@@ -140,4 +140,34 @@ button.js-round:hover { border-color: var(--p500); }
 .js-chatin button:disabled { opacity: .4; cursor: default; }
 .js-dock .js-cta { margin-top: 8px; }
 
+/* ── H1 내 술자리 ── */
+.js-home { gap: 4px; }
+.js-mecard { display: flex; align-items: center; gap: 14px; border: var(--bd); box-shadow: var(--sh-sm); padding: 12px 14px; background: #fff; }
+.js-meav { width: 78px; height: 78px; background: var(--p50); border: var(--bd-l); display: grid; place-items: center; flex: none; }
+.js-mewho { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.js-mewho b { font-size: 17px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.js-mewho small { font-size: 12px; color: var(--ink2); line-height: 1.45; }
+.js-homeempty { border: 2px dashed var(--ink3); color: var(--ink2); font-size: 13.5px; padding: 18px 14px; text-align: center; background: #fff; }
+
+.js-rlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.js-rrow {
+  width: 100%; text-align: left; font-family: inherit; cursor: pointer; background: #fff; color: var(--ink);
+  border: var(--bd); border-left-width: 6px; box-shadow: var(--sh-sm); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.js-rrow:hover { border-color: var(--p500); }
+.js-rrow:focus-visible { outline: 3px solid var(--p500); outline-offset: 2px; }
+.js-rrow .top { display: flex; align-items: center; gap: 7px; min-width: 0; width: 100%; }
+.js-rrow .top b { font-size: 15px; font-weight: 800; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.js-rrow .todo { font-size: 13px; line-height: 1.4; color: var(--ink2); }
+/* 왼쪽 굵은 선 색 = 내가 지금 손대야 하는 방인가 */
+.js-rrow.todo { border-left-color: var(--p600); }
+.js-rrow.todo .todo { color: var(--p700); font-weight: 700; }
+.js-rrow.wait { border-left-color: var(--ink3); }
+.js-rrow.done { border-left-color: var(--ok); }
+.js-rlist.done .js-rrow { box-shadow: none; opacity: .8; }
+.js-role { flex: none; font-size: 11px; font-weight: 800; padding: 1px 6px; border: 2px solid var(--ink3); color: var(--ink2); }
+.js-role.host { border-color: var(--acc); color: var(--acc-strong); background: var(--acc-bg); }
+.js-rrow .js-badge { flex: none; }
+
 .js-soon { padding: 40px 0; text-align: center; color: var(--ink3); display: flex; flex-direction: column; gap: 10px; align-items: center; }

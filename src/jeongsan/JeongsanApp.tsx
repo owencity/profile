@@ -224,9 +224,6 @@ export default function JeongsanApp({ route, navigate }: Props) {
     </div>
   )
 
-  // v3(일회용 술자리) 화면은 새 라우터가 맡는다. 다 옮기면 이 파일의 옛 라우팅은 지운다.
-  if (isV3Route(route)) return <AppV3 route={route} navigate={navigate} />
-
   // ── 알림함 ───────────────────────────────────
   // **정산은 금액이 나왔다고 끝이 아니라 입금까지 돼야 끝난다.**
   // 그래서 알림이 한 번으로 안 끝나고, 볼 곳이 따로 필요하다.
@@ -408,6 +405,10 @@ export default function JeongsanApp({ route, navigate }: Props) {
       'js-login-mode',
     )
   }
+
+  // v3(일회용 술자리)는 로그인 뒤 새 라우터가 맡는다 — 첫 화면도 옛 "내 모임"이 아니라
+  // v3 "내 술자리"다. 모든 화면을 옮기면 이 파일의 옛 라우팅은 통째로 지운다.
+  if (isV3Route(route)) return <AppV3 route={route} navigate={navigate} />
 
   // 모임 만들기 — 번개/주기를 먼저 고른다.
   if (route === '/jungsan/new') {

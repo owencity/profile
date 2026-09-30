@@ -6,15 +6,17 @@
  */
 import './v3.css'
 import { SideStreet } from '../SideStreet'
+import { HomePage } from './HomePage'
 import { RoomPage } from './RoomPage'
 import { RoundEditPage } from './RoundEditPage'
+import { isV3Home } from './routes'
 import { useV3 } from './store'
 import type { ActionKind } from './nextAction'
 
 type Props = { route: string; navigate: (to: string) => void }
 
 export function AppV3({ route, navigate }: Props) {
-  const { me, rooms, sendMessage, giveSpoon, confirmIncoming, notReceived, saveRound, deleteRound } = useV3()
+  const { me, rooms, sendMessage, giveSpoon, confirmIncoming, notReceived, saveRound, deleteRound, createGathering } = useV3()
 
   const wrap = (node: React.ReactNode) => (
     <div className="js-root">
@@ -22,6 +24,7 @@ export function AppV3({ route, navigate }: Props) {
       {import.meta.env.DEV && (
         <div className="js-dev v3">
           <span>v3 mock</span>
+          <button className={isV3Home(route) ? 'on' : ''} onClick={() => navigate('/jungsan')}>내 술자리</button>
           {Object.values(rooms).map((r) => (
             <button key={r.id} className={route === `/jungsan/r/${r.id}` ? 'on' : ''} onClick={() => navigate(`/jungsan/r/${r.id}`)}>
               {r.title}
@@ -32,6 +35,22 @@ export function AppV3({ route, navigate }: Props) {
       {node}
     </div>
   )
+
+  // ── H1 내 술자리 ──
+  if (isV3Home(route)) {
+    return wrap(
+      <HomePage
+        me={me}
+        rooms={Object.values(rooms)}
+        onOpen={(id) => navigate(`/jungsan/r/${id}`)}
+        onCreate={() => {
+          // 입력 없이 바로 만들고 1차 입력으로 — SCREENS.md §3.1
+          const id = createGathering()
+          navigate(`/jungsan/r/${id}/round/new`)
+        }}
+      />,
+    )
+  }
 
   // ── R2 차수 편집 ──
   const roundRoute = route.match(/^\/jungsan\/r\/(\d+)\/round\/(new|\d+)$/)

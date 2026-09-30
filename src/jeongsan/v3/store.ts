@@ -9,6 +9,7 @@ import { hostOf, nameOf, participantOfUser } from './model'
 import { ME, MOCK_ROOMS } from './mock'
 import type { RoundDraft } from './round'
 import { relabel } from './round'
+import { autoTitle } from './home'
 
 type State = {
   me: User
@@ -21,6 +22,8 @@ type State = {
   /** 새 차수면 만든 차수의 id, 거부되면 null */
   saveRound: (roomId: Id, draft: RoundDraft) => Id | null
   deleteRound: (roomId: Id, roundId: Id) => void
+  /** 입력 없이 새 술자리를 만들고 id를 돌려준다. 만든 사람이 총무이자 첫 참여자다 */
+  createGathering: () => Id
 }
 
 const now = () => new Date().toISOString()
@@ -135,5 +138,31 @@ export const useV3 = create<State>((set, get) => {
         }
         return push(next, { type: 'SYSTEM', body: `${target.label}를 지웠어요` })
       }),
+
+    createGathering: () => {
+      const { me, rooms } = get()
+      const all = Object.values(rooms)
+      const id = Math.max(0, ...all.map((g) => g.id)) + 1
+      const pid = Math.max(0, ...all.flatMap((g) => g.participants.map((p) => p.id))) + 1
+      const today = new Date()
+      const g: Gathering = {
+        id,
+        title: autoTitle(today),
+        date: today.toISOString(),
+        hostUserId: me.id,
+        status: 'OPEN',
+        // 목데이터용 링크 토큰. 실제로는 서버가 발급한다
+        shareToken: Math.random().toString(36).slice(2, 7),
+        inputRevision: 0,
+        participants: [{ id: pid, userId: me.id, displayName: me.displayName, spoonCount: me.spoonCount, payout: me.payout }],
+        rounds: [],
+        responses: [],
+        transfers: [],
+        timeline: [{ id: 1, type: 'SYSTEM', body: `${me.displayName}님이 술자리를 만들었어요`, createdAt: today.toISOString() }],
+        spoonGivers: [],
+      }
+      set((s) => ({ rooms: { ...s.rooms, [id]: g } }))
+      return id
+    },
   }
 })
