@@ -16,14 +16,21 @@ type Props = {
   rooms: Gathering[]
   onOpen: (id: Id) => void
   onCreate: () => void
+  /** 로그인 화면으로 돌아간다 — 첫 화면이라 돌아갈 곳은 로그인뿐이다 */
+  onBack: () => void
 }
 
-export function HomePage({ me, rooms, onOpen, onCreate }: Props) {
+export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
   const { active, done } = myRooms(rooms, me.id)
   const neverHosted = me.spoonCount === 0 && !rooms.some((g) => g.hostUserId === me.id)
 
   return (
     <div className="js-shell js-home">
+      <header className="js-rtop">
+        <button className="js-back" onClick={onBack} aria-label="로그인 화면으로">‹</button>
+        <div className="js-rtitle"><b>내 술자리</b></div>
+      </header>
+
       <section className="js-mecard" aria-label="내 총무 캐릭터">
         <div className="js-meav"><HostCharacter spoons={me.spoonCount} px={3.2} /></div>
         <div className="js-mewho">

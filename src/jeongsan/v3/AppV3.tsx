@@ -13,9 +13,14 @@ import { isV3Home } from './routes'
 import { useV3 } from './store'
 import type { ActionKind } from './nextAction'
 
-type Props = { route: string; navigate: (to: string) => void }
+type Props = {
+  route: string
+  navigate: (to: string) => void
+  /** 첫 화면(H1)의 뒤로가기 — 로그인 화면으로 돌아간다 */
+  onLeave: () => void
+}
 
-export function AppV3({ route, navigate }: Props) {
+export function AppV3({ route, navigate, onLeave }: Props) {
   const { me, rooms, sendMessage, giveSpoon, confirmIncoming, notReceived, saveRound, deleteRound, createGathering } = useV3()
 
   const wrap = (node: React.ReactNode) => (
@@ -42,6 +47,7 @@ export function AppV3({ route, navigate }: Props) {
       <HomePage
         me={me}
         rooms={Object.values(rooms)}
+        onBack={onLeave}
         onOpen={(id) => navigate(`/jungsan/r/${id}`)}
         onCreate={() => {
           // 입력 없이 바로 만들고 1차 입력으로 — SCREENS.md §3.1

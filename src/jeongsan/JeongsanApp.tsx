@@ -408,7 +408,8 @@ export default function JeongsanApp({ route, navigate }: Props) {
 
   // v3(일회용 술자리)는 로그인 뒤 새 라우터가 맡는다 — 첫 화면도 옛 "내 모임"이 아니라
   // v3 "내 술자리"다. 모든 화면을 옮기면 이 파일의 옛 라우팅은 통째로 지운다.
-  if (isV3Route(route)) return <AppV3 route={route} navigate={navigate} />
+  // H1의 뒤로가기는 로그인 화면으로. 서버 로그아웃 API가 생기면 여기서 같이 부른다.
+  if (isV3Route(route)) return <AppV3 route={route} navigate={navigate} onLeave={() => setLoggedIn(false)} />
 
   // 모임 만들기 — 번개/주기를 먼저 고른다.
   if (route === '/jungsan/new') {
