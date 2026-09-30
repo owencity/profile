@@ -12,7 +12,16 @@
 
 /* ── 상단 줄 ── */
 .js-rtop { display: flex; align-items: center; gap: 10px; }
-.js-rtop .js-back { position: static; }
+/* 옛 .js-back은 옅은 회색 글자 하나라 버튼으로 안 보였다 — v3는 누를 수 있는 모양으로 */
+.js-rtop .js-back {
+  position: static; flex: none; width: 38px; height: 38px; padding: 0;
+  display: grid; place-items: center;
+  font-family: inherit; font-size: 24px; font-weight: 900; line-height: 1; color: var(--ink);
+  background: #fff; border: var(--bd); box-shadow: var(--sh-sm); cursor: pointer;
+}
+.js-rtop .js-back:hover { background: var(--p50); }
+.js-rtop .js-back:active { transform: translate(2px, 2px); box-shadow: none; }
+.js-rtop .js-back:focus-visible { outline: 3px solid var(--p500); outline-offset: 2px; }
 .js-rtitle { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .js-rtitle b { font-size: 17px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .js-more {
@@ -142,6 +151,7 @@ button.js-round:hover { border-color: var(--p500); }
 
 /* ── H1 내 술자리 ── */
 .js-home { gap: 4px; }
+.js-home .js-rtop { margin-bottom: 10px; }
 .js-mecard { display: flex; align-items: center; gap: 14px; border: var(--bd); box-shadow: var(--sh-sm); padding: 12px 14px; background: #fff; }
 .js-meav { width: 78px; height: 78px; background: var(--p50); border: var(--bd-l); display: grid; place-items: center; flex: none; }
 .js-mewho { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
