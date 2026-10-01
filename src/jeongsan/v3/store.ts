@@ -4,9 +4,10 @@
  * (여기 전이 규칙은 `DOMAIN_DB_DESIGN_V2.md` §3을 흉내 낸 것이다).
  */
 import { create } from 'zustand'
-import type { Gathering, Id, TimelineEntry, User } from './model'
-import { hostOf, nameOf, participantOfUser } from './model'
-import { ME, MOCK_ROOMS } from './mock'
+import type { Gathering, Id, ResponseType, RoundResponse, TimelineEntry, User } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf } from './model'
+import { ME, MOCK_ROOMS, MOCK_USERS } from './mock'
+import { mockPreview, withAutoResponses } from './mockServer'
 import type { RoundDraft } from './round'
 import { relabel } from './round'
 import { autoTitle } from './home'
@@ -24,6 +25,17 @@ type State = {
   deleteRound: (roomId: Id, roundId: Id) => void
   /** 입력 없이 새 술자리를 만들고 id를 돌려준다. 만든 사람이 총무이자 첫 참여자다 */
   createGathering: () => Id
+  /** 개발용 — 다른 사람 시점으로 보기 */
+  actAs: (userId: Id) => void
+  /** 내 응답 저장(P2). 총무가 면제로 지정한 칸은 건너뛴다 */
+  respond: (roomId: Id, answers: { roundId: Id; type: ResponseType }[]) => void
+  /** 총무가 R3에서 미응답자 응답을 대신 넣는다 */
+  respondAsHost: (roomId: Id, participantId: Id, roundId: Id, type: ResponseType) => void
+  /**
+   * 정산하기(R3). 미리보기 때의 `inputRevision`을 같이 보낸다 — 그 사이 입력이 바뀌었으면
+   * 서버가 409로 거절하는 것을 흉내 내 'STALE'을 돌려준다.
+   */
+  settle: (roomId: Id, inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
 }
 
 const now = () => new Date().toISOString()
@@ -164,5 +176,64 @@ export const useV3 = create<State>((set, get) => {
       set((s) => ({ rooms: { ...s.rooms, [id]: g } }))
       return id
     },
+
+    actAs: (userId) => {
+      const user = MOCK_USERS.find((u) => u.id === userId)
+      if (user) set({ me: user })
+    },
+
+    respond: (roomId, answers) =>
+      update(roomId, (g, meId) => {
+        if (g.status !== 'OPEN') return g
+        const first = !hasResponded(g, meId)
+        let responses = g.responses
+        for (const a of answers) {
+          // 참여자는 면제를 고를 수 없고, 총무가 면제로 정한 칸은 못 바꾼다
+          if (a.type === 'EXEMPT' || isLockedByHost(responseOf(g, meId, a.roundId))) continue
+          if (!g.rounds.some((r) => r.id === a.roundId)) continue
+          responses = setResponse(responses, { participantId: meId, roundId: a.roundId, type: a.type, source: 'SELF' })
+        }
+        const next = { ...g, responses, inputRevision: g.inputRevision + 1 }
+        return push(next, { type: 'SYSTEM', body: `${nameOf(g, meId)}님이 ${first ? '응답했어요' : '응답을 고쳤어요'}` })
+      }),
+
+    respondAsHost: (roomId, participantId, roundId, type) =>
+      update(roomId, (g) => {
+        if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
+        if (!g.participants.some((p) => p.id === participantId) || !g.rounds.some((r) => r.id === roundId)) return g
+        const responses = setResponse(g.responses, { participantId, roundId, type, source: 'HOST' })
+        return { ...g, responses, inputRevision: g.inputRevision + 1 }
+      }),
+
+    settle: (roomId, inputRevision) => {
+      const g = get().rooms[roomId]
+      if (!g || g.hostUserId !== get().me.id || g.status !== 'OPEN' || g.rounds.length === 0 || g.participants.length < 2) {
+        return 'DENIED'
+      }
+      if (g.inputRevision !== inputRevision) return 'STALE'
+
+      const preview = mockPreview(g)
+      const autoNames = preview.lines.filter((l) => l.auto).map((l) => nameOf(g, l.participantId))
+      const settled: Gathering = {
+        ...g,
+        status: 'SETTLING',
+        responses: withAutoResponses(g),
+        transfers: preview.transfers.map((t, i) => ({ id: i + 1, status: 'WAITING' as const, ...t })),
+      }
+      const hostName = hostOf(g).displayName
+      const body = autoNames.length > 0
+        ? `${hostName}님이 정산했어요 · ${autoNames.join('·')}님은 응답이 없어 전 차수 참석·알코올로 계산됐어요`
+        : `${hostName}님이 정산했어요`
+      // 보낼 돈이 하나도 없으면(총무 혼자 다 냈고 나머지가 모두 면제 등) 바로 완료
+      const next = completeIfDone(push(settled, { type: 'SYSTEM', body }))
+      set((s) => ({ rooms: { ...s.rooms, [roomId]: next } }))
+      return 'OK'
+    },
   }
 })
+
+/** 한 칸(참여자 × 차수)의 응답을 바꾸거나 새로 넣는다 */
+function setResponse(list: RoundResponse[], r: RoundResponse): RoundResponse[] {
+  const rest = list.filter((x) => !(x.participantId === r.participantId && x.roundId === r.roundId))
+  return [...rest, r]
+}

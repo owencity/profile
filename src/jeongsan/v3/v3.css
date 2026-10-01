@@ -5,6 +5,77 @@
 
 /* 옛 개발용 바는 화면 카드 안쪽에 놓일 걸 가정해 음수 여백을 쓴다. v3는 카드 밖에 둔다 */
 .js-dev.v3 { margin: 0; }
+.js-dev.v3 .sep { margin-left: 8px; padding-left: 10px; border-left: 1px solid rgba(255, 255, 255, .3); }
+.js-dev.v3 button small { font-weight: 600; opacity: .75; }
+
+.js-cta:disabled { opacity: .45; cursor: default; box-shadow: none; }
+.js-lead { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink2); }
+.js-lead.small { font-size: 12.5px; color: var(--ink3); text-align: center; }
+.js-hint.center { text-align: center; }
+.js-mini.on { background: var(--ink); color: #fff; }
+.js-linkbtn { background: none; border: 0; padding: 4px; font-family: inherit; font-size: 12.5px; color: var(--ink3); text-decoration: underline; cursor: pointer; }
+.js-locked { font-size: 13px; font-weight: 700; color: var(--acc-strong); background: var(--acc-bg); border: 2px dashed var(--acc); padding: 9px 12px; text-align: center; }
+
+/* ── 응답 버튼 줄 (P2·R3) ── */
+.js-resp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.js-respbtn {
+  font-family: inherit; font-size: 14px; font-weight: 800; padding: 11px 4px; cursor: pointer;
+  background: #fff; color: var(--ink2); border: 2px solid var(--line);
+}
+.js-respbtn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.js-respbtn.on { color: #fff; border-color: var(--ink); box-shadow: var(--sh-sm); }
+.js-respbtn.absent.on { background: var(--ink3); }
+.js-respbtn.sober.on { background: var(--ok); }
+.js-respbtn.drank.on { background: var(--p600); }
+.js-resp.compact .js-respbtn { font-size: 12.5px; padding: 7px 2px; }
+
+/* ── P2 내 응답 ── */
+.js-p2 { gap: 16px; }
+.js-allsame { display: flex; gap: 6px; flex-wrap: wrap; }
+.js-resplist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.js-respitem { border: var(--bd); box-shadow: var(--sh-sm); background: #fff; padding: 11px 12px; display: flex; flex-direction: column; gap: 9px; }
+.js-respitem .hd { display: flex; justify-content: space-between; align-items: baseline; }
+.js-respitem .hd b { font-size: 15px; font-weight: 800; color: var(--p700); }
+.js-respitem .hd span { font-size: 13px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+
+/* ── P3 보낼 돈 ── */
+.js-p3 { gap: 14px; }
+.js-paycard { border: var(--bd); box-shadow: var(--sh-sm); background: #fff; padding: 13px 14px; display: flex; flex-direction: column; gap: 10px; }
+.js-paycard.confirmed { box-shadow: none; opacity: .8; }
+.js-paycard .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.js-paycard .hd b { font-size: 15px; font-weight: 800; }
+.js-paycard .hd strong { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--p700); }
+.js-paycard .js-cta { margin-top: 0; }
+.js-basisbtn { align-self: flex-start; background: none; border: 0; padding: 0; font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--p600); cursor: pointer; }
+.js-basis { list-style: none; margin: 0; padding: 8px 10px; background: var(--p50); display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.js-basis li { display: flex; justify-content: space-between; gap: 8px; }
+.js-acct { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: var(--bd-l); padding: 9px 11px; }
+.js-acct small { display: block; font-size: 11.5px; color: var(--ink3); }
+.js-acct .no { font-size: 15px; font-variant-numeric: tabular-nums; user-select: all; overflow-wrap: anywhere; }
+.js-acct.none { font-size: 13px; color: var(--ink3); border-style: dashed; }
+.js-warnline { font-size: 13px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 8px 10px; }
+.js-paystate { text-align: center; font-size: 13.5px; font-weight: 800; color: var(--ink2); background: var(--p50); padding: 11px; }
+.js-paystate.ok { color: var(--ok); background: var(--ok-bg); }
+
+/* ── R3 정산하기 ── */
+.js-r3 { gap: 14px; }
+.js-autowarn { display: flex; flex-direction: column; gap: 6px; background: var(--acc-bg); border: 2px solid var(--acc); padding: 11px 12px; }
+.js-autowarn b { font-size: 14.5px; color: var(--acc-strong); }
+.js-autowarn span { font-size: 13px; line-height: 1.5; color: var(--ink2); }
+.js-autonames { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.js-proxy { border: var(--bd); box-shadow: var(--sh-sm); background: #fff; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.js-proxy .hd { display: flex; justify-content: space-between; align-items: center; }
+.js-proxy .row { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 8px; }
+.js-proxy .lb { font-weight: 800; color: var(--p700); font-size: 13.5px; }
+.js-preview { list-style: none; margin: 0; padding: 0; border: var(--bd); background: #fff; }
+.js-preview li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.js-preview li:last-child { border-bottom: 0; }
+.js-preview .who { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.js-preview .who b { font-size: 14.5px; }
+.js-preview strong { font-size: 15.5px; font-weight: 900; font-variant-numeric: tabular-nums; align-self: center; }
+.js-preview .why { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink3); }
+.js-role.auto { border-color: var(--acc); color: var(--acc-strong); }
+.js-warntext { color: var(--warn); font-weight: 700; }
 
 .js-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -115,7 +186,8 @@ button.js-round:hover { border-color: var(--p500); }
 .js-payer { font-family: inherit; font-size: 14px; font-weight: 700; padding: 8px 14px; cursor: pointer; background: #fff; border: 2px solid var(--line); color: var(--ink2); }
 .js-payer.on { background: var(--p600); border-color: var(--ink); color: #fff; box-shadow: var(--sh-sm); }
 .js-errs { background: var(--warn-bg); border: 2px solid var(--warn); color: var(--warn); font-size: 13.5px; font-weight: 700; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
-.js-r2btns { display: flex; flex-direction: column; margin-top: auto; }
+/* 화면의 할 일 버튼은 내용이 길어도 늘 보이게 바닥에 붙인다(정산방 도크와 같은 원칙) */
+.js-r2btns { display: flex; flex-direction: column; margin-top: auto; position: sticky; bottom: 0; background: #fff; padding: 4px 0 12px; z-index: 2; }
 .js-del { margin-top: 14px; background: none; border: 0; color: var(--ink3); font-family: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; align-self: center; padding: 6px; }
 .js-del.armed { color: var(--warn); font-weight: 800; }
 .js-preset:focus-visible, .js-payer:focus-visible, .js-qty button:focus-visible, .js-round:focus-visible, .js-del:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }

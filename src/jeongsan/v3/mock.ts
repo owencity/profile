@@ -13,6 +13,19 @@ export const ME: User = {
   payout: { bank: '카카오뱅크', accountNo: '3333-01-2345678', holder: '김동규' },
 }
 
+/**
+ * 목데이터의 사람들. 개발용 바에서 "누구로 볼지"를 바꿀 때 쓴다 — 같은 정산방을 총무·결제자·
+ * 참여자 시점으로 번갈아 보며 배너와 버튼이 어떻게 달라지는지 확인하기 위해서다.
+ */
+export const MOCK_USERS: User[] = [
+  ME,
+  { id: 2, displayName: '민지', spoonCount: 340, payout: { bank: '토스뱅크', accountNo: '1000-1234-5678', holder: '이민지' } },
+  { id: 3, displayName: '재훈', spoonCount: 12 },
+  { id: 4, displayName: '지영', spoonCount: 0 },
+  { id: 5, displayName: '민수', spoonCount: 57 },
+  { id: 6, displayName: '서연', spoonCount: 3 },
+]
+
 const iso = (daysAgo: number, hh = 21, mm = 0) => {
   const d = new Date()
   d.setDate(d.getDate() - daysAgo)
@@ -78,8 +91,8 @@ const settlingRoom: Gathering = {
     { participantId: 24, roundId: 11, type: 'DRANK', source: 'SELF' }, { participantId: 24, roundId: 12, type: 'ABSENT', source: 'SELF' },
   ],
   transfers: [
-    { id: 1, fromParticipantId: 22, toParticipantId: 21, amount: 41_000, status: 'WAITING' },
-    { id: 2, fromParticipantId: 22, toParticipantId: 23, amount: 24_000, status: 'WAITING' },
+    { id: 1, fromParticipantId: 22, toParticipantId: 21, amount: 41_000, status: 'WAITING', basis: [{ roundId: 11, type: 'DRANK', amount: 41_000 }] },
+    { id: 2, fromParticipantId: 22, toParticipantId: 23, amount: 24_000, status: 'WAITING', basis: [{ roundId: 12, type: 'DRANK', amount: 24_000 }] },
     { id: 3, fromParticipantId: 23, toParticipantId: 21, amount: 29_000, status: 'SENT', sentAt: iso(2, 11) },
     { id: 4, fromParticipantId: 24, toParticipantId: 21, amount: 45_000, status: 'CONFIRMED', sentAt: iso(3, 10), confirmedAt: iso(3, 12) },
     { id: 5, fromParticipantId: 21, toParticipantId: 23, amount: 24_000, status: 'WAITING' },

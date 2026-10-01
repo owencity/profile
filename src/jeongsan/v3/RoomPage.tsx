@@ -148,10 +148,14 @@ function fmtTime(iso: string) {
 }
 
 function Timeline({ g, meId }: { g: Gathering; meId?: Id }) {
-  const end = useRef<HTMLDivElement>(null)
-  useEffect(() => { end.current?.scrollIntoView({ block: 'nearest' }) }, [g.timeline.length])
+  // 타임라인 상자 안에서만 맨 아래로 — scrollIntoView는 창 전체까지 끌어내려 화면 위가 잘렸다
+  const box = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = box.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [g.timeline.length])
   return (
-    <section className="js-tl" aria-label="타임라인">
+    <section ref={box} className="js-tl" aria-label="타임라인">
       {g.timeline.map((e) => {
         if (e.type === 'MESSAGE') {
           const mine = e.authorParticipantId === meId
@@ -170,7 +174,6 @@ function Timeline({ g, meId }: { g: Gathering; meId?: Id }) {
           </div>
         )
       })}
-      <div ref={end} />
     </section>
   )
 }

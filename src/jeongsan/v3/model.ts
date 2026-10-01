@@ -61,7 +61,11 @@ export type Transfer = {
   confirmedAt?: string
   /** 마지막 [아직 안 들어왔어요] 시각 */
   notReceivedAt?: string
+  /** 금액 근거 — 차수별로 얼마인지(P3 "근거 펼치기"). 서버가 준다 */
+  basis?: TransferBasis[]
 }
+
+export type TransferBasis = { roundId: Id; type: ResponseType; amount: Money }
 
 export type TimelineEntry = {
   id: Id
@@ -124,3 +128,14 @@ export function daysUntilDelete(g: Gathering, now = new Date()): number | null {
 }
 
 export const won = (n: Money) => `${n.toLocaleString('ko-KR')}원`
+
+/** 응답 버튼·근거에 쓰는 이름. EXEMPT는 버튼이 아니라 총무 지정 표시로만 나온다 */
+export const RESPONSE_LABEL: Record<ResponseType, string> = {
+  ABSENT: '불참', SOBER: '논알코올', DRANK: '알코올', EXEMPT: '면제',
+}
+
+/** 참여자가 직접 고를 수 있는 응답 — 순서가 곧 버튼 순서 */
+export const SELF_CHOICES: ResponseType[] = ['ABSENT', 'SOBER', 'DRANK']
+
+/** 총무가 면제로 지정한 칸 — 참여자는 바꿀 수 없다 */
+export const isLockedByHost = (r?: RoundResponse) => r?.type === 'EXEMPT' && r.source === 'HOST'

@@ -5,12 +5,20 @@
  * 모든 화면이 옮겨지면 옛 라우터와 옛 화면을 통째로 지운다.
  */
 import './v3.css'
+import { useEffect } from 'react'
 import { SideStreet } from '../SideStreet'
 import { HomePage } from './HomePage'
 import { RoomPage } from './RoomPage'
 import { RoundEditPage } from './RoundEditPage'
+import { RespondPage } from './RespondPage'
+import { PayPage } from './PayPage'
+import { SettlePage } from './SettlePage'
 import { isV3Home } from './routes'
 import { useV3 } from './store'
+import { MOCK_USERS } from './mock'
+import { mockPreview } from './mockServer'
+import type { Id } from './model'
+import { participantOfUser, roundsPaidBy } from './model'
 import type { ActionKind } from './nextAction'
 
 type Props = {
@@ -21,7 +29,28 @@ type Props = {
 }
 
 export function AppV3({ route, navigate, onLeave }: Props) {
-  const { me, rooms, sendMessage, giveSpoon, confirmIncoming, notReceived, saveRound, deleteRound, createGathering } = useV3()
+  const {
+    me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
+    createGathering, actAs, respond, respondAsHost, settle,
+  } = useV3()
+
+  // 화면을 옮기면 맨 위부터 — 앞 화면의 스크롤 위치가 남아 머리말이 잘린 채 열렸다
+  useEffect(() => { window.scrollTo(0, 0) }, [route])
+
+  // 개발용 바 — 지금 보고 있는 술자리(있으면)에서 각 사람의 역할을 같이 보여준다
+  const roomInRoute = rooms[Number(route.match(/^\/jungsan\/r\/(\d+)/)?.[1])]
+  const roleIn = (userId: Id) => {
+    if (!roomInRoute) return ''
+    const p = participantOfUser(roomInRoute, userId)
+    if (!p) return ''
+    if (roomInRoute.hostUserId === userId) return '총무'
+    return roundsPaidBy(roomInRoute, p.id).length > 0 ? '결제' : '참여'
+  }
+  const switchTo = (userId: Id) => {
+    actAs(userId)
+    // 그 사람이 없는 술자리를 보고 있었다면 그 사람의 첫 화면으로
+    if (roomInRoute && !participantOfUser(roomInRoute, userId)) navigate('/jungsan')
+  }
 
   const wrap = (node: React.ReactNode) => (
     <div className="js-root">
@@ -30,11 +59,22 @@ export function AppV3({ route, navigate, onLeave }: Props) {
         <div className="js-dev v3">
           <span>v3 mock</span>
           <button className={isV3Home(route) ? 'on' : ''} onClick={() => navigate('/jungsan')}>내 술자리</button>
-          {Object.values(rooms).map((r) => (
-            <button key={r.id} className={route === `/jungsan/r/${r.id}` ? 'on' : ''} onClick={() => navigate(`/jungsan/r/${r.id}`)}>
-              {r.title}
-            </button>
-          ))}
+          {Object.values(rooms)
+            .filter((r) => participantOfUser(r, me.id))
+            .map((r) => (
+              <button key={r.id} className={roomInRoute?.id === r.id ? 'on' : ''} onClick={() => navigate(`/jungsan/r/${r.id}`)}>
+                {r.title}
+              </button>
+            ))}
+          <span className="sep">보는 사람</span>
+          {MOCK_USERS.map((u) => {
+            const role = roleIn(u.id)
+            return (
+              <button key={u.id} className={me.id === u.id ? 'on' : ''} onClick={() => switchTo(u.id)}>
+                {u.displayName}{role && <small> {role}</small>}
+              </button>
+            )
+          })}
         </div>
       )}
       {node}
@@ -82,6 +122,53 @@ export function AppV3({ route, navigate, onLeave }: Props) {
         onDelete={round ? () => { deleteRound(g.id, round.id); back() } : undefined}
       />,
     )
+  }
+
+  // ── R3 정산하기 · P2 내 응답 · P3 내 금액 ──
+  const step = route.match(/^\/jungsan\/r\/(\d+)\/(settle|respond|pay)$/)
+  if (step) {
+    const g = rooms[Number(step[1])]
+    const back = () => navigate(`/jungsan/r/${step[1]}`)
+    if (!g) return wrap(<Soon title="없는 술자리예요" onBack={() => navigate('/jungsan')} />)
+    const mine = participantOfUser(g, me.id)
+    if (!mine) return wrap(<Soon title="이 술자리에 참여하지 않았어요" onBack={() => navigate('/jungsan')} />)
+
+    if (step[2] === 'settle') {
+      if (g.hostUserId !== me.id) return wrap(<Soon title="정산은 총무만 할 수 있어요" onBack={back} />)
+      if (g.status !== 'OPEN') return wrap(<Soon title="이미 정산한 술자리예요" onBack={back} />)
+      if (g.rounds.length === 0) return wrap(<Soon title="차수를 먼저 넣어주세요" onBack={back} />)
+      if (g.participants.length < 2) return wrap(<Soon title="혼자서는 정산할 수 없어요. 링크를 먼저 보내주세요" onBack={back} />)
+      return wrap(
+        <SettlePage
+          g={g}
+          preview={mockPreview(g)}
+          onBack={back}
+          onRespondFor={(pid, rid, t) => respondAsHost(g.id, pid, rid, t)}
+          onSettle={(rev) => {
+            const res = settle(g.id, rev)
+            if (res === 'OK') back()
+            return res
+          }}
+        />,
+      )
+    }
+
+    if (step[2] === 'respond') {
+      if (g.status !== 'OPEN') return wrap(<Soon title="정산된 뒤에는 응답을 고칠 수 없어요" onBack={back} />)
+      if (g.rounds.length === 0) return wrap(<Soon title="아직 차수가 없어요" onBack={back} />)
+      return wrap(
+        <RespondPage
+          key={`${g.id}:${mine.id}`}
+          g={g}
+          meId={mine.id}
+          onBack={back}
+          onSubmit={(answers) => { respond(g.id, answers); back() }}
+        />,
+      )
+    }
+
+    if (g.status === 'OPEN') return wrap(<Soon title="아직 정산 전이에요" onBack={back} />)
+    return wrap(<PayPage g={g} meId={mine.id} onBack={back} onSent={(tid) => markSent(g.id, tid)} />)
   }
 
   const room = route.match(/^\/jungsan\/r\/(\d+)$/)
