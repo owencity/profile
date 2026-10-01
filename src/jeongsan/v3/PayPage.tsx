@@ -4,7 +4,7 @@
  * 받는 사람마다 카드 한 장: 금액 · 근거(차수별) · 계좌 + [계좌 복사] · [보냈어요].
  * 금액과 근거는 서버가 준 값을 그대로 보여준다(프론트는 계산하지 않는다).
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Gathering, Id, Transfer } from './model'
 import { RESPONSE_LABEL, won } from './model'
 import { BackButton } from './BackButton'
@@ -13,11 +13,16 @@ type Props = {
   g: Gathering
   meId: Id
   onBack: () => void
+  /** 이 화면을 열었다 — 목록의 [정산금액 확인] 뱃지를 뗀다 */
+  onSeen: () => void
   onSent: (transferId: Id) => void
 }
 
-export function PayPage({ g, meId, onBack, onSent }: Props) {
+export function PayPage({ g, meId, onBack, onSeen, onSent }: Props) {
   const outgoing = g.transfers.filter((t) => t.fromParticipantId === meId)
+  // 열었을 때 한 번만. onSeen은 렌더마다 새 함수라 의존성에서 뺀다
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { onSeen() }, [g.id, meId])
 
   return (
     <div className="js-shell narrow js-p3">

@@ -3,7 +3,7 @@
  * 세 술자리가 각각 다른 단계(응답 받는 중 / 송금 중 / 완료)라서 정산방의 "지금 할 일"이
  * 단계마다 어떻게 바뀌는지 한 번에 볼 수 있다. 금액은 서버 계산 결과를 흉내 낸 고정값이다.
  */
-import type { Gathering, User } from './model'
+import type { AppNotification, Gathering, User } from './model'
 
 /** 로그인한 나 — 프로 총무(1,280스푼) */
 export const ME: User = {
@@ -134,3 +134,13 @@ const completedRoom: Gathering = {
 }
 
 export const MOCK_ROOMS: Gathering[] = [openRoom, settlingRoom, completedRoom]
+
+/** 이미 와 있는 알림 — 목데이터 술자리들이 지금 단계까지 오며 생겼을 것들 */
+export const MOCK_NOTIFICATIONS: AppNotification[] = [
+  { id: 1, userId: 1, roomId: 102, link: '/jungsan/r/102/pay', read: false, createdAt: iso(3, 9),
+    title: '정산이 나왔어요! 입금액을 확인해주세요', body: '9/25 회식 · 민지님께 41,000원 외 1건 · 응답이 없어 전 차수 참석·알코올로 계산됐어요' },
+  { id: 2, userId: 2, roomId: 102, link: '/jungsan/r/102', read: false, createdAt: iso(2, 11),
+    title: '재훈님이 보냈대요. 입금을 확인해주세요', body: '9/25 회식 · 29,000원' },
+  { id: 3, userId: 1, roomId: 103, link: '/jungsan/r/103', read: true, createdAt: iso(2, 14),
+    title: '정산 완료! 🎉', body: '9/20 동기 모임 · 모두 입금했어요. 7일 뒤 사라져요' },
+]

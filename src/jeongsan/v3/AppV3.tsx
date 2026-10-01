@@ -13,8 +13,10 @@ import { RoundEditPage } from './RoundEditPage'
 import { RespondPage } from './RespondPage'
 import { PayPage } from './PayPage'
 import { SettlePage } from './SettlePage'
+import { NotificationsPage } from './NotificationsPage'
+import { entryRoute } from './home'
 import { isV3Home } from './routes'
-import { useV3 } from './store'
+import { seenKey, useV3 } from './store'
 import { MOCK_USERS } from './mock'
 import { mockPreview } from './mockServer'
 import type { Id } from './model'
@@ -32,7 +34,10 @@ export function AppV3({ route, navigate, onLeave }: Props) {
   const {
     me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
     createGathering, actAs, respond, respondAsHost, settle,
+    notifications, markRead, markAllRead, paySeen, markPaySeen,
   } = useV3()
+  const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
+  const myAlerts = notifications.filter((n) => n.userId === me.id)
 
   // 화면을 옮기면 맨 위부터 — 앞 화면의 스크롤 위치가 남아 머리말이 잘린 채 열렸다
   useEffect(() => { window.scrollTo(0, 0) }, [route])
@@ -90,12 +95,28 @@ export function AppV3({ route, navigate, onLeave }: Props) {
         me={me}
         rooms={Object.values(rooms)}
         onBack={onLeave}
-        onOpen={(id) => navigate(`/jungsan/r/${id}`)}
+        // 참여자는 정산방보다 할 일 화면(응답하기·내 금액)을 먼저 — home.ts entryRoute
+        onOpen={(id) => navigate(entryRoute(rooms[id], me.id, isPaySeen(id)))}
+        paySeen={isPaySeen}
+        unread={myAlerts.filter((n) => !n.read).length}
+        onOpenAlerts={() => navigate('/jungsan/notifications')}
         onCreate={() => {
           // 입력 없이 바로 만들고 1차 입력으로 — SCREENS.md §3.1
           const id = createGathering()
           navigate(`/jungsan/r/${id}/round/new`)
         }}
+      />,
+    )
+  }
+
+  // ── N1 알림함 ──
+  if (route === '/jungsan/notifications') {
+    return wrap(
+      <NotificationsPage
+        items={myAlerts}
+        onBack={() => navigate('/jungsan')}
+        onReadAll={markAllRead}
+        onOpen={(n) => { markRead(n.id); navigate(n.link) }}
       />,
     )
   }
@@ -170,7 +191,9 @@ export function AppV3({ route, navigate, onLeave }: Props) {
     }
 
     if (g.status === 'OPEN') return wrap(<Soon title="아직 정산 전이에요" onBack={back} />)
-    return wrap(<PayPage g={g} meId={mine.id} onBack={back} onSent={(tid) => markSent(g.id, tid)} />)
+    return wrap(
+      <PayPage g={g} meId={mine.id} onBack={back} onSeen={() => markPaySeen(g.id)} onSent={(tid) => markSent(g.id, tid)} />,
+    )
   }
 
   const room = route.match(/^\/jungsan\/r\/(\d+)$/)

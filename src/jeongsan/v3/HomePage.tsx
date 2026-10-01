@@ -10,7 +10,7 @@ import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, User } from './model'
 import { daysUntilDelete, hostOf } from './model'
 import type { HomeTab } from './home'
-import { TAB_LABEL, initialTab, myRoomTabs, tabHasTodo } from './home'
+import { TAB_LABEL, initialTab, myRoomTabs, rowBadge, tabHasTodo } from './home'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
 
@@ -21,6 +21,10 @@ type Props = {
   onCreate: () => void
   /** 로그인 화면으로 돌아간다 — 첫 화면이라 돌아갈 곳은 로그인뿐이다 */
   onBack: () => void
+  /** 이 방의 정산금액을 이미 열어봤는가 — [정산금액 확인] 뱃지 기준 */
+  paySeen: (roomId: Id) => boolean
+  unread: number
+  onOpenAlerts: () => void
 }
 
 const EMPTY: Record<HomeTab, string> = {
@@ -31,7 +35,7 @@ const EMPTY: Record<HomeTab, string> = {
 
 const TABS: HomeTab[] = ['HOSTING', 'JOINED', 'DONE']
 
-export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
+export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread, onOpenAlerts }: Props) {
   const tabs = myRoomTabs(rooms, me.id)
   const [tab, setTab] = useState<HomeTab>(() => initialTab(tabs, me.id))
   const neverHosted = me.spoonCount === 0 && !rooms.some((g) => g.hostUserId === me.id)
@@ -42,6 +46,9 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
       <header className="js-rtop">
         <BackButton onClick={onBack} to="로그인 화면으로" />
         <div className="js-rtitle"><b>내 술자리</b></div>
+        <button type="button" className="js-bell" onClick={onOpenAlerts} aria-label={`알림${unread ? ` ${unread}개 안 읽음` : ''}`}>
+          🔔{unread > 0 && <span className="n">{unread}</span>}
+        </button>
       </header>
 
       <section className="js-mecard" aria-label="내 총무 캐릭터">
@@ -78,7 +85,7 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
           <div className="js-homeempty">{EMPTY[tab]}</div>
         ) : (
           <ul className={`js-rlist${tab === 'DONE' ? ' done' : ''}`}>
-            {list.map((g) => <RoomRow key={g.id} g={g} meId={me.id} tab={tab} onOpen={onOpen} />)}
+            {list.map((g) => <RoomRow key={g.id} g={g} meId={me.id} tab={tab} seen={paySeen(g.id)} onOpen={onOpen} />)}
           </ul>
         )}
       </section>
@@ -90,15 +97,17 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
   )
 }
 
-function RoomRow({ g, meId, tab, onOpen }: { g: Gathering; meId: Id; tab: HomeTab; onOpen: (id: Id) => void }) {
+function RoomRow({ g, meId, tab, seen, onOpen }: { g: Gathering; meId: Id; tab: HomeTab; seen: boolean; onOpen: (id: Id) => void }) {
   const isHost = g.hostUserId === meId
   const days = daysUntilDelete(g)
   const act = nextAction(g, meId)
+  const badge = rowBadge(g, meId, seen)
   return (
     <li>
       <button className={`js-rrow ${act.tone}`} onClick={() => onOpen(g.id)}>
         <span className="top">
           <b>{g.title}</b>
+          {badge && <span className="js-newbadge">{badge}</span>}
           {/* 탭이 이미 역할을 말해주니, 역할이 섞이는 [완료]에서만 붙인다. [참여 중]엔 누가 총무인지 */}
           {tab === 'DONE' && <span className={`js-role${isHost ? ' host' : ''}`}>{isHost ? '총무' : '참여'}</span>}
           {tab === 'JOINED' && <span className="js-role">{hostOf(g).displayName} 총무</span>}

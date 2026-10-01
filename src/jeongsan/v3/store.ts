@@ -4,10 +4,11 @@
  * (여기 전이 규칙은 `DOMAIN_DB_DESIGN_V2.md` §3을 흉내 낸 것이다).
  */
 import { create } from 'zustand'
-import type { Gathering, Id, ResponseType, RoundResponse, TimelineEntry, User } from './model'
+import type { AppNotification, Gathering, Id, ResponseType, RoundResponse, TimelineEntry, User } from './model'
 import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf } from './model'
-import { ME, MOCK_ROOMS, MOCK_USERS } from './mock'
+import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { mockPreview, withAutoResponses } from './mockServer'
+import { notificationsFor } from './notify'
 import type { RoundDraft } from './round'
 import { relabel } from './round'
 import { autoTitle } from './home'
@@ -36,7 +37,17 @@ type State = {
    * 서버가 409로 거절하는 것을 흉내 내 'STALE'을 돌려준다.
    */
   settle: (roomId: Id, inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
+
+  /** 모든 사람의 알림 — 화면은 지금 보는 사람 것만 거른다 */
+  notifications: AppNotification[]
+  markRead: (notificationId: Id) => void
+  markAllRead: () => void
+  /** 정산금액(P3)을 열어본 `방:사람` — [정산금액 확인] 뱃지를 떼는 기준 */
+  paySeen: string[]
+  markPaySeen: (roomId: Id) => void
 }
+
+export const seenKey = (roomId: Id, userId: Id) => `${roomId}:${userId}`
 
 const now = () => new Date().toISOString()
 
@@ -60,17 +71,39 @@ function completeIfDone(g: Gathering): Gathering {
 }
 
 export const useV3 = create<State>((set, get) => {
+  /** 술자리를 바꾸고, 바뀐 만큼 알림을 쌓는다(행동한 본인은 빼고) — 서버의 이벤트 → 알림 흉내 */
+  const commit = (s: State, prev: Gathering, next: Gathering): Partial<State> => {
+    if (next === prev) return {}
+    const startId = Math.max(0, ...s.notifications.map((n) => n.id)) + 1
+    const fresh = notificationsFor(prev, next)
+      .filter((n) => n.userId !== s.me.id)
+      .map((n, i) => ({ ...n, id: startId + i, createdAt: now(), read: false }))
+    return { rooms: { ...s.rooms, [next.id]: next }, notifications: [...fresh, ...s.notifications] }
+  }
+
   const update = (roomId: Id, fn: (g: Gathering, meId: Id) => Gathering) =>
     set((s) => {
       const g = s.rooms[roomId]
       const me = g && participantOfUser(g, s.me.id)
       if (!g || !me) return s
-      return { rooms: { ...s.rooms, [roomId]: fn(g, me.id) } }
+      return commit(s, g, fn(g, me.id))
     })
 
   return {
     me: ME,
     rooms: Object.fromEntries(MOCK_ROOMS.map((g) => [g.id, g])),
+    notifications: MOCK_NOTIFICATIONS,
+    paySeen: [],
+
+    markRead: (id) =>
+      set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
+    markAllRead: () =>
+      set((s) => ({ notifications: s.notifications.map((n) => (n.userId === s.me.id ? { ...n, read: true } : n)) })),
+    markPaySeen: (roomId) =>
+      set((s) => {
+        const key = seenKey(roomId, s.me.id)
+        return s.paySeen.includes(key) ? s : { paySeen: [...s.paySeen, key] }
+      }),
 
     sendMessage: (roomId, text) =>
       update(roomId, (g, meId) => push(g, { type: 'MESSAGE', authorParticipantId: meId, body: text })),
@@ -226,7 +259,7 @@ export const useV3 = create<State>((set, get) => {
         : `${hostName}님이 정산했어요`
       // 보낼 돈이 하나도 없으면(총무 혼자 다 냈고 나머지가 모두 면제 등) 바로 완료
       const next = completeIfDone(push(settled, { type: 'SYSTEM', body }))
-      set((s) => ({ rooms: { ...s.rooms, [roomId]: next } }))
+      set((s) => commit(s, g, next))
       return 'OK'
     },
   }

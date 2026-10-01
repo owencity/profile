@@ -1,7 +1,36 @@
 /** H1 내 술자리의 규칙 — docs/SCREENS.md §5 H1. 앱도 같은 규칙을 옮긴다. */
 import type { Gathering, Id } from './model'
-import { participantOfUser } from './model'
+import { hasResponded, participantOfUser } from './model'
 import { nextAction } from './nextAction'
+
+/**
+ * 목록에서 방을 눌렀을 때 바로 갈 곳(CTO 결정 2026-10-01). 참여자는 정산방보다 **할 일 화면을
+ * 먼저** 본다 — 응답 전이면 응답하기, 정산이 나왔는데 금액을 아직 안 봤으면 내 금액.
+ * 그 밖에는 정산방. 총무는 늘 정산방(할 일 버튼이 거기 있다).
+ */
+export function entryRoute(g: Gathering, userId: Id, paySeen: boolean): string {
+  const room = `/jungsan/r/${g.id}`
+  const me = participantOfUser(g, userId)
+  if (!me || g.hostUserId === userId) return room
+  if (g.status === 'OPEN' && g.rounds.length > 0 && !hasResponded(g, me.id)) return `${room}/respond`
+  if (g.status === 'SETTLING' && !paySeen && g.transfers.some((t) => t.fromParticipantId === me.id && t.status !== 'CONFIRMED')) {
+    return `${room}/pay`
+  }
+  return room
+}
+
+/** 목록 줄에 붙일 뱃지 — 내가 아직 확인 안 한 일. 없으면 null */
+export function rowBadge(g: Gathering, userId: Id, paySeen: boolean): string | null {
+  const me = participantOfUser(g, userId)
+  if (!me) return null
+  const isHost = g.hostUserId === userId
+  if (g.status === 'OPEN') return !isHost && g.rounds.length > 0 && !hasResponded(g, me.id) ? '응답하기' : null
+  if (g.status !== 'SETTLING') return null
+  // 배너와 같은 순서 원칙: 남을 막고 있는 일(보냈다는 돈 확인)이 먼저 — SCREENS.md §4
+  if (g.transfers.some((t) => t.toParticipantId === me.id && t.status === 'SENT')) return '입금 확인'
+  if (!paySeen && g.transfers.some((t) => t.fromParticipantId === me.id && t.status !== 'CONFIRMED')) return '정산금액 확인'
+  return null
+}
 
 /** 새 술자리 이름 — 입력받지 않고 날짜로 채운다("9/30 술자리"). 정산방 메뉴에서 바꾼다. */
 export const autoTitle = (d: Date) => `${d.getMonth() + 1}/${d.getDate()} 술자리`

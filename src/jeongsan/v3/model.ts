@@ -94,6 +94,22 @@ export type Gathering = {
   spoonGivers: Id[]
 }
 
+/**
+ * 앱 안 알림(N1). 실제 서비스에선 서버가 만들고 푸시(FCM)도 같이 보낸다 — 목데이터 단계에선
+ * 스토어가 상태 전이 때 만든다.
+ */
+export type AppNotification = {
+  id: Id
+  userId: Id
+  roomId: Id
+  title: string
+  body: string
+  /** 누르면 갈 곳 */
+  link: string
+  createdAt: string
+  read: boolean
+}
+
 // ── 조회 도우미 ─────────────────────────────────
 
 export const hostOf = (g: Gathering) => g.participants.find((p) => p.userId === g.hostUserId)!
