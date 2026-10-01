@@ -1,14 +1,16 @@
 /**
  * H1 내 술자리 — docs/SCREENS.md §5. 로그인하면 가장 먼저 보이는 화면.
  *
- * 모임(Group)은 없다. 내가 참여한 술자리만 진행 중 / 완료로 나눠 보여주고, 각 줄에는
- * 그 방에서 "지금 할 일" 한 줄을 붙인다 — 목록에서 이미 무엇을 해야 하는지 보이게.
+ * 모임(Group)은 없다. 내가 들어간 술자리를 탭 세 개로 나눈다: [내가 총무] [참여 중] [완료].
+ * 각 줄에는 그 방의 "지금 할 일" 한 줄을 붙여, 방에 들어가기 전에 무엇을 할지 보이게 한다.
  */
+import { useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, User } from './model'
-import { daysUntilDelete } from './model'
-import { myRooms } from './home'
+import { daysUntilDelete, hostOf } from './model'
+import type { HomeTab } from './home'
+import { TAB_LABEL, initialTab, myRoomTabs, tabHasTodo } from './home'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
 
@@ -21,9 +23,19 @@ type Props = {
   onBack: () => void
 }
 
+const EMPTY: Record<HomeTab, string> = {
+  HOSTING: '총무로 연 술자리가 없어요. 아래 [+ 새 술자리]로 시작해요',
+  JOINED: '참여 중인 술자리가 없어요. 친구가 보낸 링크로 들어올 수 있어요',
+  DONE: '완료된 술자리가 없어요. 완료되면 7일 동안 여기 남아요',
+}
+
+const TABS: HomeTab[] = ['HOSTING', 'JOINED', 'DONE']
+
 export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
-  const { active, done } = myRooms(rooms, me.id)
+  const tabs = myRoomTabs(rooms, me.id)
+  const [tab, setTab] = useState<HomeTab>(() => initialTab(tabs, me.id))
   const neverHosted = me.spoonCount === 0 && !rooms.some((g) => g.hostUserId === me.id)
+  const list = tabs[tab]
 
   return (
     <div className="js-shell js-home">
@@ -41,25 +53,35 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
         </div>
       </section>
 
-      <section aria-labelledby="h-active">
-        <h2 id="h-active" className="js-lab">진행 중</h2>
-        {active.length === 0 ? (
-          <div className="js-homeempty">진행 중인 술자리가 없어요</div>
+      <div className="js-tabs" role="tablist" aria-label="술자리 나누기">
+        {TABS.map((t) => {
+          const todo = t !== 'DONE' && tabHasTodo(tabs[t], me.id)
+          return (
+            <button
+              key={t}
+              role="tab"
+              id={`tab-${t}`}
+              aria-selected={tab === t}
+              aria-controls="home-panel"
+              className={`js-tab${tab === t ? ' on' : ''}`}
+              onClick={() => setTab(t)}
+            >
+              {TAB_LABEL[t]} <span className="n">{tabs[t].length}</span>
+              {todo && <i className="dot" aria-label="할 일 있음" />}
+            </button>
+          )
+        })}
+      </div>
+
+      <section id="home-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {list.length === 0 ? (
+          <div className="js-homeempty">{EMPTY[tab]}</div>
         ) : (
-          <ul className="js-rlist">
-            {active.map((g) => <RoomRow key={g.id} g={g} meId={me.id} onOpen={onOpen} />)}
+          <ul className={`js-rlist${tab === 'DONE' ? ' done' : ''}`}>
+            {list.map((g) => <RoomRow key={g.id} g={g} meId={me.id} tab={tab} onOpen={onOpen} />)}
           </ul>
         )}
       </section>
-
-      {done.length > 0 && (
-        <section aria-labelledby="h-done">
-          <h2 id="h-done" className="js-lab">완료</h2>
-          <ul className="js-rlist done">
-            {done.map((g) => <RoomRow key={g.id} g={g} meId={me.id} onOpen={onOpen} />)}
-          </ul>
-        </section>
-      )}
 
       <div className="js-dock">
         <button className="js-cta" onClick={onCreate}>+ 새 술자리</button>
@@ -68,7 +90,7 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
   )
 }
 
-function RoomRow({ g, meId, onOpen }: { g: Gathering; meId: Id; onOpen: (id: Id) => void }) {
+function RoomRow({ g, meId, tab, onOpen }: { g: Gathering; meId: Id; tab: HomeTab; onOpen: (id: Id) => void }) {
   const isHost = g.hostUserId === meId
   const days = daysUntilDelete(g)
   const act = nextAction(g, meId)
@@ -77,7 +99,9 @@ function RoomRow({ g, meId, onOpen }: { g: Gathering; meId: Id; onOpen: (id: Id)
       <button className={`js-rrow ${act.tone}`} onClick={() => onOpen(g.id)}>
         <span className="top">
           <b>{g.title}</b>
-          <span className={`js-role${isHost ? ' host' : ''}`}>{isHost ? '총무' : '참여'}</span>
+          {/* 탭이 이미 역할을 말해주니, 역할이 섞이는 [완료]에서만 붙인다. [참여 중]엔 누가 총무인지 */}
+          {tab === 'DONE' && <span className={`js-role${isHost ? ' host' : ''}`}>{isHost ? '총무' : '참여'}</span>}
+          {tab === 'JOINED' && <span className="js-role">{hostOf(g).displayName} 총무</span>}
           {g.status === 'COMPLETED' && <span className="js-badge done">완료</span>}
         </span>
         <span className="todo">{days !== null ? `${days}일 뒤 사라져요` : act.banner}</span>

@@ -34,7 +34,7 @@ export function RespondPage({ g, meId, onBack, onSubmit }: Props) {
         <div className="js-rtitle"><b>{already ? '응답 고치기' : '응답하기'}</b></div>
       </header>
 
-      <p className="js-lead">차수마다 어떻게 했는지 골라주세요. 정산 전까지는 다시 고칠 수 있어요.</p>
+      <p className="js-lead">차수마다 하나만 고르면 끝이에요.</p>
 
       {editable.length > 1 && (
         <section className="js-field">

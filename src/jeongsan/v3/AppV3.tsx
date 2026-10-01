@@ -85,6 +85,8 @@ export function AppV3({ route, navigate, onLeave }: Props) {
   if (isV3Home(route)) {
     return wrap(
       <HomePage
+        // 보는 사람이 바뀌면 처음 열 탭도 그 사람 기준으로 다시 고른다
+        key={me.id}
         me={me}
         rooms={Object.values(rooms)}
         onBack={onLeave}
