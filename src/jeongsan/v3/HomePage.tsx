@@ -10,6 +10,7 @@ import type { Gathering, Id, User } from './model'
 import { daysUntilDelete } from './model'
 import { myRooms } from './home'
 import { nextAction } from './nextAction'
+import { BackButton } from './BackButton'
 
 type Props = {
   me: User
@@ -27,7 +28,7 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack }: Props) {
   return (
     <div className="js-shell js-home">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="로그인 화면으로">‹</button>
+        <BackButton onClick={onBack} to="로그인 화면으로" />
         <div className="js-rtitle"><b>내 술자리</b></div>
       </header>
 

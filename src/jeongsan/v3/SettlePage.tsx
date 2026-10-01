@@ -10,6 +10,7 @@ import type { Gathering, Id, ResponseType } from './model'
 import { RESPONSE_LABEL, hostOf, nameOf, responseOf, unrespondedParticipants, won } from './model'
 import type { SettlePreview } from './mockServer'
 import { ResponseRow } from './ResponseRow'
+import { BackButton } from './BackButton'
 
 type Props = {
   g: Gathering
@@ -37,7 +38,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
   return (
     <div className="js-shell narrow js-r3">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="정산방으로">‹</button>
+        <BackButton onClick={onBack} to="정산방으로" />
         <div className="js-rtitle"><b>정산하기</b></div>
       </header>
 
@@ -115,7 +116,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
 
       {error && <div className="js-errs" role="alert">{error}</div>}
 
-      <div className="js-r2btns">
+      <div className="js-r2btns stick">
         <button className="js-cta" onClick={settle}>정산하기</button>
       </div>
     </div>

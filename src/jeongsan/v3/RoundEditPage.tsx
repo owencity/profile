@@ -9,6 +9,7 @@ import type { DrinkItem, Gathering, Id, Round } from './model'
 import { hostOf, won } from './model'
 import type { RoundDraft } from './round'
 import { DRINK_PRESETS, drinksTotal, parseAmount, validateRound } from './round'
+import { BackButton } from './BackButton'
 
 type Props = {
   g: Gathering
@@ -52,7 +53,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
   return (
     <div className="js-shell narrow js-r2">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="정산방으로">‹</button>
+        <BackButton onClick={onBack} to="정산방으로" />
         <div className="js-rtitle"><b>{label}{round ? ' 고치기' : ' 넣기'}</b></div>
       </header>
 

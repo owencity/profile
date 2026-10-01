@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import type { Gathering, Id, Transfer } from './model'
 import { RESPONSE_LABEL, won } from './model'
+import { BackButton } from './BackButton'
 
 type Props = {
   g: Gathering
@@ -21,7 +22,7 @@ export function PayPage({ g, meId, onBack, onSent }: Props) {
   return (
     <div className="js-shell narrow js-p3">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="정산방으로">‹</button>
+        <BackButton onClick={onBack} to="정산방으로" />
         <div className="js-rtitle"><b>보낼 돈</b></div>
       </header>
 

@@ -83,16 +83,16 @@
 
 /* ── 상단 줄 ── */
 .js-rtop { display: flex; align-items: center; gap: 10px; }
-/* 옛 .js-back은 옅은 회색 글자 하나라 버튼으로 안 보였다 — v3는 누를 수 있는 모양으로 */
-.js-rtop .js-back {
-  position: static; flex: none; width: 38px; height: 38px; padding: 0;
-  display: grid; place-items: center;
-  font-family: inherit; font-size: 24px; font-weight: 900; line-height: 1; color: var(--ink);
+/* 뒤로가기 — ‹ 기호만으로는 버튼인지 몰랐다. "뒤로가기" 글자를 쓴 버튼으로 (BackButton.tsx) */
+.js-backbtn {
+  flex: none; display: inline-flex; align-items: center; gap: 4px; height: 38px; padding: 0 12px 0 9px;
+  font-family: inherit; font-size: 14px; font-weight: 800; color: var(--ink); white-space: nowrap;
   background: #fff; border: var(--bd); box-shadow: var(--sh-sm); cursor: pointer;
 }
-.js-rtop .js-back:hover { background: var(--p50); }
-.js-rtop .js-back:active { transform: translate(2px, 2px); box-shadow: none; }
-.js-rtop .js-back:focus-visible { outline: 3px solid var(--p500); outline-offset: 2px; }
+.js-backbtn span { font-size: 20px; font-weight: 900; line-height: 1; margin-top: -2px; }
+.js-backbtn:hover { background: var(--p50); }
+.js-backbtn:active { transform: translate(2px, 2px); box-shadow: none; }
+.js-backbtn:focus-visible { outline: 3px solid var(--p500); outline-offset: 2px; }
 .js-rtitle { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .js-rtitle b { font-size: 17px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .js-more {
@@ -186,8 +186,10 @@ button.js-round:hover { border-color: var(--p500); }
 .js-payer { font-family: inherit; font-size: 14px; font-weight: 700; padding: 8px 14px; cursor: pointer; background: #fff; border: 2px solid var(--line); color: var(--ink2); }
 .js-payer.on { background: var(--p600); border-color: var(--ink); color: #fff; box-shadow: var(--sh-sm); }
 .js-errs { background: var(--warn-bg); border: 2px solid var(--warn); color: var(--warn); font-size: 13.5px; font-weight: 700; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
-/* 화면의 할 일 버튼은 내용이 길어도 늘 보이게 바닥에 붙인다(정산방 도크와 같은 원칙) */
-.js-r2btns { display: flex; flex-direction: column; margin-top: auto; position: sticky; bottom: 0; background: #fff; padding: 4px 0 12px; z-index: 2; }
+.js-r2btns { display: flex; flex-direction: column; margin-top: auto; }
+/* 버튼이 하나뿐인 화면(R3·P2)은 내용이 길어도 늘 보이게 바닥에 붙인다(정산방 도크와 같은 원칙).
+   R2처럼 버튼이 여럿이면 붙이지 않는다 — 입력칸을 덮는다 */
+.js-r2btns.stick { position: sticky; bottom: 0; background: #fff; padding: 4px 0 12px; z-index: 2; }
 .js-del { margin-top: 14px; background: none; border: 0; color: var(--ink3); font-family: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; align-self: center; padding: 6px; }
 .js-del.armed { color: var(--warn); font-weight: 800; }
 .js-preset:focus-visible, .js-payer:focus-visible, .js-qty button:focus-visible, .js-round:focus-visible, .js-del:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }

@@ -8,6 +8,7 @@ import { useState } from 'react'
 import type { Gathering, Id, ResponseType } from './model'
 import { RESPONSE_LABEL, SELF_CHOICES, isLockedByHost, responseOf, won } from './model'
 import { ResponseRow } from './ResponseRow'
+import { BackButton } from './BackButton'
 
 type Props = {
   g: Gathering
@@ -29,7 +30,7 @@ export function RespondPage({ g, meId, onBack, onSubmit }: Props) {
   return (
     <div className="js-shell narrow js-p2">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="정산방으로">‹</button>
+        <BackButton onClick={onBack} to="정산방으로" />
         <div className="js-rtitle"><b>{already ? '응답 고치기' : '응답하기'}</b></div>
       </header>
 
@@ -65,7 +66,7 @@ export function RespondPage({ g, meId, onBack, onSubmit }: Props) {
         })}
       </ul>
 
-      <div className="js-r2btns">
+      <div className="js-r2btns stick">
         {!filled && <div className="js-hint center">모든 차수를 골라야 저장할 수 있어요</div>}
         <button
           className="js-cta"

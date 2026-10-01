@@ -11,6 +11,7 @@ import type { Gathering, Id, Participant } from './model'
 import { hasResponded, hostOf, nameOf, participantOfUser, won } from './model'
 import type { ActionKind } from './nextAction'
 import { nextAction } from './nextAction'
+import { BackButton } from './BackButton'
 
 type Props = {
   g: Gathering
@@ -36,7 +37,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
   return (
     <div className="js-shell js-room">
       <header className="js-rtop">
-        <button className="js-back" onClick={onBack} aria-label="내 술자리로">‹</button>
+        <BackButton onClick={onBack} to="내 술자리로" />
         <div className="js-rtitle">
           <b>{g.title}</b>
           {g.status === 'COMPLETED' && <span className="js-badge done">완료</span>}
