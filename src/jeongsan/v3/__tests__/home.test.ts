@@ -54,9 +54,9 @@ describe('내 술자리 탭 — [내가 총무] [참여 중] [완료]', () => {
   })
 
   it('처음 열리는 탭은 할 일이 있는 탭이다 — 총무 일이 먼저', () => {
-    // 동규: 총무방(101)은 응답 기다리는 중(wait), 참여방(102)은 보낼 돈(todo)
+    // 김동규: 총무방(101)은 응답 기다리는 중(wait), 참여방(102)은 보낼 돈(todo)
     expect(initialTab(myRoomTabs(MOCK_ROOMS, ME.id), ME.id)).toBe('JOINED')
-    // 민지: 총무방(102)에 재훈이 보냈대요(todo)
+    // 이민지: 총무방(102)에 박재훈이 보냈대요(todo)
     expect(initialTab(myRoomTabs(MOCK_ROOMS, 2), 2)).toBe('HOSTING')
   })
 

@@ -1,10 +1,11 @@
 /**
- * L2 이름 확인 — 첫 로그인 때 한 번(docs/SCREENS.md §2). 카카오 닉네임을 기본값으로 채워 두고,
- * 친구들이 정산방에서 알아볼 이름인지 확인만 받는다. 대부분은 그대로 [이 이름으로 시작]을 누른다.
+ * L2 이름 확인 — 첫 로그인 때 한 번(docs/SCREENS.md §2). **실명을 성까지** 받는다 — 총무가 은행 앱의
+ * 입금자명과 참여자를 맞춰 보기 때문이다. 칸은 비워 둔다(카카오 닉네임을 채워 두면 그대로 넘어가 실명이 안 모인다).
+ * 한 번 정하면 바뀌지 않는다. 카카오 닉네임은 목록에서 `이름(닉네임)`으로 옆에 붙는다.
  */
 import { useState } from 'react'
-import type { User } from './model'
-import { MAX_NAME, validateName } from './name'
+import { nameWithNick, type User } from './model'
+import { MAX_NAME, NAME_GUIDE, validateName } from './name'
 import { BackButton } from './BackButton'
 
 type Props = {
@@ -14,10 +15,10 @@ type Props = {
 }
 
 export function NamePage({ me, onBack, onConfirm }: Props) {
-  const [name, setName] = useState(me.displayName)
+  const [name, setName] = useState('')
   const [tried, setTried] = useState(false)
   const errors = validateName(name)
-  const preview = name.trim() || '이름'
+  const preview = name.trim() || '김동규'
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,25 +35,27 @@ export function NamePage({ me, onBack, onConfirm }: Props) {
       <section className="js-p1hero">
         <span className="js-p1kicker">처음 오셨네요</span>
         <h1>정산방에서 쓸 이름</h1>
-        <span className="sub">카카오 닉네임을 가져왔어요. 친구들이 알아볼 이름으로 바꿔도 돼요.</span>
+        <span className="sub">한 번 정하면 바꿀 수 없어요.</span>
       </section>
 
       <section className="js-field">
-        <label htmlFor="display-name" className="js-lab">이름 <small>{[...name.trim()].length}/{MAX_NAME}</small></label>
+        <label htmlFor="display-name" className="js-lab">실명 <small>{[...name.trim()].length}/{MAX_NAME}</small></label>
+        <div className="js-nameguide">{NAME_GUIDE}</div>
         <input
           id="display-name"
           className="js-inp big"
-          autoComplete="nickname"
+          autoComplete="name"
+          placeholder="예: 김동규"
           maxLength={MAX_NAME + 4}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </section>
 
-      {/* 실제로 어떻게 보이는지 — 친구 화면의 알림·타임라인 문구로 미리 보여준다 */}
+      {/* 실제로 어떻게 보이는지 — 목록엔 이름(닉네임), 알림·타임라인 문장엔 이름만 */}
       <section className="js-namepreview" aria-label="미리보기">
         <span className="js-lab">친구들에겐 이렇게 보여요</span>
-        <div className="js-tlsys"><span>⚙ {preview}님이 들어왔어요</span></div>
+        <div className="js-namerow">👤 <b>{nameWithNick({ displayName: preview, nickname: me.nickname })}</b> <small>참여자 목록</small></div>
         <div className="js-tlsys"><span>⚙ {preview}님이 보냈대요. 입금을 확인해주세요</span></div>
       </section>
 

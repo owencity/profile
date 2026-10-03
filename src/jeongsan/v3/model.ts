@@ -21,7 +21,9 @@ export type User = {
   displayName: string
   spoonCount: number
   payout?: Payout
-  /** 첫 로그인이라 표시 이름을 아직 확인하지 않았다(L2). 그동안 displayName은 카카오 닉네임 그대로다 */
+  /** 카카오 닉네임. 목록에서 `이름(닉네임)`으로 같이 보여 누군지 알아보게 한다. 사용자가 입력하지 않는다 */
+  nickname?: string
+  /** 첫 로그인이라 실명을 아직 받지 않았다(L2). 한 번 받으면 바뀌지 않는다 */
   needsName?: boolean
 }
 
@@ -29,6 +31,7 @@ export type Participant = {
   id: Id
   userId: Id
   displayName: string
+  nickname?: string
   spoonCount: number
   /** 결제자일 때 받을 계좌. 없으면 "계좌 등록을 기다리는 중" */
   payout?: Payout
@@ -117,6 +120,19 @@ export type AppNotification = {
 export const hostOf = (g: Gathering) => g.participants.find((p) => p.userId === g.hostUserId)!
 
 export const participantOfUser = (g: Gathering, userId: Id) => g.participants.find((p) => p.userId === userId)
+
+/**
+ * 목록용 이름 — `김동규(동규짱)`. 참여자 줄·관리 시트·정산 확인처럼 "누구인지 알아보는" 곳에 쓴다.
+ * 타임라인·알림 같은 문장에는 이름만 쓴다(괄호까지 붙으면 한 줄을 넘는다).
+ */
+export const nameWithNick = (p: { displayName: string; nickname?: string }) =>
+  p.nickname && p.nickname !== p.displayName ? `${p.displayName}(${p.nickname})` : p.displayName
+
+/** 아바타 한 글자 — 한글 세 글자 실명은 이름 첫 글자(김동규 → 동). 성으로 하면 김씨가 여럿일 때 구분이 안 된다 */
+export const initialOf = (name: string) => {
+  const c = [...name]
+  return c.length === 3 && /^[가-힣]+$/.test(name) ? c[1] : (c[0] ?? '')
+}
 
 export const nameOf = (g: Gathering, participantId: Id) =>
   g.participants.find((p) => p.id === participantId)?.displayName ?? '알 수 없음'

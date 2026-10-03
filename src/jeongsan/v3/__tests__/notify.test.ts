@@ -33,7 +33,7 @@ describe('정산되면 알림', () => {
     s().settle(OPEN, room().inputRevision)
     const t = room().transfers.find((x) => x.fromParticipantId === 14)!
     const n = inbox(4).find((x) => x.roomId === OPEN)!
-    expect(n.body).toContain(`동규님께 ${t.amount.toLocaleString('ko-KR')}원`)
+    expect(n.body).toContain(`김동규님께 ${t.amount.toLocaleString('ko-KR')}원`)
   })
 
   it('자동응답된 사람의 알림엔 그 사실이 붙고, 총무도 따로 알림을 받는다', () => {
@@ -49,20 +49,20 @@ describe('정산되면 알림', () => {
   })
 
   it('[보냈어요]를 누르면 받는 사람에게 "입금을 확인해주세요"가 간다', () => {
-    s().markSent(SETTLING, 1) // 동규 → 민지
-    expect(inbox(2)[0].title).toBe('동규님이 보냈대요. 입금을 확인해주세요')
+    s().markSent(SETTLING, 1) // 김동규 → 이민지
+    expect(inbox(2)[0].title).toBe('김동규님이 보냈대요. 입금을 확인해주세요')
   })
 
   it('[아직 안 들어왔어요]를 누르면 보낸 사람에게 알림이 가고, 누르면 내 금액으로 간다', () => {
     s().actAs(2)
-    s().notReceived(SETTLING, 3) // 재훈 → 민지
+    s().notReceived(SETTLING, 3) // 박재훈 → 이민지
     const n = inbox(3)[0]
-    expect(n.title).toBe('민지님이 아직 입금을 확인 못 했대요')
+    expect(n.title).toBe('이민지님이 아직 입금을 확인 못 했대요')
     expect(n.link).toBe('/jungsan/r/102/pay')
   })
 
   it('모두 입금되면 행동한 사람 빼고 모두에게 "정산 완료!"가 간다', () => {
-    // 102를 끝까지: 동규(1·2번 송금), 민지(5번 송금)가 보내고, 받는 사람이 모두 확인. 마지막 확인은 재훈
+    // 102를 끝까지: 김동규(1·2번 송금), 이민지(5번 송금)가 보내고, 받는 사람이 모두 확인. 마지막 확인은 박재훈
     s().markSent(SETTLING, 1); s().markSent(SETTLING, 2)
     s().actAs(2); s().confirmIncoming(SETTLING, 1); s().confirmIncoming(SETTLING, 3); s().markSent(SETTLING, 5)
     s().actAs(3); s().confirmIncoming(SETTLING, 2); s().confirmIncoming(SETTLING, 5)
@@ -121,7 +121,7 @@ describe('목록 뱃지 — 내가 아직 확인 안 한 일', () => {
   })
 
   it('누가 보냈다고 한 돈이 있으면 [입금 확인] — 내 보낼 돈보다 먼저(남을 막고 있는 일이 먼저)', () => {
-    // 민지: 재훈이 보냈다는 돈(확인 대기)과 자기가 재훈에게 보낼 돈이 둘 다 있다
+    // 이민지: 박재훈이 보냈다는 돈(확인 대기)과 자기가 박재훈에게 보낼 돈이 둘 다 있다
     expect(rowBadge(room(SETTLING), 2, false)).toBe('입금 확인')
   })
 

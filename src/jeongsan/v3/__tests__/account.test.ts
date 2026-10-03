@@ -9,7 +9,7 @@ import { nextAction } from '../nextAction'
 import { cleanAccountNo, copyableAccountNo, copyableAmount, validatePayout } from '../payout'
 import { useV3 } from '../store'
 
-const SETTLING = 102 // 재훈(3, 참여자 23)은 2차 결제자인데 계좌가 없다. 동규(22)가 재훈에게 24,000원
+const SETTLING = 102 // 박재훈(3, 참여자 23)은 2차 결제자인데 계좌가 없다. 김동규(22)가 박재훈에게 24,000원
 const s = () => useV3.getState()
 const room = (id = SETTLING) => s().rooms[id]
 const KB = { bank: '국민', accountNo: '123-45-678901', holder: '박재훈' }
@@ -52,7 +52,7 @@ describe('입력 검증', () => {
 
 describe('목록에서 계좌 등록이 가장 먼저', () => {
   it('계좌 없는 결제자의 줄엔 [계좌 등록] 뱃지가 다른 뱃지보다 먼저 붙는다', () => {
-    // 재훈은 102에서 보낼 돈(정산금액 확인 대상)도 있지만 계좌 등록이 먼저
+    // 박재훈은 102에서 보낼 돈(정산금액 확인 대상)도 있지만 계좌 등록이 먼저
     expect(rowBadge(room(), 3, false)).toBe('계좌 등록')
   })
 
@@ -97,12 +97,12 @@ describe('등록', () => {
   it('처음 등록하면 그 사람에게 보낼 돈이 있는 사람에게 알림이 가고, 누르면 보낼 돈으로 간다', () => {
     s().registerPayout(KB)
     const toDongkyu = s().notifications.find((n) => n.userId === 1 && n.roomId === SETTLING)!
-    expect(toDongkyu.title).toBe('재훈님이 계좌를 등록했어요. 이제 보낼 수 있어요')
+    expect(toDongkyu.title).toBe('박재훈님이 계좌를 등록했어요. 이제 보낼 수 있어요')
     expect(toDongkyu.link).toBe('/jungsan/r/102/pay')
   })
 
   it('타임라인에 등록 소식이 남는다', () => {
     s().registerPayout(KB)
-    expect(room().timeline.at(-1)!.body).toBe('재훈님이 받을 계좌를 등록했어요')
+    expect(room().timeline.at(-1)!.body).toBe('박재훈님이 받을 계좌를 등록했어요')
   })
 })

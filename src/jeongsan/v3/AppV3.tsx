@@ -147,7 +147,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         loggedIn={loggedIn}
         onLogin={onLogin}
         // 첫 로그인이면 P1에서 이름 확인(L2)을 같이 받는다 — 확인한 이름으로 참여한다
-        askName={me.needsName ? me.displayName : undefined}
+        askName={me.needsName}
         onJoin={(answers, name) => {
           if (name !== undefined) confirmName(name)
           const id = joinGathering(token, answers)

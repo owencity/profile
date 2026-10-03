@@ -343,6 +343,11 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 /* ── L2 이름 확인 ── */
 .js-l2 { gap: 16px; }
 .js-namepreview { display: flex; flex-direction: column; gap: 6px; background: var(--p50); border: var(--bd-l); padding: 10px 12px; }
+.js-namerow { font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+.js-namerow small { font-size: 11.5px; color: var(--ink3); margin-left: 4px; }
+/* 실명 안내 — 왜 실명인지까지 한 줄로. 강조색으로 눈에 띄게 */
+.js-nameguide { font-size: 13px; font-weight: 700; color: var(--acc-strong); line-height: 1.45; }
+.js-person .nick { font-size: 10.5px; color: var(--ink3); max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: -3px; }
 
 /* ── A1 계좌 등록 ── */
 .js-a1 { gap: 16px; }

@@ -20,7 +20,7 @@ describe('공유 문구', () => {
   const url = 'https://x/jungsan/j/k7Qx2'
 
   it('응답 받는 중이면 "차수마다 마셨는지만 눌러주세요"', () => {
-    expect(shareMessage(room(101), url)).toBe(`[정산어택] 동규님의 9/28 술자리\n차수마다 마셨는지만 눌러주세요 👉 ${url}`)
+    expect(shareMessage(room(101), url)).toBe(`[정산어택] 김동규님의 9/28 술자리\n차수마다 마셨는지만 눌러주세요 👉 ${url}`)
   })
 
   it('차수가 아직 없으면 먼저 들어오라고 한다', () => {

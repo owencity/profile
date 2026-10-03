@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { Gathering, Id } from './model'
-import { RESPONSE_LABEL, responseOf } from './model'
+import { RESPONSE_LABEL, nameWithNick, responseOf } from './model'
 import { removeBlockedReason } from './store'
 import { SHOW_EXEMPT } from './features'
 
@@ -49,7 +49,7 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
         onClick={(e) => e.stopPropagation()}
       >
         <div className="js-sheethd">
-          <b>{p.displayName}</b>
+          <b>{nameWithNick(p)}</b>
           {paid.length > 0 && <span className="js-role">{paid.map((r) => r.label).join('·')} 낸 사람</span>}
           <button type="button" className="js-linkbtn" onClick={onClose}>닫기</button>
         </div>

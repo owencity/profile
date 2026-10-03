@@ -270,7 +270,7 @@ export const useV3 = create<State>((set, get) => {
         // 목데이터용 링크 토큰. 실제로는 서버가 발급한다
         shareToken: Math.random().toString(36).slice(2, 7),
         inputRevision: 0,
-        participants: [{ id: pid, userId: me.id, displayName: me.displayName, spoonCount: me.spoonCount, payout: me.payout }],
+        participants: [{ id: pid, userId: me.id, displayName: me.displayName, nickname: me.nickname, spoonCount: me.spoonCount, payout: me.payout }],
         rounds: [],
         responses: [],
         transfers: [],
@@ -319,7 +319,7 @@ export const useV3 = create<State>((set, get) => {
       const pid = Math.max(0, ...Object.values(rooms).flatMap((x) => x.participants.map((p) => p.id))) + 1
       let next: Gathering = {
         ...g,
-        participants: [...g.participants, { id: pid, userId: me.id, displayName: me.displayName, spoonCount: me.spoonCount, payout: me.payout }],
+        participants: [...g.participants, { id: pid, userId: me.id, displayName: me.displayName, nickname: me.nickname, spoonCount: me.spoonCount, payout: me.payout }],
       }
       next = push(next, { type: 'SYSTEM', body: `${me.displayName}님이 들어왔어요` })
       let responses = next.responses

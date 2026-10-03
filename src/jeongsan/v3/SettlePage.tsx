@@ -7,7 +7,7 @@
  */
 import { useState } from 'react'
 import type { Gathering, Id, ResponseType } from './model'
-import { RESPONSE_LABEL, hostOf, nameOf, responseOf, unrespondedParticipants, won } from './model'
+import { RESPONSE_LABEL, hostOf, nameOf, nameWithNick, responseOf, unrespondedParticipants, won } from './model'
 import type { SettlePreview } from './mockServer'
 import { ResponseRow } from './ResponseRow'
 import { BackButton } from './BackButton'
@@ -93,7 +93,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
             return (
               <li key={l.participantId}>
                 <div className="who">
-                  <b>{p.displayName}</b>
+                  <b>{nameWithNick(p)}</b>
                   {p.id === host.id && <span className="js-role host">총무</span>}
                   {paid && <span className="js-role">낸 사람</span>}
                   {l.auto && <span className="js-role auto">자동</span>}

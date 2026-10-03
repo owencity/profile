@@ -58,7 +58,7 @@ describe('정산하기', () => {
       expect(hasResponded(room(), pid)).toBe(true)
       expect(room().responses.filter((r) => r.participantId === pid).every((r) => r.type === 'DRANK' && r.source === 'AUTO')).toBe(true)
     }
-    expect(room().timeline.at(-1)!.body).toContain('지영·민수님은 응답이 없어')
+    expect(room().timeline.at(-1)!.body).toContain('최지영·정민수님은 응답이 없어')
   })
 
   it('자동응답된 사람의 배너 아래에 안내가 붙는다', () => {
@@ -109,7 +109,7 @@ describe('내 응답(P2)', () => {
     s().respond(OPEN, [{ roundId: 1, type: 'DRANK' }, { roundId: 2, type: 'SOBER' }])
     expect(responseOf(room(), 15, 2)).toMatchObject({ type: 'SOBER', source: 'SELF' })
     expect(nextAction(room(), 5).action?.kind).toBe('EDIT_RESPONSE')
-    expect(room().timeline.at(-1)!.body).toBe('민수님이 응답했어요')
+    expect(room().timeline.at(-1)!.body).toBe('정민수님이 응답했어요')
   })
 
   it('총무가 면제로 정한 칸은 참여자가 바꿀 수 없다', () => {
@@ -134,14 +134,14 @@ describe('내 응답(P2)', () => {
 
 describe('보낼 돈(P3)', () => {
   it('[보냈어요]를 누르면 받는 사람의 배너가 "확인해주세요"로 바뀐다', () => {
-    s().markSent(SETTLING, 1) // 동규 → 민지
+    s().markSent(SETTLING, 1) // 김동규 → 이민지
     s().actAs(2)
-    expect(nextAction(room(SETTLING), 2).banner).toBe('동규님이 보냈대요. 확인해주세요')
+    expect(nextAction(room(SETTLING), 2).banner).toBe('김동규님이 보냈대요. 확인해주세요')
   })
 
   it('[아직 안 들어왔어요] 뒤에는 보낸 사람이 다시 [보냈어요]를 누를 수 있다', () => {
     s().actAs(2)
-    s().notReceived(SETTLING, 3) // 재훈 → 민지, SENT 였다
+    s().notReceived(SETTLING, 3) // 박재훈 → 이민지, SENT 였다
     expect(room(SETTLING).transfers.find((t) => t.id === 3)).toMatchObject({ status: 'WAITING' })
     expect(room(SETTLING).transfers.find((t) => t.id === 3)!.notReceivedAt).toBeDefined()
     s().actAs(3)
@@ -154,7 +154,7 @@ describe('보는 사람 바꾸기(개발용)', () => {
   it('같은 정산방이 총무에겐 정산하기, 참여자에겐 응답으로 보인다', () => {
     expect(nextAction(room(), s().me.id).action?.kind).toBe('SETTLE')
     s().actAs(4)
-    expect(s().me.displayName).toBe('지영')
+    expect(s().me.displayName).toBe('최지영')
     expect(nextAction(room(), s().me.id).action?.kind).toBe('RESPOND')
   })
 

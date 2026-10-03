@@ -11,7 +11,8 @@ import type { AppNotification, Gathering, User } from './model'
  */
 export const ME: User = {
   id: 1,
-  displayName: '동규',
+  displayName: '김동규',
+  nickname: '동규짱',
   spoonCount: 1_280,
   payout: { bank: '카카오뱅크', accountNo: '3333-01-2345678', holder: '김동규' },
   needsName: true,
@@ -23,11 +24,11 @@ export const ME: User = {
  */
 export const MOCK_USERS: User[] = [
   ME,
-  { id: 2, displayName: '민지', spoonCount: 340, payout: { bank: '토스뱅크', accountNo: '1000-1234-5678', holder: '이민지' } },
-  { id: 3, displayName: '재훈', spoonCount: 12 },
-  { id: 4, displayName: '지영', spoonCount: 0 },
-  { id: 5, displayName: '민수', spoonCount: 57 },
-  { id: 6, displayName: '서연', spoonCount: 3 },
+  { id: 2, displayName: '이민지', nickname: '밍지🍺', spoonCount: 340, payout: { bank: '토스뱅크', accountNo: '1000-1234-5678', holder: '이민지' } },
+  { id: 3, displayName: '박재훈', nickname: 'jaehoon', spoonCount: 12 },
+  { id: 4, displayName: '최지영', nickname: '지영', spoonCount: 0 },
+  { id: 5, displayName: '정민수', spoonCount: 57 },
+  { id: 6, displayName: '한서연', nickname: '🌸봄이🌸', spoonCount: 3 },
 ]
 
 const iso = (daysAgo: number, hh = 21, mm = 0) => {
@@ -41,11 +42,11 @@ const iso = (daysAgo: number, hh = 21, mm = 0) => {
 const openRoom: Gathering = {
   id: 101, title: '9/28 술자리', date: iso(1), hostUserId: 1, status: 'OPEN',
   shareToken: 'k7Qx2', inputRevision: 7, participants: [
-    { id: 11, userId: 1, displayName: '동규', spoonCount: 1_280, payout: ME.payout },
-    { id: 12, userId: 2, displayName: '민지', spoonCount: 340 },
-    { id: 13, userId: 3, displayName: '재훈', spoonCount: 12 },
-    { id: 14, userId: 4, displayName: '지영', spoonCount: 0 },
-    { id: 15, userId: 5, displayName: '민수', spoonCount: 57 },
+    { id: 11, userId: 1, displayName: '김동규', spoonCount: 1_280, payout: ME.payout },
+    { id: 12, userId: 2, displayName: '이민지', spoonCount: 340 },
+    { id: 13, userId: 3, displayName: '박재훈', spoonCount: 12 },
+    { id: 14, userId: 4, displayName: '최지영', spoonCount: 0 },
+    { id: 15, userId: 5, displayName: '정민수', spoonCount: 57 },
   ],
   rounds: [
     { id: 1, seq: 1, label: '1차', total: 184_000, payerParticipantId: 11, drinks: [
@@ -65,24 +66,24 @@ const openRoom: Gathering = {
   ],
   transfers: [],
   timeline: [
-    { id: 1, type: 'SYSTEM', body: '동규님이 술자리를 만들었어요', createdAt: iso(1, 19, 2) },
-    { id: 2, type: 'SYSTEM', body: '민지님이 들어왔어요', createdAt: iso(1, 19, 40) },
-    { id: 3, type: 'SYSTEM', body: '재훈님이 응답했어요', createdAt: iso(1, 23, 5) },
+    { id: 1, type: 'SYSTEM', body: '김동규님이 술자리를 만들었어요', createdAt: iso(1, 19, 2) },
+    { id: 2, type: 'SYSTEM', body: '이민지님이 들어왔어요', createdAt: iso(1, 19, 40) },
+    { id: 3, type: 'SYSTEM', body: '박재훈님이 응답했어요', createdAt: iso(1, 23, 5) },
     { id: 4, type: 'MESSAGE', authorParticipantId: 13, body: '2차는 먼저 들어가서 불참으로 했어요!', createdAt: iso(1, 23, 6) },
-    { id: 5, type: 'SYSTEM', body: '민지님이 응답했어요', createdAt: iso(0, 9, 12) },
-    { id: 6, type: 'MESSAGE', authorParticipantId: 11, body: '민지 생일이라 2차는 면제로 해뒀어요 🎂', createdAt: iso(0, 9, 20) },
+    { id: 5, type: 'SYSTEM', body: '이민지님이 응답했어요', createdAt: iso(0, 9, 12) },
+    { id: 6, type: 'MESSAGE', authorParticipantId: 11, body: '이민지 생일이라 2차는 면제로 해뒀어요 🎂', createdAt: iso(0, 9, 20) },
   ],
   spoonGivers: [],
 }
 
-/** ② 민지가 총무, 송금 중 — 나는 민지와 재훈(2차 결제자)에게 각각 보내야 한다 */
+/** ② 이민지가 총무, 송금 중 — 나는 이민지와 박재훈(2차 결제자)에게 각각 보내야 한다 */
 const settlingRoom: Gathering = {
   id: 102, title: '9/25 회식', date: iso(4), hostUserId: 2, status: 'SETTLING',
   shareToken: 'Pw9mL', inputRevision: 12, participants: [
-    { id: 21, userId: 2, displayName: '민지', spoonCount: 340, payout: { bank: '토스뱅크', accountNo: '1000-1234-5678', holder: '이민지' } },
-    { id: 22, userId: 1, displayName: '동규', spoonCount: 1_280, payout: ME.payout },
-    { id: 23, userId: 3, displayName: '재훈', spoonCount: 12 },
-    { id: 24, userId: 6, displayName: '서연', spoonCount: 3 },
+    { id: 21, userId: 2, displayName: '이민지', spoonCount: 340, payout: { bank: '토스뱅크', accountNo: '1000-1234-5678', holder: '이민지' } },
+    { id: 22, userId: 1, displayName: '김동규', spoonCount: 1_280, payout: ME.payout },
+    { id: 23, userId: 3, displayName: '박재훈', spoonCount: 12 },
+    { id: 24, userId: 6, displayName: '한서연', spoonCount: 3 },
   ],
   rounds: [
     { id: 11, seq: 1, label: '1차', total: 156_000, payerParticipantId: 21, drinks: [{ name: '소주', unitPrice: 5_000, quantity: 10 }] },
@@ -102,23 +103,23 @@ const settlingRoom: Gathering = {
     { id: 5, fromParticipantId: 21, toParticipantId: 23, amount: 24_000, status: 'WAITING' },
   ],
   timeline: [
-    { id: 1, type: 'SYSTEM', body: '민지님이 정산했어요 · 동규님은 전 차수 참석·알코올로 자동 계산됐어요', createdAt: iso(3, 9) },
+    { id: 1, type: 'SYSTEM', body: '이민지님이 정산했어요 · 김동규님은 전 차수 참석·알코올로 자동 계산됐어요', createdAt: iso(3, 9) },
     { id: 2, type: 'MESSAGE', authorParticipantId: 23, body: '2차는 제가 냈어요! 계좌 등록할게요', createdAt: iso(3, 9, 30) },
-    { id: 3, type: 'SYSTEM', body: '서연님이 보냈어요', createdAt: iso(3, 10) },
-    { id: 4, type: 'SYSTEM', body: '민지님이 서연님 입금을 확인했어요', createdAt: iso(3, 12) },
-    { id: 5, type: 'SPOON', authorParticipantId: 24, body: '서연님이 총무에게 한 스푼 줬어요', createdAt: iso(3, 12, 5) },
-    { id: 6, type: 'SYSTEM', body: '재훈님이 보냈어요', createdAt: iso(2, 11) },
+    { id: 3, type: 'SYSTEM', body: '한서연님이 보냈어요', createdAt: iso(3, 10) },
+    { id: 4, type: 'SYSTEM', body: '이민지님이 한서연님 입금을 확인했어요', createdAt: iso(3, 12) },
+    { id: 5, type: 'SPOON', authorParticipantId: 24, body: '한서연님이 총무에게 한 스푼 줬어요', createdAt: iso(3, 12, 5) },
+    { id: 6, type: 'SYSTEM', body: '박재훈님이 보냈어요', createdAt: iso(2, 11) },
   ],
   spoonGivers: [24],
 }
 
-/** ③ 재훈이 총무, 완료 — 2일 전 끝나서 5일 뒤 사라진다 */
+/** ③ 박재훈이 총무, 완료 — 2일 전 끝나서 5일 뒤 사라진다 */
 const completedRoom: Gathering = {
   id: 103, title: '9/20 동기 모임', date: iso(9), hostUserId: 3, status: 'COMPLETED',
   shareToken: 'Zr3Tq', inputRevision: 5, completedAt: iso(2, 14), participants: [
-    { id: 31, userId: 3, displayName: '재훈', spoonCount: 12, payout: { bank: '국민', accountNo: '123-45-678901', holder: '박재훈' } },
-    { id: 32, userId: 1, displayName: '동규', spoonCount: 1_280, payout: ME.payout },
-    { id: 33, userId: 2, displayName: '민지', spoonCount: 340 },
+    { id: 31, userId: 3, displayName: '박재훈', spoonCount: 12, payout: { bank: '국민', accountNo: '123-45-678901', holder: '박재훈' } },
+    { id: 32, userId: 1, displayName: '김동규', spoonCount: 1_280, payout: ME.payout },
+    { id: 33, userId: 2, displayName: '이민지', spoonCount: 340 },
   ],
   rounds: [{ id: 21, seq: 1, label: '1차', total: 93_000, payerParticipantId: 31, drinks: [] }],
   responses: [
@@ -131,20 +132,26 @@ const completedRoom: Gathering = {
     { id: 2, fromParticipantId: 33, toParticipantId: 31, amount: 25_000, status: 'CONFIRMED', sentAt: iso(3), confirmedAt: iso(2, 14) },
   ],
   timeline: [
-    { id: 1, type: 'SYSTEM', body: '재훈님이 정산했어요', createdAt: iso(4) },
+    { id: 1, type: 'SYSTEM', body: '박재훈님이 정산했어요', createdAt: iso(4) },
     { id: 2, type: 'SYSTEM', body: '모두 입금 완료! 🎉', createdAt: iso(2, 14) },
   ],
   spoonGivers: [33],
 }
 
-export const MOCK_ROOMS: Gathering[] = [openRoom, settlingRoom, completedRoom]
+// 참여자의 닉네임은 사람(users)에서 가져온다 — 서버도 users를 조인한다
+const withNicks = (g: Gathering): Gathering => ({
+  ...g,
+  participants: g.participants.map((p) => ({ ...p, nickname: MOCK_USERS.find((u) => u.id === p.userId)?.nickname })),
+})
+
+export const MOCK_ROOMS: Gathering[] = [openRoom, settlingRoom, completedRoom].map(withNicks)
 
 /** 이미 와 있는 알림 — 목데이터 술자리들이 지금 단계까지 오며 생겼을 것들 */
 export const MOCK_NOTIFICATIONS: AppNotification[] = [
   { id: 1, userId: 1, roomId: 102, link: '/jungsan/r/102/pay', read: false, createdAt: iso(3, 9),
-    title: '정산이 나왔어요! 입금액을 확인해주세요', body: '9/25 회식 · 민지님께 41,000원 외 1건 · 응답이 없어 전 차수 참석·알코올로 계산됐어요' },
+    title: '정산이 나왔어요! 입금액을 확인해주세요', body: '9/25 회식 · 이민지님께 41,000원 외 1건 · 응답이 없어 전 차수 참석·알코올로 계산됐어요' },
   { id: 2, userId: 2, roomId: 102, link: '/jungsan/r/102', read: false, createdAt: iso(2, 11),
-    title: '재훈님이 보냈대요. 입금을 확인해주세요', body: '9/25 회식 · 29,000원' },
+    title: '박재훈님이 보냈대요. 입금을 확인해주세요', body: '9/25 회식 · 29,000원' },
   { id: 3, userId: 1, roomId: 103, link: '/jungsan/r/103', read: true, createdAt: iso(2, 14),
     title: '정산 완료! 🎉', body: '9/20 동기 모임 · 모두 입금했어요. 7일 뒤 사라져요' },
 ]

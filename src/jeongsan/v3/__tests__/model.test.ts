@@ -46,7 +46,7 @@ describe('정산 되돌리기 가능 여부 — DOMAIN_DB_DESIGN_V2.md §5.2', (
 describe('응답 여부', () => {
   it('모든 차수에 응답이 있어야 응답한 것이다', () => {
     const g = room(101)
-    expect(hasResponded(g, 13)).toBe(true) // 재훈: 1차·2차 모두
+    expect(hasResponded(g, 13)).toBe(true) // 박재훈: 1차·2차 모두
     g.responses = g.responses.filter((r) => !(r.participantId === 13 && r.roundId === 2))
     expect(hasResponded(g, 13)).toBe(false)
   })

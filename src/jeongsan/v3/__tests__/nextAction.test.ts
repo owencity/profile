@@ -8,9 +8,9 @@ import { MOCK_ROOMS } from '../mock'
 import { nextAction } from '../nextAction'
 
 const room = (id: number): Gathering => structuredClone(MOCK_ROOMS.find((g) => g.id === id)!)
-const OPEN = 101 // 동규(1)가 총무, 지영(4)·민수(5) 미응답
-const SETTLING = 102 // 민지(2)가 총무, 동규(1)는 민지·재훈에게 보낼 돈
-const COMPLETED = 103 // 재훈(3)이 총무, 민지는 스푼 줬고 동규는 아직
+const OPEN = 101 // 김동규(1)가 총무, 최지영(4)·정민수(5) 미응답
+const SETTLING = 102 // 이민지(2)가 총무, 김동규(1)는 이민지·박재훈에게 보낼 돈
+const COMPLETED = 103 // 박재훈(3)이 총무, 이민지는 스푼 줬고 김동규는 아직
 
 describe('총무 — 정산 전', () => {
   it('차수가 없으면 1차 금액 입력이 먼저 뜬다', () => {
@@ -65,7 +65,7 @@ describe('참여자 — 정산 전', () => {
 describe('송금 중', () => {
   it('보낼 돈이 있으면 받는 사람과 금액을 알려준다', () => {
     const a = nextAction(room(SETTLING), 1)
-    expect(a.banner).toBe('민지님께 41,000원을 보내주세요')
+    expect(a.banner).toBe('이민지님께 41,000원을 보내주세요')
     expect(a.action?.kind).toBe('VIEW_PAY')
   })
 
@@ -78,37 +78,37 @@ describe('송금 중', () => {
     const t = g.transfers.find((x) => x.id === 1)!
     t.sentAt = new Date().toISOString()
     t.notReceivedAt = new Date().toISOString()
-    expect(nextAction(g, 1).banner).toBe('민지님이 아직 입금을 확인 못 했어요')
+    expect(nextAction(g, 1).banner).toBe('이민지님이 아직 입금을 확인 못 했어요')
   })
 
   it('계좌 없는 결제자에게는 계좌 등록이 무엇보다 먼저 뜬다', () => {
-    // 재훈은 2차 결제자인데 계좌가 없다
+    // 박재훈은 2차 결제자인데 계좌가 없다
     expect(nextAction(room(SETTLING), 3).action?.kind).toBe('REGISTER_ACCOUNT')
   })
 
   it('남을 막고 있는 일이 먼저다 — 총무에게 보낼 돈이 남아 있어도 [보냈어요] 받은 확인이 먼저 뜬다', () => {
-    // 민지(총무)는 재훈에게 보낼 24,000원이 있지만, 재훈이 보낸 29,000원이 확인을 기다린다
+    // 이민지(총무)는 박재훈에게 보낼 24,000원이 있지만, 박재훈이 보낸 29,000원이 확인을 기다린다
     const a = nextAction(room(SETTLING), 2)
-    expect(a.banner).toBe('재훈님이 보냈대요. 확인해주세요')
+    expect(a.banner).toBe('박재훈님이 보냈대요. 확인해주세요')
     expect(a.action?.kind).toBe('CONFIRM_INCOMING')
   })
 
   it('확인할 게 없으면 총무도 다른 결제자에게 보낼 돈을 안내받는다', () => {
     const g = room(SETTLING)
-    g.transfers.find((x) => x.id === 3)!.status = 'CONFIRMED' // 재훈 → 민지 확인 끝
-    expect(nextAction(g, 2).banner).toBe('재훈님께 24,000원을 보내주세요')
+    g.transfers.find((x) => x.id === 3)!.status = 'CONFIRMED' // 박재훈 → 이민지 확인 끝
+    expect(nextAction(g, 2).banner).toBe('박재훈님께 24,000원을 보내주세요')
   })
 
   it('결제자에게도 같은 원칙 — [보냈어요] 받은 확인이 내 송금의 [아직 안 들어왔어요]보다 먼저다', () => {
     const g = room(SETTLING)
-    g.participants.find((p) => p.id === 23)!.payout = { bank: '국민', accountNo: '1', holder: '재훈' }
+    g.participants.find((p) => p.id === 23)!.payout = { bank: '국민', accountNo: '1', holder: '박재훈' }
     const fromMe = g.transfers.find((x) => x.id === 2)!
-    fromMe.status = 'SENT' // 동규 → 재훈 보냄
+    fromMe.status = 'SENT' // 김동규 → 박재훈 보냄
     fromMe.sentAt = new Date().toISOString()
-    const bounced = g.transfers.find((x) => x.id === 3)! // 재훈 → 민지: 안 들어왔대요
+    const bounced = g.transfers.find((x) => x.id === 3)! // 박재훈 → 이민지: 안 들어왔대요
     bounced.status = 'WAITING'
     bounced.notReceivedAt = new Date().toISOString()
-    expect(nextAction(g, 3).banner).toBe('동규님이 보냈대요. 확인해주세요')
+    expect(nextAction(g, 3).banner).toBe('김동규님이 보냈대요. 확인해주세요')
   })
 
   it('내 송금이 모두 확인되면 총무에게 한 스푼을 권하고, 이미 줬으면 권하지 않는다', () => {
@@ -128,8 +128,8 @@ describe('완료', () => {
   })
 
   it('스푼을 아직 안 준 참여자에게만 한 스푼 버튼을 준다', () => {
-    expect(nextAction(room(COMPLETED), 1).action?.kind).toBe('GIVE_SPOON') // 동규: 아직
-    expect(nextAction(room(COMPLETED), 2).action).toBeUndefined() // 민지: 이미 줌
+    expect(nextAction(room(COMPLETED), 1).action?.kind).toBe('GIVE_SPOON') // 김동규: 아직
+    expect(nextAction(room(COMPLETED), 2).action).toBeUndefined() // 이민지: 이미 줌
   })
 
   it('총무 자신에게는 스푼 버튼이 없다', () => {

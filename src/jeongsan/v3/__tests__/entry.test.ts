@@ -7,14 +7,14 @@ import { hasResponded, participantOfUser, responseOf } from '../model'
 import { isV3JoinRoute, isV3Route } from '../routes'
 import { useV3 } from '../store'
 
-const OPEN_TOKEN = 'k7Qx2' // 101 — 동규 총무, 응답 받는 중
+const OPEN_TOKEN = 'k7Qx2' // 101 — 김동규 총무, 응답 받는 중
 const SETTLING_TOKEN = 'Pw9mL' // 102 — 정산 뒤
 const s = () => useV3.getState()
 const room = () => s().rooms[101]
 
 beforeEach(() => {
   useV3.setState(useV3.getInitialState(), true)
-  s().actAs(6) // 서연 — 101에 없는 사람
+  s().actAs(6) // 한서연 — 101에 없는 사람
 })
 
 describe('참여하기', () => {
@@ -22,20 +22,20 @@ describe('참여하기', () => {
     const id = s().joinGathering(OPEN_TOKEN, [{ roundId: 1, type: 'DRANK' }, { roundId: 2, type: 'ABSENT' }])
     expect(id).toBe(101)
     const me = participantOfUser(room(), 6)!
-    expect(me.displayName).toBe('서연')
+    expect(me.displayName).toBe('한서연')
     expect(hasResponded(room(), me.id)).toBe(true)
     expect(responseOf(room(), me.id, 2)).toMatchObject({ type: 'ABSENT', source: 'SELF' })
   })
 
   it('타임라인에 들어온 소식과 응답 소식이 남는다', () => {
     s().joinGathering(OPEN_TOKEN, [{ roundId: 1, type: 'DRANK' }, { roundId: 2, type: 'DRANK' }])
-    expect(room().timeline.slice(-2).map((t) => t.body)).toEqual(['서연님이 들어왔어요', '서연님이 응답했어요'])
+    expect(room().timeline.slice(-2).map((t) => t.body)).toEqual(['한서연님이 들어왔어요', '한서연님이 응답했어요'])
   })
 
   it('총무에게 "참여하고 응답했어요" 알림이 간다', () => {
     s().joinGathering(OPEN_TOKEN, [{ roundId: 1, type: 'DRANK' }, { roundId: 2, type: 'DRANK' }])
     const n = s().notifications.find((x) => x.userId === 1 && x.roomId === 101)!
-    expect(n.title).toBe('서연님이 참여하고 응답했어요')
+    expect(n.title).toBe('한서연님이 참여하고 응답했어요')
   })
 
   it('명단이 바뀌면 총무가 보던 정산 미리보기로는 정산할 수 없다', () => {
@@ -52,14 +52,14 @@ describe('참여하기', () => {
   })
 
   it('이미 참여 중이면 아무것도 바꾸지 않고 그 술자리로 보낸다', () => {
-    s().actAs(3) // 재훈 — 이미 101에 있다
+    s().actAs(3) // 박재훈 — 이미 101에 있다
     const before = room()
     expect(s().joinGathering(OPEN_TOKEN, [])).toBe(101)
     expect(room()).toBe(before)
   })
 
   it('정산된 술자리에는 참여할 수 없다', () => {
-    s().actAs(4) // 지영 — 102에 없다
+    s().actAs(4) // 최지영 — 102에 없다
     expect(s().joinGathering(SETTLING_TOKEN, [])).toBeNull()
     expect(participantOfUser(s().rooms[102], 4)).toBeUndefined()
   })

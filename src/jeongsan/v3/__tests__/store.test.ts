@@ -36,7 +36,7 @@ describe('스푼', () => {
 
   it('정산 전에는 줄 수 없고, 총무는 자기 자신에게 줄 수 없다', () => {
     const openBefore = s().rooms[OPEN]
-    s().giveSpoon(OPEN) // 동규는 101의 총무이자, 101은 아직 정산 전
+    s().giveSpoon(OPEN) // 김동규는 101의 총무이자, 101은 아직 정산 전
     expect(s().rooms[OPEN]).toBe(openBefore)
   })
 })
@@ -50,12 +50,12 @@ describe('송금 상태', () => {
   })
 
   it('남의 송금에는 [보냈어요]를 누를 수 없다', () => {
-    s().markSent(SETTLING, 5) // 민지 → 재훈
+    s().markSent(SETTLING, 5) // 이민지 → 박재훈
     expect(s().rooms[SETTLING].transfers.find((x) => x.id === 5)!.status).toBe('WAITING')
   })
 
   it('[아직 안 들어왔어요]는 대기로 되돌리되 보낸 시각은 지우지 않는다 — 돈이 움직였을 수 있어서 정산 되돌리기를 계속 막아야 한다', () => {
-    actAs(2) // 민지 — 재훈이 보낸 29,000원의 수취인
+    actAs(2) // 이민지 — 박재훈이 보낸 29,000원의 수취인
     s().notReceived(SETTLING, 3)
     const t = s().rooms[SETTLING].transfers.find((x) => x.id === 3)!
     expect(t.status).toBe('WAITING')
@@ -64,17 +64,17 @@ describe('송금 상태', () => {
   })
 
   it('수취인이 아니면 입금 확인을 할 수 없다', () => {
-    s().confirmIncoming(SETTLING, 3) // 동규는 재훈→민지 송금의 수취인이 아니다
+    s().confirmIncoming(SETTLING, 3) // 김동규는 박재훈→이민지 송금의 수취인이 아니다
     expect(s().rooms[SETTLING].transfers.find((x) => x.id === 3)!.status).toBe('SENT')
   })
 
   it('마지막 송금이 확인되면 완료로 바뀌고, 참여자 2명 이상이면 총무가 기본 스푼 1개를 받는다', () => {
     const hostBefore = hostOf(s().rooms[SETTLING]).spoonCount
-    actAs(2) // 민지가 받을 돈 확인
+    actAs(2) // 이민지가 받을 돈 확인
     s().confirmIncoming(SETTLING, 3)
     s().confirmIncoming(SETTLING, 1)
-    expect(s().rooms[SETTLING].status).toBe('SETTLING') // 재훈이 받을 돈이 남았다
-    actAs(3) // 재훈이 받을 돈 확인
+    expect(s().rooms[SETTLING].status).toBe('SETTLING') // 박재훈이 받을 돈이 남았다
+    actAs(3) // 박재훈이 받을 돈 확인
     s().confirmIncoming(SETTLING, 5)
     s().confirmIncoming(SETTLING, 2)
     const g = s().rooms[SETTLING]
@@ -120,7 +120,7 @@ describe('차수 입력 (총무, 정산 전에만)', () => {
   })
 
   it('정산한 뒤에는 차수를 넣거나 지울 수 없다 — 계산 입력은 고정이다', () => {
-    actAs(2) // 102의 총무 민지
+    actAs(2) // 102의 총무 이민지
     const before = s().rooms[SETTLING]
     s().saveRound(SETTLING, { ...draft, payerParticipantId: 21 })
     s().deleteRound(SETTLING, 11)

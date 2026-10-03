@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, Participant } from './model'
-import { hasResponded, hostOf, nameOf, participantOfUser, won } from './model'
+import { hasResponded, hostOf, initialOf, nameOf, participantOfUser, won } from './model'
 import type { ActionKind } from './nextAction'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
@@ -149,8 +149,9 @@ function People({ g, onPick }: { g: Gathering; onPick?: (participantId: Id) => v
         const s = stateOf(p)
         const inner = (
           <>
-            <div className="js-av">{p.displayName.slice(0, 1)}</div>
+            <div className="js-av">{initialOf(p.displayName)}</div>
             <span className="nm">{p.displayName}</span>
+            {p.nickname && p.nickname !== p.displayName && <span className="nick">{p.nickname}</span>}
             <span className={`js-pdot ${s.cls}`} aria-label={s.label}>{s.mark}</span>
           </>
         )

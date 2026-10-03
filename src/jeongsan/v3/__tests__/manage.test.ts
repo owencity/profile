@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { hasResponded, participantOfUser, responseOf } from '../model'
 import { removeBlockedReason, useV3 } from '../store'
 
-const OPEN = 101 // 동규(1) 총무 · 11 동규(결제자) 12 민지 13 재훈 14 지영 15 민수
+const OPEN = 101 // 김동규(1) 총무 · 11 김동규(결제자) 12 이민지 13 박재훈 14 최지영 15 정민수
 const SETTLING = 102
 const s = () => useV3.getState()
 const room = (id = OPEN) => s().rooms[id]
@@ -19,15 +19,15 @@ beforeEach(() => {
 describe('차수별 면제', () => {
   it('총무가 면제하면 그 칸이 총무 지정 면제로 잠기고 입력 버전이 오른다', () => {
     const rev = room().inputRevision
-    s().setExempt(OPEN, 13, 1, true) // 재훈 1차
+    s().setExempt(OPEN, 13, 1, true) // 박재훈 1차
     expect(responseOf(room(), 13, 1)).toMatchObject({ type: 'EXEMPT', source: 'HOST' })
     expect(room().inputRevision).toBe(rev + 1)
-    expect(room().timeline.at(-1)!.body).toBe('재훈님 1차를 면제했어요 🎁')
+    expect(room().timeline.at(-1)!.body).toBe('박재훈님 1차를 면제했어요 🎁')
   })
 
   it('면제받은 사람에게 알림이 간다', () => {
     s().setExempt(OPEN, 13, 1, true)
-    expect(inbox(3)[0].title).toBe('동규 총무가 1차를 면제해줬어요 🎁')
+    expect(inbox(3)[0].title).toBe('김동규 총무가 1차를 면제해줬어요 🎁')
   })
 
   it('면제받은 칸은 참여자가 바꿀 수 없다', () => {
@@ -38,10 +38,10 @@ describe('차수별 면제', () => {
   })
 
   it('면제를 풀면 그 칸은 빈칸(응답 전)으로 돌아간다', () => {
-    s().setExempt(OPEN, 12, 2, false) // 민지 2차 — 목데이터에서 원래 면제
+    s().setExempt(OPEN, 12, 2, false) // 이민지 2차 — 목데이터에서 원래 면제
     expect(responseOf(room(), 12, 2)).toBeUndefined()
     expect(hasResponded(room(), 12)).toBe(false)
-    expect(room().timeline.at(-1)!.body).toBe('민지님 2차 면제를 풀었어요')
+    expect(room().timeline.at(-1)!.body).toBe('이민지님 2차 면제를 풀었어요')
   })
 
   it('이미 같은 상태면 아무것도 바뀌지 않는다', () => {
@@ -57,7 +57,7 @@ describe('차수별 면제', () => {
   })
 
   it('정산한 뒤에는 면제를 바꿀 수 없다 — 계산 입력은 고정이다', () => {
-    s().actAs(2) // 102 총무 민지
+    s().actAs(2) // 102 총무 이민지
     const before = room(SETTLING)
     s().setExempt(SETTLING, 22, 11, true)
     expect(room(SETTLING)).toBe(before)
@@ -69,7 +69,7 @@ describe('내보내기', () => {
     expect(s().removeParticipant(OPEN, 13)).toBeNull()
     expect(participantOfUser(room(), 3)).toBeUndefined()
     expect(room().responses.some((r) => r.participantId === 13)).toBe(false)
-    expect(room().timeline.at(-1)!.body).toBe('재훈님이 빠졌어요')
+    expect(room().timeline.at(-1)!.body).toBe('박재훈님이 빠졌어요')
   })
 
   it('빠진 사람에게 알림이 가고, 누르면 내 술자리로 간다', () => {
