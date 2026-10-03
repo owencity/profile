@@ -51,6 +51,26 @@ type State = {
    * 이미 참여 중이면 아무것도 바꾸지 않고 id만 돌려준다.
    */
   joinGathering: (shareToken: string, answers: { roundId: Id; type: ResponseType }[]) => Id | null
+  /**
+   * 총무가 한 사람의 한 차수를 면제하거나 해제한다(R4). 면제는 `EXEMPT`·`HOST`로 잠기고, 해제하면 그 칸은
+   * **빈칸(응답 전)**으로 돌아간다 — 참여자가 다시 고르고, 안 고르면 정산 때 자동응답(flow-changes FC-010).
+   */
+  setExempt: (roomId: Id, participantId: Id, roundId: Id, exempt: boolean) => void
+  /**
+   * 총무가 정산 전 한 사람을 내보낸다(R4). 결제자는 내보낼 수 없다 — 그 차수의 돈을 받을 사람이
+   * 사라지기 때문이다. 거부되면 이유 문구, 성공하면 null.
+   */
+  removeParticipant: (roomId: Id, participantId: Id) => string | null
+}
+
+/** R4 내보내기를 막는 이유. 없으면 null — 화면이 버튼을 끄고 이유를 보여주는 데도 쓴다 */
+export function removeBlockedReason(g: Gathering, participantId: Id): string | null {
+  if (g.status !== 'OPEN') return '정산한 뒤에는 내보낼 수 없어요'
+  const p = g.participants.find((x) => x.id === participantId)
+  if (!p) return '이미 없는 사람이에요'
+  if (p.userId === g.hostUserId) return '총무는 내보낼 수 없어요'
+  if (g.rounds.some((r) => r.payerParticipantId === participantId)) return '결제자는 내보낼 수 없어요. 차수의 낸 사람을 먼저 바꿔주세요'
+  return null
 }
 
 export const seenKey = (roomId: Id, userId: Id) => `${roomId}:${userId}`
@@ -270,6 +290,36 @@ export const useV3 = create<State>((set, get) => {
       next = { ...next, inputRevision: next.inputRevision + 1 }
       set((s) => commit(s, g, next))
       return g.id
+    },
+
+    setExempt: (roomId, participantId, roundId, exempt) =>
+      update(roomId, (g) => {
+        if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
+        const round = g.rounds.find((r) => r.id === roundId)
+        if (!round || !g.participants.some((p) => p.id === participantId)) return g
+        const cur = responseOf(g, participantId, roundId)
+        if (exempt === (cur?.type === 'EXEMPT')) return g
+        const responses = exempt
+          ? setResponse(g.responses, { participantId, roundId, type: 'EXEMPT', source: 'HOST' })
+          : g.responses.filter((r) => !(r.participantId === participantId && r.roundId === roundId))
+        const next = { ...g, responses, inputRevision: g.inputRevision + 1 }
+        const who = nameOf(g, participantId)
+        return push(next, { type: 'SYSTEM', body: exempt ? `${who}님 ${round.label}를 면제했어요 🎁` : `${who}님 ${round.label} 면제를 풀었어요` })
+      }),
+
+    removeParticipant: (roomId, participantId) => {
+      const g = get().rooms[roomId]
+      if (!g || g.hostUserId !== get().me.id) return '총무만 내보낼 수 있어요'
+      const blocked = removeBlockedReason(g, participantId)
+      if (blocked) return blocked
+      const next: Gathering = {
+        ...g,
+        participants: g.participants.filter((p) => p.id !== participantId),
+        responses: g.responses.filter((r) => r.participantId !== participantId),
+        inputRevision: g.inputRevision + 1,
+      }
+      set((s) => commit(s, g, push(next, { type: 'SYSTEM', body: `${nameOf(g, participantId)}님이 빠졌어요` })))
+      return null
     },
 
     settle: (roomId, inputRevision) => {

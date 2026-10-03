@@ -12,6 +12,7 @@ import { hasResponded, hostOf, nameOf, participantOfUser, won } from './model'
 import type { ActionKind } from './nextAction'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
+import { ParticipantSheet } from './ParticipantSheet'
 
 type Props = {
   g: Gathering
@@ -23,9 +24,14 @@ type Props = {
   onSend: (text: string) => void
   onConfirm: (transferId: Id) => void
   onNotReceived: (transferId: Id) => void
+  /** R4 — 총무가 한 사람의 차수 면제를 켜고 끈다 */
+  onExempt: (participantId: Id, roundId: Id, exempt: boolean) => void
+  /** R4 — 총무가 정산 전 한 사람을 내보낸다 */
+  onRemove: (participantId: Id) => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove }: Props) {
+  const [managing, setManaging] = useState<Id | null>(null)
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
   const isHost = g.hostUserId === meUserId
@@ -60,7 +66,20 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         {act.note && <span>{act.note}</span>}
       </section>
 
-      <People g={g} />
+      {/* 총무는 사람을 눌러 면제·내보내기(R4). 총무 자신은 관리 대상이 아니다 */}
+      <People g={g} onPick={isHost ? (pid) => { if (pid !== host.id) setManaging(pid) } : undefined} />
+      {isHost && g.rounds.length > 0 && g.status === 'OPEN' && g.participants.length > 1 && (
+        <p className="js-hint">사람을 누르면 차수별 면제·내보내기를 할 수 있어요</p>
+      )}
+      {managing !== null && (
+        <ParticipantSheet
+          g={g}
+          participantId={managing}
+          onClose={() => setManaging(null)}
+          onExempt={(rid, ex) => onExempt(managing, rid, ex)}
+          onRemove={() => { onRemove(managing); setManaging(null) }}
+        />
+      )}
 
       {g.rounds.length > 0 && (
         <section className="js-rounds" aria-label="차수">
@@ -111,7 +130,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
 }
 
 /** 참여자 줄 — 정산 전엔 응답 여부, 정산 후엔 송금 상태를 점으로 */
-function People({ g }: { g: Gathering }) {
+function People({ g, onPick }: { g: Gathering; onPick?: (participantId: Id) => void }) {
   const stateOf = (p: Participant): { mark: string; cls: string; label: string } => {
     if (g.status === 'OPEN') {
       return hasResponded(g, p.id)
@@ -127,12 +146,22 @@ function People({ g }: { g: Gathering }) {
     <section className="js-people" aria-label="참여자">
       {g.participants.map((p) => {
         const s = stateOf(p)
-        return (
-          <div key={p.id} className="js-person" title={`${p.displayName} · ${s.label}`}>
+        const inner = (
+          <>
             <div className="js-av">{p.displayName.slice(0, 1)}</div>
             <span className="nm">{p.displayName}</span>
             <span className={`js-pdot ${s.cls}`} aria-label={s.label}>{s.mark}</span>
-          </div>
+          </>
+        )
+        // 총무만 누를 수 있다(본인 칸 제외). 누를 수 있으면 버튼으로 — 키보드로도 열리게
+        const pickable = onPick && p.userId !== g.hostUserId
+        return pickable ? (
+          <button key={p.id} type="button" className="js-person pick" title={`${p.displayName} · ${s.label}`}
+            aria-label={`${p.displayName} 관리 · ${s.label}`} onClick={() => onPick(p.id)}>
+            {inner}
+          </button>
+        ) : (
+          <div key={p.id} className="js-person" title={`${p.displayName} · ${s.label}`}>{inner}</div>
         )
       })}
     </section>

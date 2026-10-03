@@ -297,6 +297,33 @@ button.js-round:hover { border-color: var(--p500); }
 .js-role.host { border-color: var(--acc); color: var(--acc-strong); background: var(--acc-bg); }
 .js-rrow .js-badge { flex: none; }
 
+/* ── R4 참여자 관리 시트 ── */
+button.js-person.pick { background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; }
+button.js-person.pick .js-av { box-shadow: var(--sh-sm); }
+button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+.js-scrim { position: fixed; inset: 0; z-index: 50; background: rgba(15, 37, 64, .45); display: flex; align-items: flex-end; justify-content: center; }
+.js-sheet {
+  width: 100%; max-width: 480px; background: #fff; border: var(--bd); border-bottom: 0;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px;
+  max-height: 85dvh; overflow-y: auto; animation: js-sheet-up .18s ease-out;
+}
+.js-sheet:focus { outline: none; }
+@keyframes js-sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .js-sheet { animation: none; } }
+.js-sheethd { display: flex; align-items: center; gap: 8px; }
+.js-sheethd b { font-size: 17px; font-weight: 900; flex: 1; }
+.js-exlist { list-style: none; margin: 0; padding: 0; border: var(--bd-l); }
+.js-exlist li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 9px 10px; }
+.js-exlist li + li { border-top: 1px solid var(--line); }
+.js-exlist .lb { font-weight: 800; color: var(--p700); }
+.js-exlist .st { font-size: 13.5px; color: var(--ink); }
+.js-exlist .st.none { color: var(--ink3); }
+.js-exbtn { font-family: inherit; font-size: 13px; font-weight: 800; padding: 7px 12px; cursor: pointer; background: #fff; color: var(--ink2); border: 2px solid var(--line); }
+.js-exbtn.on { background: var(--acc-bg); color: var(--acc-strong); border-color: var(--acc); }
+.js-exbtn:disabled { opacity: .5; cursor: default; }
+.js-exbtn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.js-sheetfoot { display: flex; justify-content: center; }
+
 /* ── P1 참여 입구 ── */
 .js-p1 { gap: 14px; }
 .js-p1hero { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }

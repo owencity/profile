@@ -28,6 +28,23 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     })
   }
 
+  // ── 총무가 내보냄: 빠진 사람에게 (술자리에 더는 못 들어가니 내 술자리로) ──
+  for (const p of prev.participants) {
+    if (next.participants.some((x) => x.id === p.id)) continue
+    out.push({ userId: p.userId, roomId: next.id, link: '/jungsan', title: `${next.title}에서 빠졌어요`, body: `${host.displayName} 총무가 명단에서 뺐어요` })
+  }
+
+  // ── 총무가 면제함: 그 사람에게 ──
+  for (const r of next.responses) {
+    if (r.type !== 'EXEMPT' || r.source !== 'HOST') continue
+    const before = prev.responses.find((x) => x.participantId === r.participantId && x.roundId === r.roundId)
+    if (before?.type === 'EXEMPT') continue
+    const p = next.participants.find((x) => x.id === r.participantId)
+    if (!p || p.id === host.id) continue
+    const label = next.rounds.find((x) => x.id === r.roundId)?.label ?? ''
+    out.push({ userId: p.userId, roomId: next.id, link: room, title: `${host.displayName} 총무가 ${label}를 면제해줬어요 🎁`, body: next.title })
+  }
+
   // ── 정산됨: 참여자 모두에게 "입금액을 확인해주세요" ──
   if (prev.status === 'OPEN' && next.status !== 'OPEN') {
     const autoIds = new Set(next.responses.filter((r) => r.source === 'AUTO').map((r) => r.participantId))

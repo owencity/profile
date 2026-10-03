@@ -38,7 +38,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   const {
     me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
     createGathering, actAs, respond, respondAsHost, settle,
-    notifications, markRead, markAllRead, paySeen, markPaySeen, joinGathering,
+    notifications, markRead, markAllRead, paySeen, markPaySeen, joinGathering, setExempt, removeParticipant,
   } = useV3()
   const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
   const myAlerts = notifications.filter((n) => n.userId === me.id)
@@ -265,6 +265,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         onSend={(t) => sendMessage(g.id, t)}
         onConfirm={(tid) => confirmIncoming(g.id, tid)}
         onNotReceived={(tid) => notReceived(g.id, tid)}
+        onExempt={(pid, rid, ex) => setExempt(g.id, pid, rid, ex)}
+        onRemove={(pid) => { removeParticipant(g.id, pid) }}
       />,
     )
   }
