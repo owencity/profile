@@ -15,10 +15,10 @@ import { PayPage } from './PayPage'
 import { SettlePage } from './SettlePage'
 import { NotificationsPage } from './NotificationsPage'
 import { EntryPage } from './EntryPage'
+import { AccountPage } from './AccountPage'
 import { entryRoute } from './home'
 import { isV3Home } from './routes'
 import { seenKey, useV3 } from './store'
-import { MOCK_USERS } from './mock'
 import { mockPreview } from './mockServer'
 import type { Id } from './model'
 import { participantOfUser, roundsPaidBy } from './model'
@@ -39,6 +39,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
     me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
     createGathering, actAs, respond, respondAsHost, settle,
     notifications, markRead, markAllRead, paySeen, markPaySeen, joinGathering, setExempt, removeParticipant,
+    users, registerPayout,
   } = useV3()
   const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
   const myAlerts = notifications.filter((n) => n.userId === me.id)
@@ -84,7 +85,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
               </button>
             ))}
           <span className="sep">보는 사람</span>
-          {MOCK_USERS.map((u) => {
+          {users.map((u) => {
             const role = roleIn(u.id)
             return (
               <button key={u.id} className={me.id === u.id ? 'on' : ''} onClick={() => switchTo(u.id)}>
@@ -183,13 +184,18 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   }
 
   // ── R3 정산하기 · P2 내 응답 · P3 내 금액 ──
-  const step = route.match(/^\/jungsan\/r\/(\d+)\/(settle|respond|pay)$/)
+  const step = route.match(/^\/jungsan\/r\/(\d+)\/(settle|respond|pay|account)$/)
   if (step) {
     const g = rooms[Number(step[1])]
     const back = () => navigate(`/jungsan/r/${step[1]}`)
     if (!g) return wrap(<Soon title="없는 술자리예요" onBack={() => navigate('/jungsan')} />)
     const mine = participantOfUser(g, me.id)
     if (!mine) return wrap(<Soon title="이 술자리에 참여하지 않았어요" onBack={() => navigate('/jungsan')} />)
+
+    // A1 — 계좌는 사람 단위라 술자리와 상관없이 저장되고, 저장하면 왔던 정산방으로 돌아간다
+    if (step[2] === 'account') {
+      return wrap(<AccountPage key={me.id} me={me} onBack={back} onSave={(p) => { registerPayout(p); back() }} />)
+    }
 
     if (step[2] === 'settle') {
       if (g.hostUserId !== me.id) return wrap(<Soon title="정산은 총무만 할 수 있어요" onBack={back} />)
@@ -250,7 +256,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         case 'EDIT_RESPONSE': return navigate(`/jungsan/r/${g.id}/respond`)
         case 'VIEW_PAY':
         case 'RESEND': return navigate(`/jungsan/r/${g.id}/pay`)
-        case 'REGISTER_ACCOUNT': return navigate('/jungsan/account')
+        case 'REGISTER_ACCOUNT': return navigate(`/jungsan/r/${g.id}/account`)
       }
     }
 

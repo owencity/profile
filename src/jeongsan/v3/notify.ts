@@ -45,6 +45,20 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     out.push({ userId: p.userId, roomId: next.id, link: room, title: `${host.displayName} 총무가 ${label}를 면제해줬어요 🎁`, body: next.title })
   }
 
+  // ── 결제자가 계좌를 처음 등록함: 그 사람에게 보낼 돈이 있는 사람에게 (계좌가 없어 [보냈어요]가 꺼져 있었다) ──
+  for (const p of next.participants) {
+    const before = prev.participants.find((x) => x.id === p.id)
+    if (!before || before.payout || !p.payout) continue
+    const owe = next.transfers.filter((t) => t.toParticipantId === p.id && t.status !== 'CONFIRMED')
+    for (const t of owe) {
+      out.push({
+        userId: userOf(next, t.fromParticipantId), roomId: next.id, link: `${room}/pay`,
+        title: `${p.displayName}님이 계좌를 등록했어요. 이제 보낼 수 있어요`,
+        body: `${next.title} · ${won(t.amount)}`,
+      })
+    }
+  }
+
   // ── 정산됨: 참여자 모두에게 "입금액을 확인해주세요" ──
   if (prev.status === 'OPEN' && next.status !== 'OPEN') {
     const autoIds = new Set(next.responses.filter((r) => r.source === 'AUTO').map((r) => r.participantId))

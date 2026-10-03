@@ -324,6 +324,12 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-exbtn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .js-sheetfoot { display: flex; justify-content: center; }
 
+/* ── A1 계좌 등록 ── */
+.js-a1 { gap: 16px; }
+.js-banks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.js-banks .js-payer { padding: 9px 2px; font-size: 13px; text-align: center; }
+.js-inp.big { font-size: 20px; font-weight: 800; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+
 /* ── P1 참여 입구 ── */
 .js-p1 { gap: 14px; }
 .js-p1hero { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }

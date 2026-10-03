@@ -1,6 +1,6 @@
 /** H1 내 술자리의 규칙 — docs/SCREENS.md §5 H1. 앱도 같은 규칙을 옮긴다. */
 import type { Gathering, Id } from './model'
-import { hasResponded, participantOfUser } from './model'
+import { hasResponded, participantOfUser, roundsPaidBy } from './model'
 import { nextAction } from './nextAction'
 
 /**
@@ -12,6 +12,8 @@ export function entryRoute(g: Gathering, userId: Id, paySeen: boolean): string {
   const room = `/jungsan/r/${g.id}`
   const me = participantOfUser(g, userId)
   if (!me || g.hostUserId === userId) return room
+  // 결제자인데 계좌가 없으면 무엇보다 먼저 — 그 계좌가 있어야 남이 돈을 보낼 수 있다(배너 규칙과 같음)
+  if (needsAccount(g, me.id)) return `${room}/account`
   if (g.status === 'OPEN' && g.rounds.length > 0 && !hasResponded(g, me.id)) return `${room}/respond`
   if (g.status === 'SETTLING' && !paySeen && g.transfers.some((t) => t.fromParticipantId === me.id && t.status !== 'CONFIRMED')) {
     return `${room}/pay`
@@ -19,11 +21,17 @@ export function entryRoute(g: Gathering, userId: Id, paySeen: boolean): string {
   return room
 }
 
-/** 목록 줄에 붙일 뱃지 — 내가 아직 확인 안 한 일. 없으면 null */
+/** 이 술자리에서 내가 결제자인데 받을 계좌가 없는가(완료된 방 제외) — nextAction의 첫 조건과 같다 */
+export const needsAccount = (g: Gathering, participantId: Id) =>
+  g.status !== 'COMPLETED' && roundsPaidBy(g, participantId).length > 0 &&
+  !g.participants.find((p) => p.id === participantId)?.payout
+
+/** 목록 줄에 붙일 뱃지 — 내가 아직 확인 안 한 일. 없으면 null. 순서는 배너와 같다(계좌 등록 → 입금 확인 → …) */
 export function rowBadge(g: Gathering, userId: Id, paySeen: boolean): string | null {
   const me = participantOfUser(g, userId)
   if (!me) return null
   const isHost = g.hostUserId === userId
+  if (needsAccount(g, me.id)) return '계좌 등록'
   if (g.status === 'OPEN') return !isHost && g.rounds.length > 0 && !hasResponded(g, me.id) ? '응답하기' : null
   if (g.status !== 'SETTLING') return null
   // 배너와 같은 순서 원칙: 남을 막고 있는 일(보냈다는 돈 확인)이 먼저 — SCREENS.md §4

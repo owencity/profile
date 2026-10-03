@@ -4,7 +4,7 @@
  * (여기 전이 규칙은 `DOMAIN_DB_DESIGN_V2.md` §3을 흉내 낸 것이다).
  */
 import { create } from 'zustand'
-import type { AppNotification, Gathering, Id, ResponseType, RoundResponse, TimelineEntry, User } from './model'
+import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
 import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -61,6 +61,13 @@ type State = {
    * 사라지기 때문이다. 거부되면 이유 문구, 성공하면 null.
    */
   removeParticipant: (roomId: Id, participantId: Id) => string | null
+  /** 목데이터의 사람들 — 보는 사람 전환 때 여기서 꺼낸다(등록한 계좌가 전환 뒤에도 남게) */
+  users: User[]
+  /**
+   * 내 받을 계좌 등록·변경(A1). 사람 단위라 내가 들어간 **진행 중인** 술자리 모두에 반영한다
+   * (완료된 술자리는 바꾸지 않는다 — 이미 끝난 송금의 기록이다).
+   */
+  registerPayout: (payout: Payout) => void
 }
 
 /** R4 내보내기를 막는 이유. 없으면 null — 화면이 버튼을 끄고 이유를 보여주는 데도 쓴다 */
@@ -120,6 +127,23 @@ export const useV3 = create<State>((set, get) => {
     rooms: Object.fromEntries(MOCK_ROOMS.map((g) => [g.id, g])),
     notifications: MOCK_NOTIFICATIONS,
     paySeen: [],
+    users: MOCK_USERS,
+
+    registerPayout: (payout) =>
+      set((s) => {
+        const p = { bank: payout.bank, accountNo: payout.accountNo.trim(), holder: payout.holder.trim() }
+        const me = { ...s.me, payout: p }
+        let acc: State = { ...s, me, users: s.users.map((u) => (u.id === me.id ? me : u)) }
+        for (const g of Object.values(s.rooms)) {
+          const mine = participantOfUser(g, me.id)
+          if (!mine || g.status === 'COMPLETED') continue
+          const first = !mine.payout
+          let next: Gathering = { ...g, participants: g.participants.map((x) => (x.id === mine.id ? { ...x, payout: p } : x)) }
+          next = push(next, { type: 'SYSTEM', body: `${me.displayName}님이 받을 계좌를 ${first ? '등록했어요' : '바꿨어요'}` })
+          acc = { ...acc, ...commit(acc, g, next) }
+        }
+        return acc
+      }),
 
     markRead: (id) =>
       set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
@@ -237,7 +261,7 @@ export const useV3 = create<State>((set, get) => {
     },
 
     actAs: (userId) => {
-      const user = MOCK_USERS.find((u) => u.id === userId)
+      const user = get().users.find((u) => u.id === userId)
       if (user) set({ me: user })
     },
 
