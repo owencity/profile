@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Gathering, Id } from './model'
 import { RESPONSE_LABEL, responseOf } from './model'
 import { removeBlockedReason } from './store'
+import { SHOW_EXEMPT } from './features'
 
 type Props = {
   g: Gathering
@@ -53,7 +54,7 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
           <button type="button" className="js-linkbtn" onClick={onClose}>닫기</button>
         </div>
 
-        {!open && <p className="js-lead small">정산한 뒤에는 면제·내보내기를 바꿀 수 없어요.</p>}
+        {!open && <p className="js-lead small">정산한 뒤에는 {SHOW_EXEMPT ? '면제·내보내기를 바꿀' : '내보낼'} 수 없어요.</p>}
 
         <ul className="js-exlist">
           {g.rounds.map((r) => {
@@ -63,7 +64,7 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
               <li key={r.id}>
                 <span className="lb">{r.label}</span>
                 <span className={`st${cur ? '' : ' none'}`}>{cur ? RESPONSE_LABEL[cur.type] : '아직 응답 안 함'}</span>
-                <button
+                {SHOW_EXEMPT && <button
                   type="button"
                   role="switch"
                   aria-checked={exempt}
@@ -73,12 +74,12 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
                   onClick={() => onExempt(r.id, !exempt)}
                 >
                   {exempt ? '면제 🎁' : '면제'}
-                </button>
+                </button>}
               </li>
             )
           })}
         </ul>
-        {open && <p className="js-hint">면제를 풀면 그 차수는 다시 응답을 받아요.</p>}
+        {open && SHOW_EXEMPT && <p className="js-hint">면제를 풀면 그 차수는 다시 응답을 받아요.</p>}
 
         {open && (
           <div className="js-sheetfoot">

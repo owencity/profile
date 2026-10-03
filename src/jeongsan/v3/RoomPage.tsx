@@ -13,6 +13,7 @@ import type { ActionKind } from './nextAction'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
 import { ParticipantSheet } from './ParticipantSheet'
+import { SHOW_EXEMPT } from './features'
 
 type Props = {
   g: Gathering
@@ -69,7 +70,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
       {/* 총무는 사람을 눌러 면제·내보내기(R4). 총무 자신은 관리 대상이 아니다 */}
       <People g={g} onPick={isHost ? (pid) => { if (pid !== host.id) setManaging(pid) } : undefined} />
       {isHost && g.rounds.length > 0 && g.status === 'OPEN' && g.participants.length > 1 && (
-        <p className="js-hint">사람을 누르면 차수별 면제·내보내기를 할 수 있어요</p>
+        <p className="js-hint">{SHOW_EXEMPT ? '사람을 누르면 차수별 면제·내보내기를 할 수 있어요' : '사람을 누르면 응답을 보거나 내보낼 수 있어요'}</p>
       )}
       {managing !== null && (
         <ParticipantSheet
