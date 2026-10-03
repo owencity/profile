@@ -45,6 +45,12 @@ type State = {
   /** 정산금액(P3)을 열어본 `방:사람` — [정산금액 확인] 뱃지를 떼는 기준 */
   paySeen: string[]
   markPaySeen: (roomId: Id) => void
+  /**
+   * 링크로 들어와 참여하고 응답까지 한 번에(P1). 링크를 연 것만으로는 참여되지 않는다 — 이 동작을
+   * 해야 명단에 들어간다. 참여된 술자리 id, 참여할 수 없으면(없는 링크·정산 뒤) null.
+   * 이미 참여 중이면 아무것도 바꾸지 않고 id만 돌려준다.
+   */
+  joinGathering: (shareToken: string, answers: { roundId: Id; type: ResponseType }[]) => Id | null
 }
 
 export const seenKey = (roomId: Id, userId: Id) => `${roomId}:${userId}`
@@ -237,6 +243,34 @@ export const useV3 = create<State>((set, get) => {
         const responses = setResponse(g.responses, { participantId, roundId, type, source: 'HOST' })
         return { ...g, responses, inputRevision: g.inputRevision + 1 }
       }),
+
+    joinGathering: (shareToken, answers) => {
+      const { me, rooms } = get()
+      const g = Object.values(rooms).find((x) => x.shareToken === shareToken)
+      if (!g) return null
+      if (participantOfUser(g, me.id)) return g.id
+      if (g.status !== 'OPEN') return null
+
+      const pid = Math.max(0, ...Object.values(rooms).flatMap((x) => x.participants.map((p) => p.id))) + 1
+      let next: Gathering = {
+        ...g,
+        participants: [...g.participants, { id: pid, userId: me.id, displayName: me.displayName, spoonCount: me.spoonCount, payout: me.payout }],
+      }
+      next = push(next, { type: 'SYSTEM', body: `${me.displayName}님이 들어왔어요` })
+      let responses = next.responses
+      for (const a of answers) {
+        // 새로 온 사람은 면제를 고를 수 없다 — 면제는 총무만 정한다
+        if (a.type === 'EXEMPT' || !g.rounds.some((r) => r.id === a.roundId)) continue
+        responses = setResponse(responses, { participantId: pid, roundId: a.roundId, type: a.type, source: 'SELF' })
+      }
+      if (responses !== next.responses) {
+        next = push({ ...next, responses }, { type: 'SYSTEM', body: `${me.displayName}님이 응답했어요` })
+      }
+      // 명단이 바뀌면 미리보기 결과도 바뀐다 — 총무가 보던 미리보기로는 정산할 수 없게
+      next = { ...next, inputRevision: next.inputRevision + 1 }
+      set((s) => commit(s, g, next))
+      return g.id
+    },
 
     settle: (roomId, inputRevision) => {
       const g = get().rooms[roomId]

@@ -17,6 +17,17 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
   const room = `/jungsan/r/${next.id}`
   const host = hostOf(next)
 
+  // ── 링크로 새 사람이 참여함: 총무에게 (REQUIREMENTS §10 "참여자가 응답을 남김") ──
+  for (const p of next.participants) {
+    if (prev.participants.some((x) => x.id === p.id)) continue
+    const answered = next.responses.some((r) => r.participantId === p.id)
+    out.push({
+      userId: host.userId, roomId: next.id, link: room,
+      title: `${p.displayName}님이 ${answered ? '참여하고 응답했어요' : '참여했어요'}`,
+      body: next.title,
+    })
+  }
+
   // ── 정산됨: 참여자 모두에게 "입금액을 확인해주세요" ──
   if (prev.status === 'OPEN' && next.status !== 'OPEN') {
     const autoIds = new Set(next.responses.filter((r) => r.source === 'AUTO').map((r) => r.participantId))

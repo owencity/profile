@@ -297,4 +297,12 @@ button.js-round:hover { border-color: var(--p500); }
 .js-role.host { border-color: var(--acc); color: var(--acc-strong); background: var(--acc-bg); }
 .js-rrow .js-badge { flex: none; }
 
+/* ── P1 참여 입구 ── */
+.js-p1 { gap: 14px; }
+.js-p1hero { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
+.js-p1hero h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: var(--ink); text-wrap: balance; }
+.js-p1hero .sub { font-size: 13px; color: var(--ink2); }
+.js-p1kicker { font-size: 13px; font-weight: 800; color: var(--acc-strong); }
+.js-soon span { font-size: 13.5px; color: var(--ink2); }
+
 .js-soon { padding: 40px 0; text-align: center; color: var(--ink3); display: flex; flex-direction: column; gap: 10px; align-items: center; }

@@ -14,6 +14,7 @@ import { RespondPage } from './RespondPage'
 import { PayPage } from './PayPage'
 import { SettlePage } from './SettlePage'
 import { NotificationsPage } from './NotificationsPage'
+import { EntryPage } from './EntryPage'
 import { entryRoute } from './home'
 import { isV3Home } from './routes'
 import { seenKey, useV3 } from './store'
@@ -28,13 +29,16 @@ type Props = {
   navigate: (to: string) => void
   /** 첫 화면(H1)의 뒤로가기 — 로그인 화면으로 돌아간다 */
   onLeave: () => void
+  /** 참여 입구(P1)만 로그인 전에도 열린다. 그 밖의 v3 화면은 늘 로그인 뒤라 기본값 true */
+  loggedIn?: boolean
+  onLogin?: () => boolean
 }
 
-export function AppV3({ route, navigate, onLeave }: Props) {
+export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () => true }: Props) {
   const {
     me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
     createGathering, actAs, respond, respondAsHost, settle,
-    notifications, markRead, markAllRead, paySeen, markPaySeen,
+    notifications, markRead, markAllRead, paySeen, markPaySeen, joinGathering,
   } = useV3()
   const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
   const myAlerts = notifications.filter((n) => n.userId === me.id)
@@ -71,6 +75,14 @@ export function AppV3({ route, navigate, onLeave }: Props) {
                 {r.title}
               </button>
             ))}
+          {/* 내가 없는 술자리는 링크로 들어오기 — 단톡방에서 링크를 누른 것과 같다 */}
+          {Object.values(rooms)
+            .filter((r) => !participantOfUser(r, me.id))
+            .map((r) => (
+              <button key={`j${r.id}`} className={route === `/jungsan/j/${r.shareToken}` ? 'on' : ''} onClick={() => navigate(`/jungsan/j/${r.shareToken}`)}>
+                🔗 {r.title}
+              </button>
+            ))}
           <span className="sep">보는 사람</span>
           {MOCK_USERS.map((u) => {
             const role = roleIn(u.id)
@@ -85,6 +97,29 @@ export function AppV3({ route, navigate, onLeave }: Props) {
       {node}
     </div>
   )
+
+  // ── P1 참여 입구 (링크) ──
+  const joinRoute = route.match(/^\/jungsan\/j\/([^/]+)$/)
+  if (joinRoute) {
+    const token = joinRoute[1]
+    const g = Object.values(rooms).find((r) => r.shareToken === token)
+    return wrap(
+      <EntryPage
+        // 보는 사람이 바뀌면 고르던 응답을 비운다
+        key={`${token}:${me.id}`}
+        g={g}
+        meUserId={me.id}
+        loggedIn={loggedIn}
+        onLogin={onLogin}
+        onJoin={(answers) => {
+          const id = joinGathering(token, answers)
+          if (id !== null) navigate(`/jungsan/r/${id}`)
+        }}
+        onOpenRoom={() => g && navigate(`/jungsan/r/${g.id}`)}
+        onHome={() => navigate('/jungsan')}
+      />,
+    )
+  }
 
   // ── H1 내 술자리 ──
   if (isV3Home(route)) {

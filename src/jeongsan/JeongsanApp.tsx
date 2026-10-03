@@ -51,7 +51,7 @@ import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
 import { AppV3 } from './v3/AppV3'
-import { isV3Route } from './v3/routes'
+import { isV3JoinRoute, isV3Route } from './v3/routes'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -387,6 +387,26 @@ export default function JeongsanApp({ route, navigate }: Props) {
           })
         }
       />,
+    )
+  }
+
+  // v3 참여 입구(P1)는 로그인 확인 **앞**에서 받는다 — 링크를 누른 사람이 술자리부터 보고,
+  // [참여]를 누를 때 로그인한다. 로그인 전·후 모두 같은 <AppV3>라 고르던 응답이 유지된다.
+  if (isV3JoinRoute(route)) {
+    return (
+      <AppV3
+        route={route}
+        navigate={navigate}
+        onLeave={() => setLoggedIn(false)}
+        loggedIn={loggedIn}
+        onLogin={() => {
+          // mock 모드에는 백엔드가 없다 — 상태만 켠다. 실제로는 카카오 인가로 페이지를 떠나므로
+          // 고르던 응답을 sessionStorage에 남겨 돌아와서 이어 붙여야 한다(flow-changes FC-009).
+          if (isMock()) { setLoggedIn(true); return true }
+          window.location.href = kakaoLoginUrl()
+          return false
+        }}
+      />
     )
   }
 
