@@ -12,6 +12,7 @@ import { notificationsFor } from './notify'
 import type { RoundDraft } from './round'
 import { relabel } from './round'
 import { autoTitle } from './home'
+import { validateName } from './name'
 
 type State = {
   me: User
@@ -68,6 +69,11 @@ type State = {
    * (완료된 술자리는 바꾸지 않는다 — 이미 끝난 송금의 기록이다).
    */
   registerPayout: (payout: Payout) => void
+  /**
+   * 표시 이름 확인·변경(L2). 사람 단위라 내가 들어간 **진행 중인** 술자리의 내 이름도 같이 바꾼다
+   * (완료된 술자리는 그대로 — 끝난 기록이다). 확인하면 `needsName`이 풀린다.
+   */
+  confirmName: (name: string) => void
 }
 
 /** R4 내보내기를 막는 이유. 없으면 null — 화면이 버튼을 끄고 이유를 보여주는 데도 쓴다 */
@@ -128,6 +134,21 @@ export const useV3 = create<State>((set, get) => {
     notifications: MOCK_NOTIFICATIONS,
     paySeen: [],
     users: MOCK_USERS,
+
+    confirmName: (name) =>
+      set((s) => {
+        const displayName = name.trim()
+        if (validateName(displayName).length > 0) return s
+        const me: User = { ...s.me, displayName, needsName: false }
+        // 서버는 참여자 이름을 따로 저장하지 않고 users.display_name을 읽는다 — 완료된 방까지 모두 바뀐다
+        const rooms = Object.fromEntries(
+          Object.values(s.rooms).map((g) => [
+            g.id,
+            { ...g, participants: g.participants.map((p) => (p.userId === me.id ? { ...p, displayName } : p)) },
+          ]),
+        )
+        return { me, users: s.users.map((u) => (u.id === me.id ? me : u)), rooms }
+      }),
 
     registerPayout: (payout) =>
       set((s) => {

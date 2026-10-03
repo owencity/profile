@@ -5,12 +5,16 @@
  */
 import type { AppNotification, Gathering, User } from './model'
 
-/** 로그인한 나 — 프로 총무(1,280스푼) */
+/**
+ * 로그인한 나 — 프로 총무(1,280스푼). 목데이터에선 **첫 로그인처럼** 이름 확인(L2)이 한 번 뜨게 둔다
+ * (`needsName`) — 이름을 확인하면 그 뒤로는 안 뜬다.
+ */
 export const ME: User = {
   id: 1,
   displayName: '동규',
   spoonCount: 1_280,
   payout: { bank: '카카오뱅크', accountNo: '3333-01-2345678', holder: '김동규' },
+  needsName: true,
 }
 
 /**

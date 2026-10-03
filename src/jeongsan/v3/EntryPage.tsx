@@ -12,6 +12,7 @@ import type { Gathering, Id, ResponseType } from './model'
 import { RESPONSE_LABEL, SELF_CHOICES, hostOf, participantOfUser, won } from './model'
 import { ResponseRow } from './ResponseRow'
 import { BackButton } from './BackButton'
+import { MAX_NAME, validateName } from './name'
 
 type Props = {
   /** 링크가 가리키는 술자리. 없으면 잘못되거나 사라진 링크 */
@@ -20,7 +21,10 @@ type Props = {
   loggedIn: boolean
   /** 로그인. 이 자리에서 바로 로그인되면 true(목데이터), 페이지를 떠나면 false */
   onLogin: () => boolean
-  onJoin: (answers: { roundId: Id; type: ResponseType }[]) => void
+  /** 첫 로그인이라 이름을 아직 확인 안 했으면 카카오 닉네임 — P1 안에서 L2(이름 확인)를 같이 받는다 */
+  askName?: string
+  /** name: askName이 있었을 때 확인받은 이름 */
+  onJoin: (answers: { roundId: Id; type: ResponseType }[], name?: string) => void
   onOpenRoom: () => void
   onHome: () => void
 }
@@ -30,8 +34,9 @@ const fmtDate = (iso: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-export function EntryPage({ g, meUserId, loggedIn, onLogin, onJoin, onOpenRoom, onHome }: Props) {
+export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome }: Props) {
   const [draft, setDraft] = useState<Record<Id, ResponseType | undefined>>({})
+  const [name, setName] = useState(askName ?? '')
 
   const notice = (title: string, body: string, action?: { label: string; onClick: () => void }) => (
     <div className="js-shell narrow js-p1">
@@ -54,13 +59,14 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, onJoin, onOpenRoom, 
   if (g.status !== 'OPEN') return notice('이미 정산된 술자리예요', '정산이 끝난 뒤에는 참여할 수 없어요', loggedIn ? { label: '내 술자리로', onClick: onHome } : undefined)
 
   const host = hostOf(g)
-  const filled = g.rounds.every((r) => draft[r.id])
+  const nameErrors = askName !== undefined ? validateName(name) : []
+  const filled = g.rounds.every((r) => draft[r.id]) && nameErrors.length === 0
   const answers = () => g.rounds.map((r) => ({ roundId: r.id, type: draft[r.id]! }))
   const join = () => {
     if (!filled) return
     // 로그인이 안 됐으면 먼저 로그인. 목데이터는 바로 돌아오므로 이어서 참여한다
     if (!loggedIn && !onLogin()) return
-    onJoin(answers())
+    onJoin(answers(), askName !== undefined ? name.trim() : undefined)
   }
   const allSame = (t: ResponseType) => setDraft(Object.fromEntries(g.rounds.map((r) => [r.id, t])))
 
@@ -117,8 +123,17 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, onJoin, onOpenRoom, 
         </>
       )}
 
+      {/* 첫 로그인이면 L2(이름 확인)를 여기서 같이 — 화면을 하나 더 거치지 않게 */}
+      {askName !== undefined && (
+        <section className="js-field">
+          <label htmlFor="entry-name" className="js-lab">정산방에서 쓸 이름 <small>카카오 닉네임을 가져왔어요</small></label>
+          <input id="entry-name" className="js-inp" autoComplete="nickname" maxLength={MAX_NAME + 4} value={name} onChange={(e) => setName(e.target.value)} />
+          {nameErrors.length > 0 && <div className="js-hint" role="alert">{nameErrors[0]}</div>}
+        </section>
+      )}
+
       <div className="js-r2btns stick">
-        {!filled && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
+        {!g.rounds.every((r) => draft[r.id]) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
         <button className={`js-cta${loggedIn ? '' : ' kakao'}`} disabled={!filled} onClick={join}>
           {loggedIn
             ? g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'

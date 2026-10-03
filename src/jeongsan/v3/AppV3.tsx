@@ -16,6 +16,7 @@ import { SettlePage } from './SettlePage'
 import { NotificationsPage } from './NotificationsPage'
 import { EntryPage } from './EntryPage'
 import { AccountPage } from './AccountPage'
+import { NamePage } from './NamePage'
 import { entryRoute } from './home'
 import { isV3Home } from './routes'
 import { seenKey, useV3 } from './store'
@@ -40,7 +41,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
     me, rooms, sendMessage, giveSpoon, markSent, confirmIncoming, notReceived, saveRound, deleteRound,
     createGathering, actAs, respond, respondAsHost, settle,
     notifications, markRead, markAllRead, paySeen, markPaySeen, joinGathering, setExempt, removeParticipant,
-    users, registerPayout,
+    users, registerPayout, confirmName,
   } = useV3()
   const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
   const myAlerts = notifications.filter((n) => n.userId === me.id)
@@ -145,7 +146,10 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         meUserId={me.id}
         loggedIn={loggedIn}
         onLogin={onLogin}
-        onJoin={(answers) => {
+        // 첫 로그인이면 P1에서 이름 확인(L2)을 같이 받는다 — 확인한 이름으로 참여한다
+        askName={me.needsName ? me.displayName : undefined}
+        onJoin={(answers, name) => {
+          if (name !== undefined) confirmName(name)
           const id = joinGathering(token, answers)
           if (id !== null) navigate(`/jungsan/r/${id}`)
         }}
@@ -153,6 +157,11 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         onHome={() => navigate('/jungsan')}
       />,
     )
+  }
+
+  // ── L2 이름 확인 — 첫 로그인이면 내 술자리 대신 한 번 ──
+  if (isV3Home(route) && me.needsName) {
+    return wrap(<NamePage key={me.id} me={me} onBack={onLeave} onConfirm={confirmName} />)
   }
 
   // ── H1 내 술자리 ──

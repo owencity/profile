@@ -340,6 +340,10 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
   border: 2px solid var(--ink); box-shadow: var(--sh-sm); overflow-wrap: anywhere;
 }
 
+/* ── L2 이름 확인 ── */
+.js-l2 { gap: 16px; }
+.js-namepreview { display: flex; flex-direction: column; gap: 6px; background: var(--p50); border: var(--bd-l); padding: 10px 12px; }
+
 /* ── A1 계좌 등록 ── */
 .js-a1 { gap: 16px; }
 .js-banks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }

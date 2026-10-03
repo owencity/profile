@@ -21,6 +21,8 @@ export type User = {
   displayName: string
   spoonCount: number
   payout?: Payout
+  /** 첫 로그인이라 표시 이름을 아직 확인하지 않았다(L2). 그동안 displayName은 카카오 닉네임 그대로다 */
+  needsName?: boolean
 }
 
 export type Participant = {
