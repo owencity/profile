@@ -5,6 +5,7 @@
  * 금액과 근거는 서버가 준 값을 그대로 보여준다(프론트는 계산하지 않는다).
  */
 import { useEffect, useState } from 'react'
+import { copyableAccountNo } from './payout'
 import type { Gathering, Id, Transfer } from './model'
 import { RESPONSE_LABEL, won } from './model'
 import { BackButton } from './BackButton'
@@ -49,7 +50,8 @@ function PayCard({ g, t, onSent }: { g: Gathering; t: Transfer; onSent: (id: Id)
   const copy = async () => {
     if (!payout) return
     try {
-      await navigator.clipboard.writeText(`${payout.bank} ${payout.accountNo}`)
+      // 숫자만 복사 — 이체 화면 계좌번호 칸에 하이픈·은행 이름이 섞이면 잘린다(payout.ts copyableAccountNo)
+      await navigator.clipboard.writeText(copyableAccountNo(payout.accountNo))
       setCopied(true)
       setTimeout(() => setCopied(false), 1600)
     } catch {
@@ -91,7 +93,7 @@ function PayCard({ g, t, onSent }: { g: Gathering; t: Transfer; onSent: (id: Id)
             <small>{payout.bank} · {payout.holder}</small>
             <b className="no">{payout.accountNo}</b>
           </div>
-          <button type="button" className="js-mini" onClick={copy}>{copied ? '복사했어요' : '계좌 복사'}</button>
+          <button type="button" className="js-mini" onClick={copy}>{copied ? '번호만 복사했어요' : '계좌 복사'}</button>
         </div>
       ) : (
         <div className="js-acct none">{to?.displayName}님이 계좌를 등록하면 보여드릴게요</div>

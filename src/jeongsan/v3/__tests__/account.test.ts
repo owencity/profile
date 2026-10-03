@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { entryRoute, rowBadge } from '../home'
 import { participantOfUser } from '../model'
 import { nextAction } from '../nextAction'
-import { cleanAccountNo, validatePayout } from '../payout'
+import { cleanAccountNo, copyableAccountNo, validatePayout } from '../payout'
 import { useV3 } from '../store'
 
 const SETTLING = 102 // 재훈(3, 참여자 23)은 2차 결제자인데 계좌가 없다. 동규(22)가 재훈에게 24,000원
@@ -33,6 +33,11 @@ describe('입력 검증', () => {
   it('계좌번호는 하이픈을 빼고 8~16자리여야 한다', () => {
     expect(validatePayout({ ...KB, accountNo: '1234-567' })).toContain('계좌번호를 확인해주세요 (숫자 8~16자리)')
     expect(validatePayout({ ...KB, accountNo: '1234-5678' })).toEqual([])
+  })
+
+  it('[계좌 복사]는 숫자만 복사한다 — 이체 화면에 하이픈·은행 이름이 섞이면 잘린다', () => {
+    expect(copyableAccountNo('1000-1234-5678')).toBe('100012345678')
+    expect(copyableAccountNo('3333-01-2345678')).toBe('3333012345678')
   })
 
   it('계좌번호 칸은 숫자와 하이픈만 받는다 — 은행 앱에서 복사한 그대로 붙여도 된다', () => {
