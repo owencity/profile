@@ -18,6 +18,9 @@ export const cleanAccountNo = (text: string) => text.replace(/[^\d-]/g, '').slic
  */
 export const copyableAccountNo = (accountNo: string) => accountNo.replace(/\D/g, '')
 
+/** [금액 복사]로 클립보드에 넣을 값 — 숫자만("41,000원" 아니고 "41000"). 이체 화면 금액 칸에 그대로 붙게 */
+export const copyableAmount = (amount: number) => String(Math.trunc(amount))
+
 /** 저장 전에 막아야 하는 것. 빈 배열이면 저장해도 된다 */
 export function validatePayout(p: Payout): string[] {
   const errors: string[] = []

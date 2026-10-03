@@ -25,6 +25,7 @@ type Props = {
   paySeen: (roomId: Id) => boolean
   unread: number
   onOpenAlerts: () => void
+  onEditAccount: () => void
 }
 
 const EMPTY: Record<HomeTab, string> = {
@@ -35,7 +36,7 @@ const EMPTY: Record<HomeTab, string> = {
 
 const TABS: HomeTab[] = ['HOSTING', 'JOINED', 'DONE']
 
-export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread, onOpenAlerts }: Props) {
+export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread, onOpenAlerts, onEditAccount }: Props) {
   const tabs = myRoomTabs(rooms, me.id)
   const [tab, setTab] = useState<HomeTab>(() => initialTab(tabs, me.id))
   const neverHosted = me.spoonCount === 0 && !rooms.some((g) => g.hostUserId === me.id)
@@ -57,6 +58,10 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread,
           <b>{me.displayName}</b>
           <span className={`js-spoonchip lv${levelOf(me.spoonCount)}`}>🥄 {me.spoonCount.toLocaleString('ko-KR')} · {titleOf(me.spoonCount)}</span>
           {neverHosted && <small>첫 정산을 만들어보세요. 총무를 할수록 캐릭터가 자라요</small>}
+          {/* 받을 계좌 — 결제자가 됐을 때 매번 묻지 않게 여기서 미리 넣고 바꾼다 */}
+          <button type="button" className="js-acctline" onClick={onEditAccount}>
+            {me.payout ? <>받을 계좌 <b>{me.payout.bank} {me.payout.accountNo}</b> · 바꾸기</> : <>받을 계좌 등록하기 ›</>}
+          </button>
         </div>
       </section>
 

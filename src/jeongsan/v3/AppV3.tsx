@@ -5,7 +5,7 @@
  * 모든 화면이 옮겨지면 옛 라우터와 옛 화면을 통째로 지운다.
  */
 import './v3.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { SideStreet } from '../SideStreet'
 import { HomePage } from './HomePage'
 import { RoomPage } from './RoomPage'
@@ -20,7 +20,8 @@ import { entryRoute } from './home'
 import { isV3Home } from './routes'
 import { seenKey, useV3 } from './store'
 import { mockPreview } from './mockServer'
-import type { Id } from './model'
+import type { Gathering, Id } from './model'
+import { shareMessage, shareUrl } from './share'
 import { participantOfUser, roundsPaidBy } from './model'
 import type { ActionKind } from './nextAction'
 
@@ -46,6 +47,37 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
 
   // 화면을 옮기면 맨 위부터 — 앞 화면의 스크롤 위치가 남아 머리말이 잘린 채 열렸다
   useEffect(() => { window.scrollTo(0, 0) }, [route])
+
+  // 잠깐 떴다 사라지는 안내(링크 복사 등)
+  const [toast, setToast] = useState<string | null>(null)
+  useEffect(() => {
+    if (!toast) return
+    const id = window.setTimeout(() => setToast(null), 2400)
+    return () => window.clearTimeout(id)
+  }, [toast])
+
+  /**
+   * 링크 공유 — 폰 브라우저(카톡 인앱 포함)는 OS 공유 시트(Web Share API), 안 되면 문구+링크를 복사한다.
+   * 스펙(SCREENS §7)의 "카카오톡 공유(JS SDK)"는 카카오 앱 키·도메인 등록이 필요해 그때 이 자리에 먼저 끼운다.
+   */
+  const shareRoom = async (g: Gathering) => {
+    const url = shareUrl(window.location.origin, g.shareToken)
+    const text = shareMessage(g, url)
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${g.title} — 정산어택`, text })
+        return
+      }
+    } catch (e) {
+      if ((e as DOMException)?.name === 'AbortError') return // 사용자가 공유 시트를 닫음
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setToast('초대 문구와 링크를 복사했어요. 단톡방에 붙여 넣어주세요')
+    } catch {
+      setToast(`이 링크를 보내주세요: ${url}`)
+    }
+  }
 
   // 개발용 바 — 지금 보고 있는 술자리(있으면)에서 각 사람의 역할을 같이 보여준다
   const roomInRoute = rooms[Number(route.match(/^\/jungsan\/r\/(\d+)/)?.[1])]
@@ -96,6 +128,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         </div>
       )}
       {node}
+      {toast && <div className="js-toast" role="status">{toast}</div>}
     </div>
   )
 
@@ -136,12 +169,21 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         paySeen={isPaySeen}
         unread={myAlerts.filter((n) => !n.read).length}
         onOpenAlerts={() => navigate('/jungsan/notifications')}
+        onEditAccount={() => navigate('/jungsan/me/account')}
         onCreate={() => {
           // 입력 없이 바로 만들고 1차 입력으로 — SCREENS.md §3.1
           const id = createGathering()
           navigate(`/jungsan/r/${id}/round/new`)
         }}
       />,
+    )
+  }
+
+  // ── A1 계좌 (내 술자리에서 들어온 경우 — 저장하면 내 술자리로) ──
+  if (route === '/jungsan/me/account') {
+    return wrap(
+      <AccountPage key={me.id} me={me} backTo="내 술자리로" onBack={() => navigate('/jungsan')}
+        onSave={(p) => { registerPayout(p); setToast('받을 계좌를 저장했어요'); navigate('/jungsan') }} />,
     )
   }
 
@@ -249,7 +291,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         case 'CONFIRM_INCOMING':
           document.querySelector('.js-incoming')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
           return
-        case 'SHARE': return navigate(`/jungsan/r/${g.id}/share`)
+        case 'SHARE': return void shareRoom(g)
         case 'SETTLE': return navigate(`/jungsan/r/${g.id}/settle`)
         case 'EDIT_FIRST_ROUND': return navigate(`/jungsan/r/${g.id}/round/new`)
         case 'RESPOND':

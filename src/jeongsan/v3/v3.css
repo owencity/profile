@@ -42,8 +42,8 @@
 .js-p3 { gap: 14px; }
 .js-paycard { border: var(--bd); box-shadow: var(--sh-sm); background: #fff; padding: 13px 14px; display: flex; flex-direction: column; gap: 10px; }
 .js-paycard.confirmed { box-shadow: none; opacity: .8; }
-.js-paycard .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.js-paycard .hd b { font-size: 15px; font-weight: 800; }
+.js-paycard .hd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.js-paycard .hd b { font-size: 15px; font-weight: 800; flex: 1; }
 .js-paycard .hd strong { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--p700); }
 .js-paycard .js-cta { margin-top: 0; }
 .js-basisbtn { align-self: flex-start; background: none; border: 0; padding: 0; font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--p600); cursor: pointer; }
@@ -323,6 +323,22 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-exbtn:disabled { opacity: .5; cursor: default; }
 .js-exbtn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .js-sheetfoot { display: flex; justify-content: center; }
+
+.js-acctline {
+  align-self: flex-start; max-width: 100%; text-align: left; background: none; border: 0; padding: 2px 0; cursor: pointer;
+  font-family: inherit; font-size: 12.5px; color: var(--p600); font-weight: 700; text-decoration: underline; overflow-wrap: anywhere;
+}
+/* .js-mewho b(이름 17px) 규칙이 걸리지 않게 크기를 되돌린다 */
+.js-acctline b { color: var(--ink); font-weight: 800; font-size: inherit; white-space: normal; }
+.js-acctline:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+/* 잠깐 떴다 사라지는 안내 */
+.js-toast {
+  position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60;
+  width: max-content; max-width: min(440px, calc(100vw - 32px)); padding: 11px 14px;
+  background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 700; line-height: 1.45;
+  border: 2px solid var(--ink); box-shadow: var(--sh-sm); overflow-wrap: anywhere;
+}
 
 /* ── A1 계좌 등록 ── */
 .js-a1 { gap: 16px; }

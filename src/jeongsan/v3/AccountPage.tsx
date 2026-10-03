@@ -10,11 +10,13 @@ import { BackButton } from './BackButton'
 
 type Props = {
   me: User
+  /** 뒤로가기 버튼이 어디로 가는지(title) — 정산방에서 왔는지 내 술자리에서 왔는지 */
+  backTo?: string
   onBack: () => void
   onSave: (p: Payout) => void
 }
 
-export function AccountPage({ me, onBack, onSave }: Props) {
+export function AccountPage({ me, backTo = '정산방으로', onBack, onSave }: Props) {
   const [bank, setBank] = useState(me.payout?.bank ?? '')
   const [accountNo, setAccountNo] = useState(me.payout?.accountNo ?? '')
   const [holder, setHolder] = useState(me.payout?.holder ?? me.displayName)
@@ -31,7 +33,7 @@ export function AccountPage({ me, onBack, onSave }: Props) {
   return (
     <div className="js-shell narrow js-a1">
       <header className="js-rtop">
-        <BackButton onClick={onBack} to="정산방으로" />
+        <BackButton onClick={onBack} to={backTo} />
         <div className="js-rtitle"><b>{editing ? '받을 계좌 바꾸기' : '받을 계좌 등록'}</b></div>
       </header>
 

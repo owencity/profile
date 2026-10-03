@@ -5,7 +5,7 @@
  * 금액과 근거는 서버가 준 값을 그대로 보여준다(프론트는 계산하지 않는다).
  */
 import { useEffect, useState } from 'react'
-import { copyableAccountNo } from './payout'
+import { copyableAccountNo, copyableAmount } from './payout'
 import type { Gathering, Id, Transfer } from './model'
 import { RESPONSE_LABEL, won } from './model'
 import { BackButton } from './BackButton'
@@ -44,18 +44,20 @@ export function PayPage({ g, meId, onBack, onSeen, onSent }: Props) {
 function PayCard({ g, t, onSent }: { g: Gathering; t: Transfer; onSent: (id: Id) => void }) {
   const to = g.participants.find((p) => p.id === t.toParticipantId)
   const [open, setOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
+  /** 방금 복사한 것 — 버튼 문구를 잠깐 바꾼다 */
+  const [copied, setCopied] = useState<'acct' | 'amt' | null>(null)
   const payout = to?.payout
 
-  const copy = async () => {
-    if (!payout) return
+  // 이체 화면 칸에 붙여 넣을 값이라 둘 다 숫자만 복사한다(payout.ts) — 하이픈·쉼표·"원"·은행 이름이 섞이면 잘린다
+  const copy = async (which: 'acct' | 'amt') => {
+    const text = which === 'acct' ? (payout ? copyableAccountNo(payout.accountNo) : '') : copyableAmount(t.amount)
+    if (!text) return
     try {
-      // 숫자만 복사 — 이체 화면 계좌번호 칸에 하이픈·은행 이름이 섞이면 잘린다(payout.ts copyableAccountNo)
-      await navigator.clipboard.writeText(copyableAccountNo(payout.accountNo))
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1600)
+      await navigator.clipboard.writeText(text)
+      setCopied(which)
+      setTimeout(() => setCopied(null), 1600)
     } catch {
-      // 복사가 막힌 환경 — 계좌번호가 화면에 그대로 보이니 직접 고르게 둔다
+      // 복사가 막힌 환경 — 값이 화면에 그대로 보이니 직접 고르게 둔다
     }
   }
 
@@ -64,6 +66,9 @@ function PayCard({ g, t, onSent }: { g: Gathering; t: Transfer; onSent: (id: Id)
       <div className="hd">
         <b>{to?.displayName}님께</b>
         <strong>{won(t.amount)}</strong>
+        {t.status !== 'CONFIRMED' && (
+          <button type="button" className="js-mini" onClick={() => copy('amt')}>{copied === 'amt' ? '금액 복사했어요' : '금액 복사'}</button>
+        )}
       </div>
 
       {t.basis && t.basis.length > 0 && (
@@ -93,7 +98,7 @@ function PayCard({ g, t, onSent }: { g: Gathering; t: Transfer; onSent: (id: Id)
             <small>{payout.bank} · {payout.holder}</small>
             <b className="no">{payout.accountNo}</b>
           </div>
-          <button type="button" className="js-mini" onClick={copy}>{copied ? '번호만 복사했어요' : '계좌 복사'}</button>
+          <button type="button" className="js-mini" onClick={() => copy('acct')}>{copied === 'acct' ? '번호만 복사했어요' : '계좌 복사'}</button>
         </div>
       ) : (
         <div className="js-acct none">{to?.displayName}님이 계좌를 등록하면 보여드릴게요</div>

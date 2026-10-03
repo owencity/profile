@@ -15,4 +15,4 @@ export const isV3JoinRoute = (route: string) => /^\/jungsan\/j\/[^/]+$/.test(rou
  * v3로 넘긴다. 알림함은 옛 `/jungsan/alerts`가 로그인 확인 앞에서 가로채므로 새 주소를 쓴다.
  */
 export const isV3Route = (route: string) =>
-  isV3Home(route) || route === '/jungsan/notifications' || /^\/jungsan\/r\//.test(route)
+  isV3Home(route) || route === '/jungsan/notifications' || route === '/jungsan/me/account' || /^\/jungsan\/r\//.test(route)
