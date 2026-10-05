@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
 import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
+import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
 import { notificationsFor } from './notify'
 import type { RoundDraft } from './round'
@@ -70,11 +71,16 @@ type State = {
    */
   registerPayout: (payout: Payout) => void
   /**
-   * 표시 이름 확인·변경(L2). 사람 단위라 내가 들어간 **진행 중인** 술자리의 내 이름도 같이 바꾼다
-   * (완료된 술자리는 그대로 — 끝난 기록이다). 확인하면 `needsName`이 풀린다.
+   * 실명 등록(L2, 목데이터 모드). 사람 단위라 내가 들어간 모든 술자리의 내 이름도 같이 바꾼다
+   * (서버는 users.display_name을 조인한다 — FC-013). 확인하면 `needsName`이 풀린다.
    */
   confirmName: (name: string) => void
+  /** 서버가 준 내 정보로 바꾼다(API 모드, `gateway.ts`) */
+  setMe: (me: User) => void
 }
+
+/** API 모드에서 로그인 확인 전의 나 — 화면은 로그인 화면이라 그려지지 않는다 */
+const NOBODY: User = { id: 0, displayName: '', spoonCount: 0, needsName: false }
 
 /** R4 내보내기를 막는 이유. 없으면 null — 화면이 버튼을 끄고 이유를 보여주는 데도 쓴다 */
 export function removeBlockedReason(g: Gathering, participantId: Id): string | null {
@@ -128,12 +134,17 @@ export const useV3 = create<State>((set, get) => {
       return commit(s, g, fn(g, me.id))
     })
 
+  // API 모드는 목데이터 없이 빈 상태로 시작한다 — 실제 사용자에게 가짜 술자리가 보이면 안 된다
+  const apiMode = isApiMode()
   return {
-    me: ME,
-    rooms: Object.fromEntries(MOCK_ROOMS.map((g) => [g.id, g])),
-    notifications: MOCK_NOTIFICATIONS,
+    me: apiMode ? NOBODY : ME,
+    rooms: apiMode ? {} : Object.fromEntries(MOCK_ROOMS.map((g) => [g.id, g])),
+    notifications: apiMode ? [] : MOCK_NOTIFICATIONS,
     paySeen: [],
-    users: MOCK_USERS,
+    users: apiMode ? [] : MOCK_USERS,
+
+    setMe: (me) =>
+      set((s) => ({ me, users: s.users.some((u) => u.id === me.id) ? s.users.map((u) => (u.id === me.id ? me : u)) : [...s.users, me] })),
 
     confirmName: (name) =>
       set((s) => {

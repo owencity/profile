@@ -11,19 +11,26 @@ import { BackButton } from './BackButton'
 type Props = {
   me: User
   onBack: () => void
-  onConfirm: (name: string) => void
+  /** 실패면 보여줄 문구, 성공이면 null(`gateway.confirmName`) */
+  onConfirm: (name: string) => Promise<string | null>
 }
 
 export function NamePage({ me, onBack, onConfirm }: Props) {
   const [name, setName] = useState('')
   const [tried, setTried] = useState(false)
-  const errors = validateName(name)
+  // 서버가 거절한 이유(예: 이미 이름을 정함). 입력을 고치면 지운다
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const errors = serverError ? [serverError] : validateName(name)
   const preview = name.trim() || '김동규'
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTried(true)
-    if (errors.length === 0) onConfirm(name.trim())
+    if (busy || validateName(name).length > 0) return
+    setBusy(true)
+    setServerError(await onConfirm(name.trim()))
+    setBusy(false)
   }
 
   return (
@@ -48,7 +55,7 @@ export function NamePage({ me, onBack, onConfirm }: Props) {
           placeholder="예: 김동규"
           maxLength={MAX_NAME + 4}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => { setName(e.target.value); setServerError(null) }}
         />
       </section>
 
@@ -62,7 +69,7 @@ export function NamePage({ me, onBack, onConfirm }: Props) {
       {tried && errors.length > 0 && <div className="js-errs" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
 
       <div className="js-r2btns stick">
-        <button type="submit" className="js-cta">이 이름으로 시작</button>
+        <button type="submit" className="js-cta" disabled={busy}>{busy ? '저장하는 중…' : '이 이름으로 시작'}</button>
       </div>
     </form>
   )

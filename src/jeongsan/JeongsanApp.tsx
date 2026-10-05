@@ -6,7 +6,8 @@
  */
 import { useEffect, useState } from 'react'
 import './jeongsan.css'
-import { fetchMe, isMock, kakaoLoginUrl } from './api'
+import { api, isApiMode } from './v3/api'
+import { gateway } from './v3/gateway'
 import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
@@ -44,10 +45,10 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // 로그인 상태를 **서버에 물어본다.** 쿠키가 httpOnly 라 JS 로는 읽을 수 없어서
   // 프론트가 스스로 알 방법이 없다 — 이게 없으면 쿠키가 살아 있어도 새로고침할
   // 때마다 로그인 화면이 뜬다.
+  // 로그인돼 있으면 내 정보(실명·닉네임·needsName)를 스토어에 넣는다 — 실명이 없으면 L2가 뜬다.
   useEffect(() => {
-    if (isMock()) return
-    void fetchMe().then((user) => {
-      if (user) setLoggedIn(true)
+    void gateway.loadMe().then((ok) => {
+      if (ok) setLoggedIn(true)
     })
   }, [])
 
@@ -57,10 +58,13 @@ export default function JeongsanApp({ route, navigate }: Props) {
     if (!known) navigate('/jungsan')
   }, [known, navigate])
 
-  /** 실제 흐름: 서버가 카카오 인가 화면으로 302 시킨다(API.md §2.1). mock 은 상태만 켠다 */
+  /**
+   * 실제 흐름: 서버가 카카오 인가 화면으로 302 시킨다(API.md §2.1). 로그인 뒤 **지금 보던 주소로** 돌아오게
+   * `returnTo`를 넘긴다(FC-014 1-2) — 카톡 링크(P1)로 들어온 사람이 첫 화면으로 튕기지 않게. mock 은 상태만 켠다
+   */
   const login = () => {
-    if (isMock()) { setLoggedIn(true); return true }
-    window.location.href = kakaoLoginUrl()
+    if (!isApiMode()) { setLoggedIn(true); return true }
+    window.location.href = api.kakaoLoginUrl(route.startsWith('/jungsan/') ? route : undefined)
     return false
   }
   const logout = () => setLoggedIn(false)
