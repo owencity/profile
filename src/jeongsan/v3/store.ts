@@ -27,7 +27,11 @@ type State = {
   saveRound: (roomId: Id, draft: RoundDraft) => Id | null
   deleteRound: (roomId: Id, roundId: Id) => void
   /** 입력 없이 새 술자리를 만들고 id를 돌려준다. 만든 사람이 총무이자 첫 참여자다 */
-  createGathering: () => Id
+  /**
+   * 새 술자리를 만들고 id를 돌려준다. 만든 사람이 총무이자 첫 참여자다. 제목이 없으면 `M/d 술자리`.
+   * 다음 차를 다른 사람이 계산했을 때도 이걸 쓴다 — 그 사람이 총무인 **완전히 별개의** 술자리다(사람도 새로 들어온다)
+   */
+  createGathering: (title?: string) => Id
   /** 개발용 — 다른 사람 시점으로 보기 */
   actAs: (userId: Id) => void
   /** 내 응답 저장(P2). 총무가 면제로 지정한 칸은 건너뛴다 */
@@ -266,7 +270,7 @@ export const useV3 = create<State>((set, get) => {
         return push(next, { type: 'SYSTEM', body: `${target.label}를 지웠어요` })
       }),
 
-    createGathering: () => {
+    createGathering: (title) => {
       const { me, rooms } = get()
       const all = Object.values(rooms)
       const id = Math.max(0, ...all.map((g) => g.id)) + 1
@@ -274,7 +278,7 @@ export const useV3 = create<State>((set, get) => {
       const today = new Date()
       const g: Gathering = {
         id,
-        title: autoTitle(today),
+        title: title?.trim() || autoTitle(today),
         date: today.toISOString(),
         hostUserId: me.id,
         status: 'OPEN',

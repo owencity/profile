@@ -364,3 +364,14 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-soon span { font-size: 13.5px; color: var(--ink2); }
 
 .js-soon { padding: 40px 0; text-align: center; color: var(--ink3); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+/* ── 다음 차는 내가 계산했어요(새 술자리) · R2 낸 사람 접기 ── */
+.js-nextoffer { align-self: flex-start; font-family: inherit; font-size: 13px; font-weight: 800; color: var(--acc-strong); background: var(--acc-bg); border: 2px dashed var(--acc); padding: 8px 12px; cursor: pointer; }
+.js-nextoffer:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.js-nextbox { display: flex; flex-direction: column; gap: 6px; background: var(--acc-bg); border: 2px solid var(--acc); padding: 11px 12px; }
+.js-nextbox b { font-size: 14px; color: var(--acc-strong); }
+.js-nextbox span { font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.js-nextbox span b { font-size: inherit; }
+.js-nextbtns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.js-payerline { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13.5px; color: var(--ink2); }
+.js-payerline b { color: var(--ink); }

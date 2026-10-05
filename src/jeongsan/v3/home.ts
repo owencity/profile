@@ -43,6 +43,15 @@ export function rowBadge(g: Gathering, userId: Id, paySeen: boolean): string | n
 /** 새 술자리 이름 — 입력받지 않고 날짜로 채운다("9/30 술자리"). 정산방 메뉴에서 바꾼다. */
 export const autoTitle = (d: Date) => `${d.getMonth() + 1}/${d.getDate()} 술자리`
 
+/** 술자리 제목 최대 길이(FC-014 §4 PATCH 규칙과 같다) */
+export const MAX_TITLE = 20
+
+/**
+ * 다음 차를 다른 사람이 계산해 새로 만드는 술자리의 이름 — "9/28 술자리 다음 차". 단톡방에서 어느 자리에서
+ * 이어진 정산인지 알아보게 하는 이름일 뿐, 두 술자리는 데이터로 이어지지 않는다(완전히 분리).
+ */
+export const nextTitle = (prev: string) => [...`${prev} 다음 차`].slice(0, MAX_TITLE).join('')
+
 export type HomeTab = 'HOSTING' | 'JOINED' | 'DONE'
 
 /** 탭 이름 — 내 역할로 나눈다(CTO 결정 2026-10-01) */

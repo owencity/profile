@@ -29,9 +29,11 @@ type Props = {
   onExempt: (participantId: Id, roundId: Id, exempt: boolean) => void
   /** R4 — 총무가 정산 전 한 사람을 내보낸다 */
   onRemove: (participantId: Id) => void
+  /** 참여자가 "다음 차는 내가 계산했어요" — 내가 총무인 새 술자리를 만든다 */
+  onStartNext: () => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
@@ -97,6 +99,9 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         </section>
       )}
 
+      {/* 다음 차를 내가 계산했다 → 내가 총무인 새 술자리. 총무 본인은 [+ 차수]로 이어 가면 된다 */}
+      {!isHost && me && g.status !== 'COMPLETED' && <NextRoundOffer onStart={onStartNext} />}
+
       {incoming.length > 0 && (
         <section className="js-incoming" aria-label="받을 돈">
           <div className="js-lab">받을 돈</div>
@@ -131,6 +136,27 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
 }
 
 /** 참여자 줄 — 정산 전엔 응답 여부, 정산 후엔 송금 상태를 점으로 */
+/**
+ * "다음 차는 내가 계산했어요" — 첫 탭은 무엇이 분리되는지 보여주고, 두 번째 탭에 만든다.
+ * 잘못 눌러 빈 술자리가 생기지 않게, 그리고 "이 술자리와 따로 정산된다"는 걸 만들기 전에 알게 하려는 것이다.
+ */
+function NextRoundOffer({ onStart }: { onStart: () => void }) {
+  const [open, setOpen] = useState(false)
+  if (!open) {
+    return <button type="button" className="js-nextoffer" onClick={() => setOpen(true)}>🍻 다음 차는 내가 계산했어요</button>
+  }
+  return (
+    <section className="js-nextbox" aria-label="다음 차 새 술자리">
+      <b>내가 총무인 새 술자리를 만들어요</b>
+      <span>이 술자리와는 <b>완전히 따로</b> 정산돼요. 같이 간 사람들은 새 링크로 들어와요.</span>
+      <div className="js-nextbtns">
+        <button type="button" className="js-mini ghost" onClick={() => setOpen(false)}>취소</button>
+        <button type="button" className="js-mini ok" onClick={onStart}>새 술자리 만들기</button>
+      </div>
+    </section>
+  )
+}
+
 function People({ g, onPick }: { g: Gathering; onPick?: (participantId: Id) => void }) {
   const stateOf = (p: Participant): { mark: string; cls: string; label: string } => {
     if (g.status === 'OPEN') {

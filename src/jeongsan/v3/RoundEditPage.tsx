@@ -26,6 +26,8 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
   const [amountText, setAmountText] = useState(round ? round.total.toLocaleString('ko-KR') : '')
   const [drinks, setDrinks] = useState<DrinkItem[]>(round?.drinks ?? [])
   const [payer, setPayer] = useState<Id>(round?.payerParticipantId ?? host.id)
+  // 결제자는 거의 항상 총무라 고르는 칸을 접어 둔다. 이미 다른 사람이 낸 차수면 펼친 채로 연다
+  const [payerOpen, setPayerOpen] = useState(payer !== host.id)
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
   const [tried, setTried] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -128,8 +130,21 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
         )}
       </section>
 
+      {/*
+        총무 = 받는 사람(2026-10-06 CTO 결정). 다음 차를 다른 사람이 계산했으면 그 사람이 정산방에서
+        [다음 차는 내가 계산했어요]로 따로 술자리를 만든다. 같은 자리에서 카드가 안 돼 대신 낸 경우만 여기서 고른다
+      */}
+      {!payerOpen ? (
+        <section className="js-field">
+          <div className="js-payerline">
+            <span>낸 사람 <b>나(총무)</b></span>
+            <button type="button" className="js-linkbtn" onClick={() => setPayerOpen(true)}>다른 사람이 냈어요</button>
+          </div>
+        </section>
+      ) : (
       <section className="js-field">
         <div className="js-lab">누가 냈나요?</div>
+        <div className="js-hint">다음 장소를 다른 사람이 계산했다면, 그 사람이 정산방에서 [다음 차는 내가 계산했어요]로 새 술자리를 만들면 돼요</div>
         <div className="js-payers" role="radiogroup" aria-label="낸 사람">
           {g.participants.map((p) => (
             <button
@@ -146,6 +161,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
         </div>
         {g.participants.length === 1 && <div className="js-hint">사람들이 들어오면 여기서 고를 수 있어요</div>}
       </section>
+      )}
 
       {tried && errors.length > 0 && (
         <div className="js-errs" role="alert">

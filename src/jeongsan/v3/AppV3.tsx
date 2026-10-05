@@ -18,7 +18,7 @@ import { EntryPage } from './EntryPage'
 import { AccountPage } from './AccountPage'
 import { NamePage } from './NamePage'
 import { gateway } from './gateway'
-import { entryRoute } from './home'
+import { entryRoute, nextTitle } from './home'
 import { isV3Home } from './routes'
 import { seenKey, useV3 } from './store'
 import { mockPreview } from './mockServer'
@@ -329,6 +329,12 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         onNotReceived={(tid) => notReceived(g.id, tid)}
         onExempt={(pid, rid, ex) => setExempt(g.id, pid, rid, ex)}
         onRemove={(pid) => { removeParticipant(g.id, pid) }}
+        onStartNext={() => {
+          // 내가 총무인 새 술자리 → 바로 1차 금액 입력. 사람은 옮기지 않는다 — 새 링크로 들어온다
+          const id = createGathering(nextTitle(g.title))
+          setToast('새 술자리를 만들었어요. 금액을 넣고 링크를 보내주세요')
+          navigate(`/jungsan/r/${id}/round/new`)
+        }}
       />,
     )
   }
