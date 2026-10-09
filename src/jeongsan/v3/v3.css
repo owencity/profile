@@ -385,3 +385,6 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-headcount b { min-width: 64px; text-align: center; font-size: 16px; }
 /* R1 배너 아래 [지금 계산하기] — 하단 버튼(링크 공유)과 겹치지 않게 작은 글자 버튼 */
 .js-settlenow { align-self: flex-end; font-size: 13px; }
+
+/* 내 술자리 카드의 계정 링크 — 계좌 링크보다 한 단계 옅게 */
+.js-acctline.sub { color: var(--ink3); font-weight: 600; text-decoration: none; }

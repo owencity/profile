@@ -280,6 +280,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         unread={myAlerts.filter((n) => !n.read).length}
         onOpenAlerts={() => navigate('/jungsan/notifications')}
         onEditAccount={() => navigate('/jungsan/me/account')}
+        // 계정 메뉴는 계좌 화면 맨 아래에 있다 — 같은 화면으로 간다
+        onOpenAccount={api ? () => navigate('/jungsan/me/account') : undefined}
         onCreate={async () => {
           // 입력 없이 바로 만들고 1차 입력으로 — SCREENS.md §3.1
           const r = await gateway.createGathering()

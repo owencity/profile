@@ -26,6 +26,8 @@ type Props = {
   unread: number
   onOpenAlerts: () => void
   onEditAccount: () => void
+  /** 계정 메뉴(로그아웃·탈퇴) — 서버 계정이 있을 때만. 탈퇴를 찾기 쉽게 따로 보인다(App Store 5.1.1(v)) */
+  onOpenAccount?: () => void
 }
 
 const EMPTY: Record<HomeTab, string> = {
@@ -36,7 +38,7 @@ const EMPTY: Record<HomeTab, string> = {
 
 const TABS: HomeTab[] = ['HOSTING', 'JOINED', 'DONE']
 
-export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread, onOpenAlerts, onEditAccount }: Props) {
+export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread, onOpenAlerts, onEditAccount, onOpenAccount }: Props) {
   const tabs = myRoomTabs(rooms, me.id)
   const [tab, setTab] = useState<HomeTab>(() => initialTab(tabs, me.id))
   const neverHosted = me.spoonCount === 0 && !rooms.some((g) => g.hostUserId === me.id)
@@ -62,6 +64,7 @@ export function HomePage({ me, rooms, onOpen, onCreate, onBack, paySeen, unread,
           <button type="button" className="js-acctline" onClick={onEditAccount}>
             {me.payout ? <>받을 계좌 <b>{me.payout.bank} {me.payout.accountNo}</b> · 바꾸기</> : <>받을 계좌 등록하기 ›</>}
           </button>
+          {onOpenAccount && <button type="button" className="js-acctline sub" onClick={onOpenAccount}>내 계정 · 로그아웃 · 탈퇴 ›</button>}
         </div>
       </section>
 
