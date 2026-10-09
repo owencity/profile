@@ -27,6 +27,11 @@ type Props = {
   onJoin: (answers: { roundId: Id; type: ResponseType }[], name?: string) => void
   onOpenRoom: () => void
   onHome: () => void
+  /** 서버 미리보기는 명단 대신 인원수만 준다 — 있으면 이것을 쓴다 */
+  participantCount?: number
+  /** 한 술자리에 총무가 둘 이상이면(FC-015) 참여할 차수 묶음을 고른다 */
+  choices?: { id: Id; label: string }[]
+  onPick?: (id: Id) => void
 }
 
 const fmtDate = (iso: string) => {
@@ -34,7 +39,7 @@ const fmtDate = (iso: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome }: Props) {
+export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome, participantCount, choices, onPick }: Props) {
   const [draft, setDraft] = useState<Record<Id, ResponseType | undefined>>({})
   const [name, setName] = useState('')
 
@@ -81,8 +86,22 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
       <section className="js-p1hero">
         <span className="js-p1kicker">{host.displayName}님이 정산어택에 초대했어요</span>
         <h1>{g.title}</h1>
-        <span className="sub">{fmtDate(g.date)} · {g.participants.length}명 참여 중</span>
+        <span className="sub">{fmtDate(g.date)} · {participantCount ?? g.participants.length}명 참여 중</span>
       </section>
+
+      {choices && choices.length > 1 && (
+        <section className="js-field" aria-label="참여할 차수">
+          <div className="js-lab">어느 총무의 차수에 참여하나요?</div>
+          <div className="js-allsame">
+            {choices.map((c) => (
+              <button key={c.id} type="button" aria-pressed={c.id === g.id} className={`js-mini${c.id === g.id ? ' on' : ''}`}
+                onClick={() => { setDraft({}); onPick?.(c.id) }}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="js-hostcard" aria-label="총무">
         <div className="js-hostav"><HostCharacter spoons={host.spoonCount} /></div>

@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import type { DrinkItem, Gathering, Id, Round } from './model'
-import { hostOf, won } from './model'
+import { hostOf, nextRoundLabel, won } from './model'
 import type { RoundDraft } from './round'
 import { DRINK_PRESETS, drinksTotal, parseAmount, validateRound } from './round'
 import { BackButton } from './BackButton'
@@ -35,7 +35,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
   const total = parseAmount(amountText)
   const draft: RoundDraft = { id: round?.id, total, drinks, payerParticipantId: payer }
   const errors = validateRound(draft, g)
-  const label = round?.label ?? `${g.rounds.length + 1}차`
+  const label = round?.label ?? nextRoundLabel(g)
 
   const addDrink = (d: DrinkItem) => {
     // 같은 술 칩을 또 누르면 줄을 늘리지 않고 병 수를 올린다

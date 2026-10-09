@@ -28,6 +28,8 @@ export type PreviewTransfer = { fromParticipantId: Id; toParticipantId: Id; amou
 export type SettlePreview = {
   /** 정산하기 요청에 같이 보낸다 — 그 사이 입력이 바뀌었으면 서버가 409로 거절한다 */
   inputRevision: number
+  /** 서버 미리보기의 입력 해시 — 정산하기에 그대로 돌려보낸다(ADR-004). 목데이터는 없다 */
+  inputHash?: string
   lines: PreviewLine[]
   transfers: PreviewTransfer[]
 }

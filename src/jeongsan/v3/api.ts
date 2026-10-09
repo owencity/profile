@@ -6,7 +6,8 @@
  *
  * 인증은 httpOnly 쿠키(API.md §2.3)라 이 파일은 토큰을 다루지 않는다. 모든 요청에 `credentials: 'include'`.
  */
-import type { User } from './model'
+import type { ResponseType, User } from './model'
+import type { ServerGathering, ServerJoinPreview, ServerPreview } from './serverModel'
 
 const BASE = (import.meta.env.VITE_JEONGSAN_API_BASE_URL as string | undefined) ?? ''
 
@@ -65,7 +66,23 @@ export type MeResponse = {
   /** 등록한 실명. 아직 안 받았으면 null(FC-013) */
   displayName: string | null
   needsName: boolean
+  /** 본인 계좌(FC-014 §9) — 없으면 null */
+  payout?: { bank: string; accountNo: string; holder: string } | null
+  spoonCount?: number
+  unreadNotificationCount?: number
 }
+
+/** `GET /api/v1/me/notifications` 한 줄 */
+export type ServerNotification = {
+  id: number; type: string; gatheringId: number; settlementUnitId: number | null
+  title: string; body: string; createdAt: string; readAt: string | null
+}
+
+type Answer = { roundId: number; type: ResponseType }
+type RoundBody = { total: number; payerParticipantId: number; drinks: { name: string; unitPrice: number; quantity: number }[] }
+
+/** 정산 단위 경로 `…/gatherings/{gid}/settlement-units/{uid}` (SETTLEMENT_UNITS §4.2의 U) */
+const U = (gid: number, uid: number) => `/api/v1/gatherings/${gid}/settlement-units/${uid}`
 
 // ── 엔드포인트 ─────────────────────────────────────────
 
@@ -77,6 +94,43 @@ export const api = {
   /** 카카오 로그인 시작 주소. 로그인 뒤 돌아올 경로(FC-014 1-2) — `/jungsan/`으로 시작하는 것만 서버가 받는다 */
   kakaoLoginUrl: (returnTo?: string) =>
     `${BASE}/api/v1/auth/kakao/login${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`,
+  putPayout: (p: { bank: string; accountNo: string; holder: string }) => request<unknown>('PUT', '/api/v1/users/me/payout', p),
+
+  // 술자리 — 응답은 모두 술자리 전체(ServerGathering). 화면은 serverModel.toRooms 로 정산방들로 바꾼다
+  myGatherings: () => request<ServerGathering[]>('GET', '/api/v1/me/gatherings'),
+  gathering: (gid: number) => request<ServerGathering>('GET', `/api/v1/gatherings/${gid}`),
+  createGathering: (title?: string) => request<ServerGathering>('POST', '/api/v1/gatherings', title ? { title } : {}),
+  sendMessage: (gid: number, text: string) => request<unknown>('POST', `/api/v1/gatherings/${gid}/messages`, { text }),
+  joinPreview: (token: string) => request<ServerJoinPreview>('GET', `/api/v1/join/${encodeURIComponent(token)}`),
+  join: (token: string, settlementUnitId: number, responses: Answer[]) =>
+    request<{ gatheringId: number; participantId: number }>('POST', `/api/v1/join/${encodeURIComponent(token)}`, { settlementUnitId, responses }),
+
+  // 정산 단위 — 다음 차 총무(FC-015)
+  createUnit: (gid: number, requestId: string, participantIds: number[]) =>
+    request<{ id: number }>('POST', `/api/v1/gatherings/${gid}/settlement-units`, { requestId, participantIds }),
+  addMember: (gid: number, uid: number, pid: number) => request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}`),
+  removeMember: (gid: number, uid: number, pid: number) => request<unknown>('DELETE', `${U(gid, uid)}/participants/${pid}`),
+  addRound: (gid: number, uid: number, body: RoundBody) => request<{ id: number }>('POST', `${U(gid, uid)}/rounds`, body),
+  putRound: (gid: number, uid: number, rid: number, body: RoundBody) => request<{ id: number }>('PUT', `${U(gid, uid)}/rounds/${rid}`, body),
+  deleteRound: (gid: number, uid: number, rid: number) => request<unknown>('DELETE', `${U(gid, uid)}/rounds/${rid}`),
+  respond: (gid: number, uid: number, answers: Answer[]) => request<unknown>('PUT', `${U(gid, uid)}/responses/me`, { answers }),
+  respondFor: (gid: number, uid: number, pid: number, answers: Answer[]) =>
+    request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}/responses`, { answers }),
+  preview: (gid: number, uid: number) => request<ServerPreview>('GET', `${U(gid, uid)}/settlement/preview`),
+  settle: (gid: number, uid: number, inputRevision: number, inputHash: string) =>
+    request<ServerGathering>('POST', `${U(gid, uid)}/settlement`, { inputRevision, inputHash }),
+  revertSettlement: (gid: number, uid: number) => request<unknown>('DELETE', `${U(gid, uid)}/settlement`),
+  markViewed: (gid: number, uid: number) => request<unknown>('POST', `${U(gid, uid)}/settlement/viewed`),
+
+  // 송금 — 송금자·수취인만
+  sent: (tid: number) => request<unknown>('POST', `/api/v1/transfers/${tid}/sent`),
+  confirm: (tid: number) => request<unknown>('POST', `/api/v1/transfers/${tid}/confirm`),
+  notReceived: (tid: number) => request<unknown>('POST', `/api/v1/transfers/${tid}/not-received`),
+
+  // 알림
+  notifications: () => request<ServerNotification[]>('GET', '/api/v1/me/notifications'),
+  readNotification: (id: number) => request<unknown>('POST', `/api/v1/me/notifications/${id}/read`),
+  readAllNotifications: () => request<unknown>('POST', '/api/v1/me/notifications/read-all'),
 }
 
 // ── 서버 응답 → 프론트 모델 ────────────────────────────
@@ -91,7 +145,7 @@ export function toUser(m: MeResponse, prev?: User): User {
     displayName: m.displayName ?? '',
     nickname: m.nickname,
     needsName: m.needsName,
-    spoonCount: prev?.id === m.id ? prev.spoonCount : 0,
-    payout: prev?.id === m.id ? prev.payout : undefined,
+    spoonCount: m.spoonCount ?? (prev?.id === m.id ? prev.spoonCount : 0),
+    payout: m.payout !== undefined ? (m.payout ?? undefined) : prev?.id === m.id ? prev.payout : undefined,
   }
 }

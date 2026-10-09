@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, Participant } from './model'
-import { hasResponded, hostOf, initialOf, nameOf, participantOfUser, won } from './model'
+import { hasResponded, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, won } from './model'
 import type { ActionKind } from './nextAction'
 import { nextAction } from './nextAction'
 import { BackButton } from './BackButton'
@@ -30,10 +30,14 @@ type Props = {
   /** R4 — 총무가 정산 전 한 사람을 내보낸다 */
   onRemove: (participantId: Id) => void
   /** 참여자가 "다음 차는 내가 계산했어요" — 내가 총무인 새 술자리를 만든다 */
-  onStartNext: () => void
+  /** 다음 차 총무 되기 — 고른 사람(나 빼고)과 함께 이 술자리 안에 내 정산 단위를 만든다(FC-015) */
+  onStartNext: (participantIds: Id[]) => void
+  /** 이 술자리에 내가 총무인 정산방이 이미 있으면 그 id — 있으면 새로 만들지 않고 그리로 안내한다 */
+  myNextRoomId?: Id
+  onOpenMyNext?: () => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext, myNextRoomId, onOpenMyNext }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
@@ -100,7 +104,9 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
       )}
 
       {/* 다음 차를 내가 계산했다 → 내가 총무인 새 술자리. 총무 본인은 [+ 차수]로 이어 가면 된다 */}
-      {!isHost && me && g.status !== 'COMPLETED' && <NextRoundOffer onStart={onStartNext} />}
+      {!isHost && me && g.status !== 'COMPLETED' && (myNextRoomId !== undefined
+        ? <button type="button" className="js-nextoffer" onClick={onOpenMyNext}>🍻 내가 계산한 다음 차로 가기</button>
+        : <NextRoundOffer others={g.participants.filter((p) => p.id !== me.id)} onStart={onStartNext} />)}
 
       {incoming.length > 0 && (
         <section className="js-incoming" aria-label="받을 돈">
@@ -137,21 +143,42 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
 
 /** 참여자 줄 — 정산 전엔 응답 여부, 정산 후엔 송금 상태를 점으로 */
 /**
- * "다음 차는 내가 계산했어요" — 첫 탭은 무엇이 분리되는지 보여주고, 두 번째 탭에 만든다.
- * 잘못 눌러 빈 술자리가 생기지 않게, 그리고 "이 술자리와 따로 정산된다"는 걸 만들기 전에 알게 하려는 것이다.
+ * "다음 차는 내가 계산했어요" — 첫 탭은 무엇이 분리되는지와 **같이 간 사람**을 보여주고, 두 번째 탭에 만든다.
+ * 다음 차에는 사람이 빠지거나 바뀔 수 있어서 고르게 한다(기본은 전원). 나는 늘 들어간다.
+ * 이 명단에 없는 사람(다음 차에만 온 사람)은 같은 링크로 들어와 내 차수를 고르면 된다.
  */
-function NextRoundOffer({ onStart }: { onStart: () => void }) {
+function NextRoundOffer({ others, onStart }: { others: Participant[]; onStart: (participantIds: Id[]) => void }) {
   const [open, setOpen] = useState(false)
+  const [picked, setPicked] = useState<Set<Id>>(() => new Set(others.map((p) => p.id)))
   if (!open) {
     return <button type="button" className="js-nextoffer" onClick={() => setOpen(true)}>🍻 다음 차는 내가 계산했어요</button>
   }
+  const toggle = (id: Id) => {
+    const next = new Set(picked)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setPicked(next)
+  }
   return (
-    <section className="js-nextbox" aria-label="다음 차 새 술자리">
-      <b>내가 총무인 새 술자리를 만들어요</b>
-      <span>이 술자리와는 <b>완전히 따로</b> 정산돼요. 같이 간 사람들은 새 링크로 들어와요.</span>
+    <section className="js-nextbox" aria-label="다음 차 총무 되기">
+      <b>다음 차는 내가 총무예요</b>
+      <span>지금까지 차수와는 <b>따로</b> 정산돼요. 다음 차에 같이 간 사람을 골라주세요.</span>
+      <ul className="js-nextpick">
+        {others.map((p) => (
+          <li key={p.id}>
+            <label>
+              <input type="checkbox" checked={picked.has(p.id)} onChange={() => toggle(p.id)} />
+              {nameWithNick(p)}
+            </label>
+          </li>
+        ))}
+      </ul>
+      <small>여기 없는 사람은 같은 링크로 들어와 내 차수를 고르면 돼요.</small>
       <div className="js-nextbtns">
         <button type="button" className="js-mini ghost" onClick={() => setOpen(false)}>취소</button>
-        <button type="button" className="js-mini ok" onClick={onStart}>새 술자리 만들기</button>
+        <button type="button" className="js-mini ok" onClick={() => onStart([...picked])}>
+          {picked.size === 0 ? '나 혼자 시작하기' : `${picked.size + 1}명으로 시작하기`}
+        </button>
       </div>
     </section>
   )

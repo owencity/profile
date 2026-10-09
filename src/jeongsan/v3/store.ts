@@ -81,6 +81,19 @@ type State = {
   confirmName: (name: string) => void
   /** 서버가 준 내 정보로 바꾼다(API 모드, `gateway.ts`) */
   setMe: (me: User) => void
+  /**
+   * 서버 술자리 하나의 정산방들로 바꾼다(API 모드). 그 술자리의 옛 정산방은 지운다 — 단위가 늘거나 내가 빠졌을 수 있다.
+   * viewed: 내가 정산금액을 열어본 정산방 id(D5)
+   */
+  replaceGathering: (gatheringId: Id, rooms: Gathering[], viewed: Id[]) => void
+  /** 내 술자리 전체를 바꾼다(API 모드, H1 새로고침) */
+  replaceAllRooms: (rooms: Gathering[], viewed: Id[]) => void
+  setNotifications: (list: AppNotification[]) => void
+  /**
+   * 다음 차를 내가 계산 — 같은 술자리 안에 내가 총무인 정산방(정산 단위)을 만든다(FC-015, CTO 2026-10-06).
+   * 링크·사람 신원은 같은 술자리 것을 쓰고, 계산 대상은 고른 사람만. 목데이터 모드용 — API 모드는 gateway 가 서버를 부른다
+   */
+  createUnit: (roomId: Id, participantIds: Id[]) => Id | null
 }
 
 /** API 모드에서 로그인 확인 전의 나 — 화면은 로그인 화면이라 그려지지 않는다 */
@@ -149,6 +162,53 @@ export const useV3 = create<State>((set, get) => {
 
     setMe: (me) =>
       set((s) => ({ me, users: s.users.some((u) => u.id === me.id) ? s.users.map((u) => (u.id === me.id ? me : u)) : [...s.users, me] })),
+
+    replaceGathering: (gatheringId, rooms, viewed) =>
+      set((s) => {
+        const kept = Object.values(s.rooms).filter((g) => (g.gatheringId ?? g.id) !== gatheringId)
+        const ids = new Set(rooms.map((g) => g.id))
+        const paySeen = [...s.paySeen.filter((k) => !ids.has(Number(k.split(':')[0]))), ...viewed.map((id) => seenKey(id, s.me.id))]
+        return { rooms: Object.fromEntries([...kept, ...rooms].map((g) => [g.id, g])), paySeen }
+      }),
+
+    replaceAllRooms: (rooms, viewed) =>
+      set((s) => ({ rooms: Object.fromEntries(rooms.map((g) => [g.id, g])), paySeen: viewed.map((id) => seenKey(id, s.me.id)) })),
+
+    setNotifications: (notifications) => set({ notifications }),
+
+    createUnit: (roomId, participantIds) => {
+      const { me, rooms } = get()
+      const src = rooms[roomId]
+      const mine = src && participantOfUser(src, me.id)
+      if (!src || !mine) return null
+      const all = Object.values(rooms)
+      const id = Math.max(0, ...all.map((g) => g.id)) + 1
+      const gatheringId = src.gatheringId ?? src.id
+      // 차수 번호는 술자리 전체에서 이어진다 — B의 첫 차수는 3차(SETTLEMENT_UNITS §1.1-5)
+      const siblings = all.filter((g) => (g.gatheringId ?? g.id) === gatheringId)
+      const lastSeq = Math.max(0, ...siblings.flatMap((g) => g.rounds.map((r) => r.seq)))
+      const picked = new Set([...participantIds, mine.id])
+      const now = new Date().toISOString()
+      const g: Gathering = {
+        ...src,
+        id,
+        gatheringId,
+        title: src.title,
+        hostUserId: me.id,
+        status: 'OPEN',
+        inputRevision: 0,
+        completedAt: undefined,
+        participants: src.participants.filter((p) => picked.has(p.id)),
+        rounds: [],
+        responses: [],
+        transfers: [],
+        timeline: [...src.timeline, { id: Math.max(0, ...src.timeline.map((t) => t.id)) + 1, type: 'SYSTEM', body: `${me.displayName}님이 추가 차수의 총무가 되었어요`, createdAt: now }],
+        spoonGivers: [],
+        firstSeq: lastSeq + 1,
+      }
+      set((s) => ({ rooms: { ...s.rooms, [id]: g, [src.id]: src.gatheringId ? src : { ...src, gatheringId } } }))
+      return id
+    },
 
     confirmName: (name) =>
       set((s) => {
@@ -248,7 +308,7 @@ export const useV3 = create<State>((set, get) => {
           rounds = g.rounds.map((r) => (r.id === draft.id ? { ...r, ...fields } : r))
         } else {
           created = Math.max(0, ...g.rounds.map((r) => r.id)) + 1
-          rounds = relabel([...g.rounds, { id: created, seq: g.rounds.length + 1, label: '', ...fields }])
+          rounds = relabel([...g.rounds, { id: created, seq: Number.MAX_SAFE_INTEGER, label: '', ...fields }], g.firstSeq)
         }
         const label = rounds.find((r) => r.id === (exists ? draft.id : created))!.label
         const next = { ...g, rounds, inputRevision: g.inputRevision + 1 }
@@ -263,7 +323,7 @@ export const useV3 = create<State>((set, get) => {
         if (!target || g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
         const next = {
           ...g,
-          rounds: relabel(g.rounds.filter((r) => r.id !== roundId)),
+          rounds: relabel(g.rounds.filter((r) => r.id !== roundId), g.firstSeq),
           responses: g.responses.filter((r) => r.roundId !== roundId),
           inputRevision: g.inputRevision + 1,
         }

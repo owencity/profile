@@ -81,7 +81,14 @@ export type TimelineEntry = {
 }
 
 export type Gathering = {
+  /** 정산방 id. API 모드에서는 서버의 **정산 단위 id**다(`serverModel.ts`) */
   id: Id
+  /** 서버의 술자리 id — 한 술자리에 총무별 정산 단위(정산방)가 여럿일 수 있다. 목데이터는 id 와 같거나 비어 있다 */
+  gatheringId?: Id
+  /** 이 정산방의 첫 차수 번호(목데이터) — 다음 차 총무의 정산방은 술자리 전체 번호를 이어받는다. 없으면 1 */
+  firstSeq?: number
+  /** 다음에 넣을 차수 번호(API 모드) — 서버는 술자리 전체에서 번호를 매긴다. 없으면 이 정산방 차수로 센다 */
+  nextSeq?: number
   title: string
   date: string
   hostUserId: Id
@@ -116,6 +123,10 @@ export type AppNotification = {
 }
 
 // ── 조회 도우미 ─────────────────────────────────
+
+/** 새로 넣을 차수의 이름(R2) — 다음 차 총무의 정산방은 술자리 전체 번호를 이어받는다("4차 넣기") */
+export const nextRoundLabel = (g: Gathering) =>
+  `${g.nextSeq ?? (g.rounds.length > 0 ? Math.max(...g.rounds.map((r) => r.seq)) : (g.firstSeq ?? 1) - 1) + 1}차`
 
 export const hostOf = (g: Gathering) => g.participants.find((p) => p.userId === g.hostUserId)!
 

@@ -1,0 +1,95 @@
+{
+  "settlementUnitId": 1,
+  "inputRevision": 5,
+  "inputHash": "8b2249690627194408c89ad763fd4ba6aaa0c1cb7be3c211e2aa7cf1c8269e2c",
+  "lines": [
+    {
+      "participantId": 1,
+      "total": 93332,
+      "auto": true,
+      "rounds": [
+        {
+          "roundId": 1,
+          "type": "DRANK",
+          "amount": 61333
+        },
+        {
+          "roundId": 2,
+          "type": "DRANK",
+          "amount": 32000
+        }
+      ]
+    },
+    {
+      "participantId": 2,
+      "total": 93334,
+      "auto": false,
+      "rounds": [
+        {
+          "roundId": 1,
+          "type": "DRANK",
+          "amount": 61333
+        },
+        {
+          "roundId": 2,
+          "type": "SOBER",
+          "amount": 32000
+        }
+      ]
+    },
+    {
+      "participantId": 3,
+      "total": 93334,
+      "auto": true,
+      "rounds": [
+        {
+          "roundId": 1,
+          "type": "DRANK",
+          "amount": 61333
+        },
+        {
+          "roundId": 2,
+          "type": "DRANK",
+          "amount": 32000
+        }
+      ]
+    }
+  ],
+  "transfers": [
+    {
+      "from": 2,
+      "to": 1,
+      "amount": 93334,
+      "basis": [
+        {
+          "roundId": 1,
+          "type": "DRANK",
+          "amount": 61333
+        },
+        {
+          "roundId": 2,
+          "type": "SOBER",
+          "amount": 32001
+        }
+      ]
+    },
+    {
+      "from": 3,
+      "to": 1,
+      "amount": 93334,
+      "basis": [
+        {
+          "roundId": 1,
+          "type": "DRANK",
+          "amount": 61333
+        },
+        {
+          "roundId": 2,
+          "type": "DRANK",
+          "amount": 32001
+        }
+      ]
+    }
+  ],
+  "grandTotal": 280000
+}

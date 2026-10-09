@@ -1,0 +1,17 @@
+{
+  "title": "10/9 술자리",
+  "date": "2026-10-09",
+  "status": "OPEN",
+  "participantCount": 1,
+  "settlementUnits": [
+    {
+      "id": 1,
+      "status": "OPEN",
+      "host": {
+        "displayName": "김동규",
+        "spoonCount": 0
+      },
+      "rounds": []
+    }
+  ]
+}
