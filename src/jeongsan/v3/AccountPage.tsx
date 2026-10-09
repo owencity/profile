@@ -97,7 +97,7 @@ export function AccountPage({ me, backTo = '정산방으로', onBack, onSave, on
           {onLogout && <button type="button" className="js-cta2" onClick={onLogout}>로그아웃</button>}
           {onDeleteAccount && (
             <>
-              {armed && <p className="js-warntext">탈퇴하면 계정과 등록한 계좌가 지워지고 되돌릴 수 없어요. 진행 중인 정산의 기록은 다른 사람 화면에 남아요.</p>}
+              {armed && <p className="js-warntext">탈퇴하면 계정과 등록한 계좌가 지워지고 되돌릴 수 없어요. 지난 정산 기록에는 &lsquo;탈퇴한 사용자&rsquo;로 남아요. 진행 중인 정산이 있으면 끝난 뒤에 탈퇴할 수 있어요.</p>}
               <button
                 type="button"
                 className={`js-del${armed ? ' armed' : ''}`}
