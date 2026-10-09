@@ -314,8 +314,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         g={g}
         round={round}
         onBack={back}
-        onSave={async (draft, andNext) => {
-          const r = await gateway.saveRound(g.id, draft)
+        onSave={async (draft, andNext, mine) => {
+          const r = await gateway.saveRound(g.id, draft, mine)
           if ('error' in r) { setToast(r.error); return }
           navigate(andNext ? `/jungsan/r/${g.id}/round/new` : `/jungsan/r/${g.id}`)
         }}

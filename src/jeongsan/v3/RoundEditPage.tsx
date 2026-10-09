@@ -5,8 +5,9 @@
  * 끝나게 한다. 웹에는 [영수증 찍기]가 없다(SCREENS.md §7 — 앱 전용).
  */
 import { useState } from 'react'
-import type { DrinkItem, Gathering, Id, Round } from './model'
-import { hostOf, nextRoundLabel, won } from './model'
+import type { DrinkItem, Gathering, Id, ResponseType, Round } from './model'
+import { hostOf, nextRoundLabel, responseOf, won } from './model'
+import { ResponseRow } from './ResponseRow'
 import type { RoundDraft } from './round'
 import { DRINK_PRESETS, drinksTotal, parseAmount, validateRound } from './round'
 import { BackButton } from './BackButton'
@@ -16,8 +17,8 @@ type Props = {
   /** 새 차수면 없다 */
   round?: Round
   onBack: () => void
-  /** 저장. `andNext`면 저장 뒤 다음 차수를 연다 */
-  onSave: (draft: RoundDraft, andNext: boolean) => void
+  /** 저장. `andNext`면 저장 뒤 다음 차수를 연다. `mine`은 총무 본인의 이 차수 응답(FC-019) */
+  onSave: (draft: RoundDraft, andNext: boolean, mine: ResponseType) => void
   onDelete?: () => void
 }
 
@@ -31,6 +32,12 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
   const [tried, setTried] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // 총무 본인 응답(FC-019 A) — 대부분 마시니 알코올이 눌린 채 보이고, 안 마신 날은 여기서 한 번 바꾼다.
+  // 숨은 기본값이 아니라 화면에 보이는 기본값이다. 고치는 중이면 이미 넣은 응답을 보여준다
+  const [mine, setMine] = useState<ResponseType>(() => {
+    const cur = round ? responseOf(g, host.id, round.id)?.type : undefined
+    return cur && cur !== 'EXEMPT' ? cur : 'DRANK'
+  })
 
   const total = parseAmount(amountText)
   const draft: RoundDraft = { id: round?.id, total, drinks, payerParticipantId: payer }
@@ -49,7 +56,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
 
   const save = (andNext: boolean) => {
     setTried(true)
-    if (errors.length === 0) onSave(draft, andNext)
+    if (errors.length === 0) onSave(draft, andNext, mine)
   }
 
   return (
@@ -128,6 +135,11 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
         {drinks.length > 0 && (
           <div className="js-drinksum">술 합계 <b>{won(drinksTotal(drinks))}</b></div>
         )}
+      </section>
+
+      <section className="js-field">
+        <div className="js-lab">나는 이 차수에</div>
+        <ResponseRow label={`내 ${label}`} value={mine} onChange={setMine} />
       </section>
 
       {/*
