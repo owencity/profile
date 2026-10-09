@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, extraParticipants } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -472,7 +472,18 @@ export const useV3 = create<State>((set, get) => {
  * 정산(서버 흉내) — 미리보기대로 송금을 만들고 금액을 고정한다. 수동([지금 계산하기])과 자동(FC-020)이 같이 쓴다.
  * 응답 없는 칸은 전 차수 참석·알코올(AUTO)로 채운다. 보낼 돈이 하나도 없으면 바로 완료
  */
-function settleNow(g: Gathering, auto: boolean): Gathering {
+function settleNow(source: Gathering, auto: boolean): Gathering {
+  // 자동 정산은 인원 안의 사람만 — 인원 밖에 들어온 사람은 이번 정산에서 빠진다(총무가 [포함하기]를 안 눌렀다).
+  // 수동([지금 계산하기])은 총무가 명단을 보고 직접 누른 것이라 그대로 둔다(빼려면 [내보내기])
+  const extras = auto ? extraParticipants(source) : []
+  let g = source
+  if (extras.length > 0) {
+    const out = new Set(extras.map((p) => p.id))
+    g = push(
+      { ...g, participants: g.participants.filter((p) => !out.has(p.id)), responses: g.responses.filter((r) => !out.has(r.participantId)) },
+      { type: 'SYSTEM', body: `${extras.map((p) => p.displayName).join('·')}님은 인원(${g.headcount}명) 밖이라 이번 정산에서 빠졌어요` },
+    )
+  }
   const preview = mockPreview(g)
   const autoNames = preview.lines.filter((l) => l.auto).map((l) => nameOf(g, l.participantId))
   const settled: Gathering = {

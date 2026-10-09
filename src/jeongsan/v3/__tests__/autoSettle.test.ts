@@ -5,7 +5,7 @@
  */
 import { beforeEach, describe, expect, it } from 'vitest'
 import { ME } from '../mock'
-import { hostOf } from '../model'
+import { hostOf, respondedCount } from '../model'
 import { canSettleNow, nextAction } from '../nextAction'
 import { paymentRequestMessage } from '../share'
 import { useV3 } from '../store'
@@ -70,10 +70,10 @@ describe('자동 정산', () => {
     s().setHeadcount(OPEN, 4)
     expect(g().headcount).toBeUndefined()
     actAs(1)
-    s().setHeadcount(OPEN, 1)
-    expect(g().headcount).toBe(2)
     s().setHeadcount(OPEN, 99)
     expect(g().headcount).toBe(50)
+    s().setHeadcount(OPEN, 1)
+    expect(g().headcount).toBe(2)
   })
 })
 
@@ -118,5 +118,57 @@ describe('입금 요청 문구', () => {
     const done = { ...room, transfers: room.transfers.map((t) => (t.id === first.id ? { ...t, status: 'CONFIRMED' as const } : t)) }
     const who = room.participants.find((p) => p.id === first.fromParticipantId)!.displayName
     expect(paymentRequestMessage(done, 'u')).not.toContain(`· ${who} `)
+  })
+})
+
+describe('인원보다 더 들어오면 (CTO 결정 2026-10-09)', () => {
+  it('총무에게 "현재 5명이 참여했어요 · 인원이 맞는지 확인"과 [5명 모두 포함하기]가 먼저 뜬다', () => {
+    s().setHeadcount(OPEN, 4)
+    const a = nextAction(g(), 1)
+    expect(a.banner).toBe('현재 5명이 참여했어요 · 인원(4명)이 맞는지 확인해주세요')
+    expect(a.note).toBe('그대로면 4명으로 계산되고 정민수님은 빠져요') // 마지막에 들어온 사람
+    expect(a.action).toEqual({ kind: 'INCLUDE_EXTRA', label: '5명 모두 포함하기' })
+    expect(canSettleNow(g(), 1)).toBe(false) // "안 들어온 사람"이 없으니 [지금 계산하기]는 숨긴다
+  })
+
+  it('링크로 인원보다 한 명 더 들어오는 순간 총무에게 알림이 한 번 간다', () => {
+    s().setHeadcount(OPEN, 5)
+    actAs(6) // 한서연 — 6번째
+    s().joinGathering(g().shareToken, [])
+    actAs(2)
+    s().sendMessage(OPEN, '안녕') // 그 뒤 다른 변화로는 다시 안 간다
+    const host = hostOf(g()).userId
+    expect(s().notifications.filter((n) => n.userId === host && n.title.startsWith('현재 6명이 참여했어요')).length).toBe(1)
+  })
+
+  it('그대로 두면 앞에서부터 인원만큼 응답했을 때 정산되고, 뒤에 온 사람은 빠진다', () => {
+    s().setHeadcount(OPEN, 4)
+    answerAll(4) // 4번째 최지영 — 앞의 4명이 모두 응답
+    expect(g().status).toBe('SETTLING')
+    expect(g().participants.map((p) => p.displayName)).not.toContain('정민수')
+    expect(g().timeline.some((e) => e.body === '정민수님은 인원(4명) 밖이라 이번 정산에서 빠졌어요')).toBe(true)
+    expect(s().notifications.some((n) => n.userId === 5 && n.body.includes('인원(4명) 밖이라'))).toBe(true)
+  })
+
+  it('[포함하기]를 누르면 인원이 늘고, 모두 응답해야 함께 정산된다', () => {
+    s().setHeadcount(OPEN, 4)
+    s().setHeadcount(OPEN, g().participants.length) // [5명 모두 포함하기]
+    answerAll(4)
+    expect(g().status).toBe('OPEN') // 정민수가 아직
+    answerAll(5)
+    expect(g().status).toBe('SETTLING')
+    expect(g().participants.map((p) => p.displayName)).toContain('정민수')
+  })
+
+  it('인원 밖에 들어온 사람은 "인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요"를 본다', () => {
+    s().setHeadcount(OPEN, 4)
+    expect(nextAction(g(), 5).note).toBe('인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요')
+  })
+
+  it('응답 수는 인원 안의 사람만 센다 — "4명 중 3명"', () => {
+    s().setHeadcount(OPEN, 4)
+    s().setHeadcount(OPEN, 5)
+    s().setHeadcount(OPEN, 4)
+    expect(respondedCount(g())).toBe(3)
   })
 })

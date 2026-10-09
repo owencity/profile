@@ -417,6 +417,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
           return
         case 'SHARE': return void shareRoom(g)
         case 'REQUEST_PAYMENT': return void requestPayment(g)
+        // 인원을 들어온 사람 수로 — 모두 응답했으면 이 순간 자동 정산된다
+        case 'INCLUDE_EXTRA': return void ok(gateway.setHeadcount(g.id, g.participants.length))
         case 'SETTLE': return navigate(`/jungsan/r/${g.id}/settle`)
         case 'EDIT_FIRST_ROUND': return navigate(`/jungsan/r/${g.id}/round/new`)
         case 'RESPOND':

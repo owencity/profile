@@ -319,6 +319,16 @@ export const gateway = {
     }
   },
 
+  /** 인원(FC-020) — R1 [포함하기]. 서버는 바꾼 뒤 자동 정산 판정을 한 번 돈다 */
+  async setHeadcount(roomId: Id, headcount: number): Promise<string | null> {
+    if (!isApiMode()) {
+      s().setHeadcount(roomId, headcount)
+      return null
+    }
+    const { gid, uid } = ctx(roomId)
+    return mutate(gid, () => api.putHeadcount(gid, uid, headcount))
+  },
+
   /** 계산 대상에서 빼기(R4) — 그 정산 단위에서만. 공유 참여자는 남는다 */
   async removeParticipant(roomId: Id, participantId: Id): Promise<string | null> {
     if (!isApiMode()) return s().removeParticipant(roomId, participantId)

@@ -163,7 +163,7 @@ export const hasResponded = (g: Gathering, participantId: Id) =>
 export const unrespondedParticipants = (g: Gathering) => g.participants.filter((p) => !hasResponded(g, p.id))
 
 /** 모든 차수에 응답을 마친 사람 수 — R1 "5명 중 3명 응답" */
-export const respondedCount = (g: Gathering) => g.participants.filter((p) => hasResponded(g, p.id)).length
+export const respondedCount = (g: Gathering) => countedParticipants(g).filter((p) => hasResponded(g, p.id)).length
 
 /**
  * 자동 정산 조건(FC-020) — 총무가 넣은 인원만큼 들어와 모두가 모든 차수에 응답했다. 서버 판정과 같은 규칙.
@@ -171,7 +171,18 @@ export const respondedCount = (g: Gathering) => g.participants.filter((p) => has
  */
 export const allIn = (g: Gathering) =>
   g.status === 'OPEN' && g.headcount !== undefined && g.rounds.length > 0 &&
-  g.participants.length >= g.headcount && g.participants.every((p) => hasResponded(g, p.id))
+  g.participants.length >= g.headcount && countedParticipants(g).every((p) => hasResponded(g, p.id))
+
+/**
+ * 인원 안에 드는 사람(CTO 결정 2026-10-09) — 들어온 순서로 앞에서부터 인원만큼. 명단은 들어온 순서다(총무가 맨 앞).
+ * 인원보다 더 들어와도 막지 않지만, 총무가 [포함하기]로 인원을 늘리지 않으면 뒤에 들어온 사람은 자동 정산에서 빠진다.
+ */
+export const countedParticipants = (g: Gathering) =>
+  g.headcount === undefined ? g.participants : g.participants.slice(0, g.headcount)
+
+/** 인원 밖에 들어온 사람 — 총무가 확인해야 한다 */
+export const extraParticipants = (g: Gathering) =>
+  g.headcount === undefined ? [] : g.participants.slice(g.headcount)
 
 /** 인원 입력 범위(FC-020) — 서버 검증과 같다 */
 export const HEADCOUNT_MIN = 2

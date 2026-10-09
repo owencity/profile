@@ -28,10 +28,23 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     })
   }
 
-  // ── 총무가 내보냄: 빠진 사람에게 (술자리에 더는 못 들어가니 내 술자리로) ──
+  // ── 명단에서 빠짐: 그 사람에게 (술자리에 더는 못 들어가니 내 술자리로) ──
+  // 자동 정산 때 인원 밖이라 빠진 것(FC-020)과 총무가 내보낸 것을 문구로 구분한다
+  const settledNow = prev.status === 'OPEN' && next.status !== 'OPEN'
   for (const p of prev.participants) {
     if (next.participants.some((x) => x.id === p.id)) continue
-    out.push({ userId: p.userId, roomId: next.id, link: '/jungsan', title: `${next.title}에서 빠졌어요`, body: `${host.displayName} 총무가 명단에서 뺐어요` })
+    const why = settledNow ? `인원(${prev.headcount}명) 밖이라 이번 정산에서 빠졌어요` : `${host.displayName} 총무가 명단에서 뺐어요`
+    out.push({ userId: p.userId, roomId: next.id, link: '/jungsan', title: `${next.title}에서 빠졌어요`, body: why })
+  }
+
+  // ── 인원보다 더 들어옴: 총무에게 (CTO 결정 2026-10-09) — 넘는 순간 한 번 ──
+  if (next.status === 'OPEN' && next.headcount !== undefined && next.participants.length > next.headcount &&
+      prev.participants.length <= (prev.headcount ?? Infinity)) {
+    out.push({
+      userId: host.userId, roomId: next.id, link: room,
+      title: `현재 ${next.participants.length}명이 참여했어요. 인원이 맞는지 확인해주세요`,
+      body: `그대로면 ${next.headcount}명으로 계산되고 마지막에 들어온 사람은 빠져요`,
+    })
   }
 
   // ── 총무가 면제함: 그 사람에게 ──

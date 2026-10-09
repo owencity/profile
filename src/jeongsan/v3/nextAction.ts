@@ -6,7 +6,7 @@
  */
 import type { Gathering, Id } from './model'
 import {
-  daysUntilDelete, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
+  daysUntilDelete, extraParticipants, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
   unrespondedParticipants, won,
 } from './model'
 
@@ -15,6 +15,8 @@ export type ActionKind =
   | 'REGISTER_ACCOUNT' | 'RESPOND' | 'EDIT_RESPONSE' | 'RESEND' | 'GIVE_SPOON'
   /** 정산 뒤 총무가 단톡방에 사람별 금액·계좌를 보낸다(FC-020) */
   | 'REQUEST_PAYMENT'
+  /** 인원보다 더 들어온 사람까지 함께 정산 — 인원을 들어온 사람 수로 늘린다(FC-020) */
+  | 'INCLUDE_EXTRA'
 
 export type NextAction = {
   /** 배너 한 줄 */
@@ -51,6 +53,15 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
     if (isHost) {
       if (g.rounds.length === 0) return { banner: '1차 금액을 넣어주세요', tone: 'todo', action: { kind: 'EDIT_FIRST_ROUND', label: '1차 입력' } }
       if (g.participants.length === 1) return { banner: '링크를 보내서 사람들을 불러주세요', tone: 'todo', action: { kind: 'SHARE', label: '링크 공유' } }
+      // 인원보다 더 들어왔으면 총무 확인이 먼저(CTO 결정 2026-10-09) — 그대로면 인원만큼만 계산되고 뒤에 온 사람은 빠진다
+      const extras = extraParticipants(g)
+      if (extras.length > 0) {
+        return {
+          banner: `현재 ${g.participants.length}명이 참여했어요 · 인원(${g.headcount}명)이 맞는지 확인해주세요`,
+          note: `그대로면 ${g.headcount}명으로 계산되고 ${extras.map((p) => p.displayName).join('·')}님은 빠져요`,
+          tone: 'todo', action: { kind: 'INCLUDE_EXTRA', label: `${g.participants.length}명 모두 포함하기` },
+        }
+      }
       const waiting = unrespondedParticipants(g).length
       // 인원을 넣었으면 다 모일 때 서버가 자동 정산한다(FC-020) — 총무는 링크만 돌리면 된다.
       // 안 들어오는 사람이 있을 때의 [지금 계산하기]는 R1 배너 아래 작은 버튼(canSettleNow)
@@ -65,6 +76,12 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
         : { banner: '모두 응답했어요', tone: 'todo', action: { kind: 'SETTLE', label: '지금 계산하기' } }
     }
     const labels = g.rounds.map((r) => r.label).join('·')
+    // 인원 밖에 들어온 사람 — 총무가 포함하면 함께, 아니면 이번 정산에서 빠진다
+    if (extraParticipants(g).some((p) => p.id === me.id)) {
+      return hasResponded(g, me.id)
+        ? { banner: '인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요', tone: 'wait', action: { kind: 'EDIT_RESPONSE', label: '응답 고치기' } }
+        : { banner: `${labels} 응답을 남겨주세요`, note: '인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요', tone: 'todo', action: { kind: 'RESPOND', label: '응답하기' } }
+    }
     return hasResponded(g, me.id)
       ? {
           banner: g.headcount !== undefined ? '응답 완료! 다 모이면 자동으로 계산돼요' : '응답 완료! 총무가 정산하면 알려드릴게요',
@@ -122,4 +139,6 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
  * 총무가 직접 마무리한다. 하단 버튼은 [링크 공유]라 이 버튼이 따로 있어야 한다.
  */
 export const canSettleNow = (g: Gathering, meUserId: Id) =>
-  g.status === 'OPEN' && g.hostUserId === meUserId && g.headcount !== undefined && g.rounds.length > 0 && g.participants.length >= 2
+  g.status === 'OPEN' && g.hostUserId === meUserId && g.headcount !== undefined && g.rounds.length > 0 && g.participants.length >= 2 &&
+  // 인원보다 더 들어왔으면 "안 들어온 사람"이 없다 — 그때는 [포함하기]만
+  extraParticipants(g).length === 0
