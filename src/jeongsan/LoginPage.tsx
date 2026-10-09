@@ -69,7 +69,11 @@ export function LoginPage({ onLogin }: { onLogin: () => void }) {
       <div className="js-login">
         <AppIcon />
         <div className="t">정산어택</div>
-        <div className="hook">같이 놀고 같이 먹는데 왜 총무만 고생을 해야하냐!</div>
+        <div className="hook">
+          간단한 건 그대로 N분의 1 하면 되지만,
+          <br />
+          계산이 복잡해지면 총무분들은 계산이 힘들어집니다.
+        </div>
         <div className="s">
           그래서 총무들의 고생을 위해 만든 정산 앱입니다.
           <br />
