@@ -137,3 +137,29 @@ describe('gateway — 화면이 부르는 입구', () => {
     expect(m.useV3.getState().me).toMatchObject({ displayName: '김동구', needsName: false })
   })
 })
+
+describe('로그아웃·탈퇴', () => {
+  it('로그아웃은 POST /auth/logout 을 부르고, 서버가 실패해도 화면의 술자리·내 정보를 비운다', async () => {
+    const calls = fakeServer({ status: 200, body: { ...ME, displayName: '김동규', needsName: false } }, { status: 500 })
+    const m = await load('https://api.test')
+    await m.gateway.loadMe()
+    expect(m.useV3.getState().me.id).toBe(7)
+    await m.gateway.logout()
+    expect(calls[1].url).toBe('https://api.test/api/v1/auth/logout')
+    expect(calls[1].init.method).toBe('POST')
+    expect(m.useV3.getState().me.id).toBe(0)
+    expect(Object.keys(m.useV3.getState().rooms)).toHaveLength(0)
+  })
+
+  it('탈퇴는 DELETE /users/me — 실패하면 문구를 돌려주고 화면은 그대로 둔다', async () => {
+    const calls = fakeServer({ status: 200, body: { ...ME, displayName: '김동규', needsName: false } }, { status: 500, body: { code: 'X', message: '잠시 뒤 다시 시도해주세요' } }, { status: 204 })
+    const m = await load('https://api.test')
+    await m.gateway.loadMe()
+    expect(await m.gateway.deleteAccount()).toBe('잠시 뒤 다시 시도해주세요')
+    expect(m.useV3.getState().me.id).toBe(7)
+    expect(await m.gateway.deleteAccount()).toBeNull()
+    expect(calls[2].url).toBe('https://api.test/api/v1/users/me')
+    expect(calls[2].init.method).toBe('DELETE')
+    expect(m.useV3.getState().me.id).toBe(0)
+  })
+})

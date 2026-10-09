@@ -94,6 +94,10 @@ export const api = {
   /** 카카오 로그인 시작 주소. 로그인 뒤 돌아올 경로(FC-014 1-2) — `/jungsan/`으로 시작하는 것만 서버가 받는다 */
   kakaoLoginUrl: (returnTo?: string) =>
     `${BASE}/api/v1/auth/kakao/login${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`,
+  /** 로그아웃 — 서버 세션을 끊고 쿠키를 지운다 */
+  logout: () => request<unknown>('POST', '/api/v1/auth/logout'),
+  /** 회원 탈퇴 — 계정·연결 정보를 지우고 쿠키도 지운다 */
+  deleteMe: () => request<unknown>('DELETE', '/api/v1/users/me'),
   putPayout: (p: { bank: string; accountNo: string; holder: string }) => request<unknown>('PUT', '/api/v1/users/me/payout', p),
 
   // 술자리 — 응답은 모두 술자리 전체(ServerGathering). 화면은 serverModel.toRooms 로 정산방들로 바꾼다

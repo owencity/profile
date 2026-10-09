@@ -294,6 +294,13 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   if (route === '/jungsan/me/account') {
     return wrap(
       <AccountPage key={me.id} me={me} backTo="내 술자리로" onBack={() => navigate('/jungsan')}
+        // 계정 메뉴는 서버 계정이 있을 때만(목데이터에는 로그아웃할 계정이 없다)
+        onLogout={api ? async () => { await gateway.logout(); onLeave() } : undefined}
+        onDeleteAccount={api ? async () => {
+          const err = await gateway.deleteAccount()
+          if (err) setToast(err)
+          else onLeave()
+        } : undefined}
         onSave={async (p) => {
           if (await ok(gateway.registerPayout(p))) { setToast('받을 계좌를 저장했어요'); navigate('/jungsan') }
         }} />,

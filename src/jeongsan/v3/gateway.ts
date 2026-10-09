@@ -118,6 +118,25 @@ export const gateway = {
     }
   },
 
+  /** 로그아웃 — 서버 세션을 끊고(실패해도) 화면 데이터를 비운다. 목데이터는 화면만 로그인으로 */
+  async logout(): Promise<void> {
+    if (!isApiMode()) return
+    await api.logout().catch(() => {})
+    useV3.setState(useV3.getInitialState(), true)
+  },
+
+  /** 회원 탈퇴 — 성공하면 null. 서버가 계정·연결을 지우고, 화면 데이터도 비운다 */
+  async deleteAccount(): Promise<string | null> {
+    if (!isApiMode()) return '목데이터 모드에서는 탈퇴할 수 없어요'
+    try {
+      await api.deleteMe()
+      useV3.setState(useV3.getInitialState(), true)
+      return null
+    } catch (e) {
+      return messageOf(e)
+    }
+  },
+
   /** 내 술자리 전부 + 알림(H1 들어올 때). 목데이터는 할 일 없음 */
   async loadMine(): Promise<string | null> {
     if (!isApiMode()) return null

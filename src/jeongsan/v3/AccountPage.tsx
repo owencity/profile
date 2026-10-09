@@ -14,9 +14,13 @@ type Props = {
   backTo?: string
   onBack: () => void
   onSave: (p: Payout) => void
+  /** 내 술자리에서 연 경우만(API 모드) — 계정 메뉴(로그아웃·탈퇴)를 맨 아래에 둔다 */
+  onLogout?: () => void
+  onDeleteAccount?: () => void
 }
 
-export function AccountPage({ me, backTo = '정산방으로', onBack, onSave }: Props) {
+export function AccountPage({ me, backTo = '정산방으로', onBack, onSave, onLogout, onDeleteAccount }: Props) {
+  const [armed, setArmed] = useState(false)
   const [bank, setBank] = useState(me.payout?.bank ?? '')
   const [accountNo, setAccountNo] = useState(me.payout?.accountNo ?? '')
   const [holder, setHolder] = useState(me.payout?.holder ?? me.displayName)
@@ -84,6 +88,26 @@ export function AccountPage({ me, backTo = '정산방으로', onBack, onSave }: 
 
       {tried && errors.length > 0 && (
         <div className="js-errs" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>
+      )}
+
+      {/* 계정 — 탈퇴는 되돌릴 수 없어 두 번 눌러야 한다(차수 지우기와 같은 방식). 앱과 같은 자리·같은 문구 */}
+      {(onLogout || onDeleteAccount) && (
+        <section className="js-field js-account-menu" aria-label="계정">
+          <div className="js-lab">계정</div>
+          {onLogout && <button type="button" className="js-cta2" onClick={onLogout}>로그아웃</button>}
+          {onDeleteAccount && (
+            <>
+              {armed && <p className="js-warntext">탈퇴하면 계정과 등록한 계좌가 지워지고 되돌릴 수 없어요. 진행 중인 정산의 기록은 다른 사람 화면에 남아요.</p>}
+              <button
+                type="button"
+                className={`js-del${armed ? ' armed' : ''}`}
+                onClick={() => (armed ? onDeleteAccount() : setArmed(true))}
+              >
+                {armed ? '한 번 더 누르면 탈퇴해요' : '회원 탈퇴'}
+              </button>
+            </>
+          )}
+        </section>
       )}
 
       <div className="js-r2btns stick">
