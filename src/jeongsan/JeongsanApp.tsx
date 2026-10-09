@@ -12,7 +12,8 @@ import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
 import { SideStreet } from './SideStreet'
 import { AppV3 } from './v3/AppV3'
-import { isV3JoinRoute, isV3Route } from './v3/routes'
+import { isV3JoinRoute, isV3PublicRoute, isV3Route } from './v3/routes'
+import { PrivacyPage, SupportPage } from './v3/PrivacyPage'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -53,7 +54,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }, [])
 
   // 지워진 v2 화면의 주소는 첫 화면으로 보낸다. 렌더 중에 navigate 하지 않게 effect 로.
-  const known = isV3JoinRoute(route) || isV3Route(route)
+  const known = isV3JoinRoute(route) || isV3Route(route) || isV3PublicRoute(route)
   useEffect(() => {
     if (!known) navigate('/jungsan')
   }, [known, navigate])
@@ -73,6 +74,12 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // [참여]를 누를 때 로그인한다. 로그인 전·후 모두 같은 <AppV3>라 고르던 응답이 유지된다.
   // 실제 로그인은 카카오 인가로 페이지를 떠나므로 고르던 응답을 sessionStorage 에 남겨
   // 돌아와서 이어 붙여야 한다(flow-changes FC-009).
+  // 개인정보처리방침·지원 — 로그인과 상관없이 누구나(스토어 심사관 포함) 읽을 수 있어야 한다
+  if (isV3PublicRoute(route)) {
+    const home = () => navigate('/jungsan')
+    return route === '/jungsan/privacy' ? <PrivacyPage onHome={home} /> : <SupportPage onHome={home} />
+  }
+
   if (isV3JoinRoute(route)) {
     return <AppV3 route={route} navigate={navigate} onLeave={logout} loggedIn={loggedIn} onLogin={login} />
   }

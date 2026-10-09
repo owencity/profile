@@ -380,6 +380,19 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-payerline { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13.5px; color: var(--ink2); }
 .js-payerline b { color: var(--ink); }
 
+/* ── 개인정보처리방침·지원(/jungsan/privacy, /jungsan/support) — 읽는 문서라 글자 위주, 장식 없음 ── */
+.js-legal { gap: 10px; padding-bottom: 40px; color: var(--ink); line-height: 1.7; }
+.js-legal h1 { font-size: 22px; font-weight: 900; margin: 8px 0 0; }
+.js-legal h2 { font-size: 16px; font-weight: 800; margin: 18px 0 2px; color: var(--p700, var(--ink)); }
+.js-legal h3 { font-size: 14px; font-weight: 800; margin: 10px 0 0; }
+.js-legal p, .js-legal li { font-size: 14px; color: var(--ink2); }
+.js-legal ul { list-style: disc; padding-left: 20px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.js-legal table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.js-legal th, .js-legal td { border: 2px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+.js-legal th { background: var(--p50, #f2f7ff); font-weight: 800; }
+.js-legal-meta { font-size: 12.5px; color: var(--ink3); }
+.js-legal-contact { font-size: 16px; font-weight: 800; color: var(--ink); user-select: all; }
+
 /* R2 인원(FC-020) — 병 수 [−][+]와 같은 모양, 숫자 자리만 넓게 */
 .js-headcount { align-self: flex-start; }
 .js-headcount b { min-width: 64px; text-align: center; font-size: 16px; }
