@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import type { DrinkItem, Gathering, Id, ResponseType, Round } from './model'
-import { hostOf, nextRoundLabel, responseOf, won } from './model'
+import { HEADCOUNT_MAX, HEADCOUNT_MIN, hostOf, nextRoundLabel, responseOf, won } from './model'
 import { ResponseRow } from './ResponseRow'
 import type { RoundDraft } from './round'
 import { DRINK_PRESETS, drinksTotal, parseAmount, validateRound } from './round'
@@ -17,8 +17,8 @@ type Props = {
   /** 새 차수면 없다 */
   round?: Round
   onBack: () => void
-  /** 저장. `andNext`면 저장 뒤 다음 차수를 연다. `mine`은 총무 본인의 이 차수 응답(FC-019) */
-  onSave: (draft: RoundDraft, andNext: boolean, mine: ResponseType) => void
+  /** 저장. `andNext`면 저장 뒤 다음 차수를 연다. `mine`은 총무 본인의 이 차수 응답(FC-019), `headcount`는 나 포함 인원(FC-020) */
+  onSave: (draft: RoundDraft, andNext: boolean, mine: ResponseType, headcount: number) => void
   onDelete?: () => void
 }
 
@@ -38,6 +38,8 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
     const cur = round ? responseOf(g, host.id, round.id)?.type : undefined
     return cur && cur !== 'EXEMPT' ? cur : 'DRANK'
   })
+  // 인원(FC-020) — 이만큼 모두 응답하면 자동 정산. 처음엔 지금 들어온 사람 수(최소 2)에서 시작한다
+  const [headcount, setHeadcount] = useState(() => g.headcount ?? Math.max(HEADCOUNT_MIN, g.participants.length))
 
   const total = parseAmount(amountText)
   const draft: RoundDraft = { id: round?.id, total, drinks, payerParticipantId: payer }
@@ -56,7 +58,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
 
   const save = (andNext: boolean) => {
     setTried(true)
-    if (errors.length === 0) onSave(draft, andNext, mine)
+    if (errors.length === 0) onSave(draft, andNext, mine, headcount)
   }
 
   return (
@@ -135,6 +137,16 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
         {drinks.length > 0 && (
           <div className="js-drinksum">술 합계 <b>{won(drinksTotal(drinks))}</b></div>
         )}
+      </section>
+
+      <section className="js-field">
+        <div className="js-lab">몇 명이서 마셨나요? <small>나 포함 · 다 응답하면 자동으로 계산돼요</small></div>
+        <div className="js-qty js-headcount" role="group" aria-label="인원">
+          <button type="button" onClick={() => setHeadcount(Math.max(HEADCOUNT_MIN, headcount - 1))} aria-label="한 명 빼기" disabled={headcount <= HEADCOUNT_MIN}>−</button>
+          <b aria-live="polite">{headcount}명</b>
+          <button type="button" onClick={() => setHeadcount(Math.min(HEADCOUNT_MAX, headcount + 1))} aria-label="한 명 더하기" disabled={headcount >= HEADCOUNT_MAX}>+</button>
+        </div>
+        {headcount < g.participants.length && <div className="js-hint">이미 {g.participants.length}명이 들어와 있어요</div>}
       </section>
 
       <section className="js-field">

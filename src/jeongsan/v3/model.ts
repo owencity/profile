@@ -85,6 +85,11 @@ export type Gathering = {
   id: Id
   /** 서버의 술자리 id — 한 술자리에 총무별 정산 단위(정산방)가 여럿일 수 있다. 목데이터는 id 와 같거나 비어 있다 */
   gatheringId?: Id
+  /**
+   * 총무가 넣은 인원(총무 포함, FC-020). 이만큼 들어와 모두 응답하면 자동으로 정산된다.
+   * 없으면(옛 술자리·아직 안 넣음) 총무가 [지금 계산하기]로 정산한다
+   */
+  headcount?: number
   /** 이 정산방의 첫 차수 번호(목데이터) — 다음 차 총무의 정산방은 술자리 전체 번호를 이어받는다. 없으면 1 */
   firstSeq?: number
   /** 다음에 넣을 차수 번호(API 모드) — 서버는 술자리 전체에서 번호를 매긴다. 없으면 이 정산방 차수로 센다 */
@@ -156,6 +161,21 @@ export const hasResponded = (g: Gathering, participantId: Id) =>
   g.rounds.length > 0 && g.rounds.every((r) => responseOf(g, participantId, r.id))
 
 export const unrespondedParticipants = (g: Gathering) => g.participants.filter((p) => !hasResponded(g, p.id))
+
+/** 모든 차수에 응답을 마친 사람 수 — R1 "5명 중 3명 응답" */
+export const respondedCount = (g: Gathering) => g.participants.filter((p) => hasResponded(g, p.id)).length
+
+/**
+ * 자동 정산 조건(FC-020) — 총무가 넣은 인원만큼 들어와 모두가 모든 차수에 응답했다. 서버 판정과 같은 규칙.
+ * 인원보다 더 들어온 건 막지 않는다(≥).
+ */
+export const allIn = (g: Gathering) =>
+  g.status === 'OPEN' && g.headcount !== undefined && g.rounds.length > 0 &&
+  g.participants.length >= g.headcount && g.participants.every((p) => hasResponded(g, p.id))
+
+/** 인원 입력 범위(FC-020) — 서버 검증과 같다 */
+export const HEADCOUNT_MIN = 2
+export const HEADCOUNT_MAX = 50
 
 /** 이 참여자가 결제자인 차수 */
 export const roundsPaidBy = (g: Gathering, participantId: Id) =>

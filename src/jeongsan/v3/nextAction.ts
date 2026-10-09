@@ -6,13 +6,15 @@
  */
 import type { Gathering, Id } from './model'
 import {
-  daysUntilDelete, hasResponded, hostOf, nameOf, participantOfUser, roundsPaidBy,
+  daysUntilDelete, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
   unrespondedParticipants, won,
 } from './model'
 
 export type ActionKind =
   | 'EDIT_FIRST_ROUND' | 'SHARE' | 'SETTLE' | 'VIEW_PAY' | 'CONFIRM_INCOMING'
   | 'REGISTER_ACCOUNT' | 'RESPOND' | 'EDIT_RESPONSE' | 'RESEND' | 'GIVE_SPOON'
+  /** 정산 뒤 총무가 단톡방에 사람별 금액·계좌를 보낸다(FC-020) */
+  | 'REQUEST_PAYMENT'
 
 export type NextAction = {
   /** 배너 한 줄 */
@@ -50,13 +52,24 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
       if (g.rounds.length === 0) return { banner: '1차 금액을 넣어주세요', tone: 'todo', action: { kind: 'EDIT_FIRST_ROUND', label: '1차 입력' } }
       if (g.participants.length === 1) return { banner: '링크를 보내서 사람들을 불러주세요', tone: 'todo', action: { kind: 'SHARE', label: '링크 공유' } }
       const waiting = unrespondedParticipants(g).length
+      // 인원을 넣었으면 다 모일 때 서버가 자동 정산한다(FC-020) — 총무는 링크만 돌리면 된다.
+      // 안 들어오는 사람이 있을 때의 [지금 계산하기]는 R1 배너 아래 작은 버튼(canSettleNow)
+      if (g.headcount !== undefined && waiting + Math.max(0, g.headcount - g.participants.length) > 0) {
+        return {
+          banner: `${g.headcount}명 중 ${respondedCount(g)}명 응답했어요 · 다 모이면 자동으로 계산돼요`,
+          tone: 'wait', action: { kind: 'SHARE', label: '링크 공유' },
+        }
+      }
       return waiting > 0
-        ? { banner: `${waiting}명이 아직 응답 안 했어요 · 준비되면 정산하세요`, tone: 'wait', action: { kind: 'SETTLE', label: '정산하기' } }
-        : { banner: '모두 응답했어요', tone: 'todo', action: { kind: 'SETTLE', label: '정산하기' } }
+        ? { banner: `${waiting}명이 아직 응답 안 했어요 · 준비되면 정산하세요`, tone: 'wait', action: { kind: 'SETTLE', label: '지금 계산하기' } }
+        : { banner: '모두 응답했어요', tone: 'todo', action: { kind: 'SETTLE', label: '지금 계산하기' } }
     }
     const labels = g.rounds.map((r) => r.label).join('·')
     return hasResponded(g, me.id)
-      ? { banner: '응답 완료! 총무가 정산하면 알려드릴게요', tone: 'wait', action: { kind: 'EDIT_RESPONSE', label: '응답 고치기' } }
+      ? {
+          banner: g.headcount !== undefined ? '응답 완료! 다 모이면 자동으로 계산돼요' : '응답 완료! 총무가 정산하면 알려드릴게요',
+          tone: 'wait', action: { kind: 'EDIT_RESPONSE', label: '응답 고치기' },
+        }
       : { banner: `${labels} 응답을 남겨주세요`, tone: 'todo', action: { kind: 'RESPOND', label: '응답하기' } }
   }
 
@@ -89,7 +102,10 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
   }
   const waitingIn = incoming.filter((t) => t.status === 'WAITING').length
   if (waitingIn > 0) {
-    return { banner: `${waitingIn}명 입금 기다리는 중`, tone: 'wait', action: { kind: 'SHARE', label: '링크 다시 공유' } }
+    // 총무는 계산이 끝나면 단톡방에 입금 요청을 돌린다(FC-020) — 사람별 금액·계좌가 담긴 문구
+    return isHost
+      ? { banner: '계산 끝! 단톡방에 입금 요청을 보내주세요', tone: 'todo', action: { kind: 'REQUEST_PAYMENT', label: '입금 요청 보내기' } }
+      : { banner: `${waitingIn}명 입금 기다리는 중`, tone: 'wait', action: { kind: 'SHARE', label: '링크 다시 공유' } }
   }
   if (outgoing.some((t) => t.status === 'SENT')) {
     return { banner: '확인 기다리는 중이에요', note: autoNote, tone: 'wait' }
@@ -100,3 +116,10 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
   }
   return { banner: '다른 사람들 입금을 기다리는 중이에요', tone: 'wait' }
 }
+
+/**
+ * R1 배너 아래 작은 [지금 계산하기](FC-020) — 인원을 넣어 자동 정산을 기다리는 중인데, 끝까지 안 들어오는 사람이 있으면
+ * 총무가 직접 마무리한다. 하단 버튼은 [링크 공유]라 이 버튼이 따로 있어야 한다.
+ */
+export const canSettleNow = (g: Gathering, meUserId: Id) =>
+  g.status === 'OPEN' && g.hostUserId === meUserId && g.headcount !== undefined && g.rounds.length > 0 && g.participants.length >= 2

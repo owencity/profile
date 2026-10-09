@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -43,6 +43,8 @@ type State = {
    * 서버가 409로 거절하는 것을 흉내 내 'STALE'을 돌려준다.
    */
   settle: (roomId: Id, inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
+  /** 인원(총무 포함, FC-020) — 총무·정산 전. 2~50으로 맞춘다. 이 인원이 모두 응답하면 자동 정산 */
+  setHeadcount: (roomId: Id, headcount: number) => void
 
   /** 모든 사람의 알림 — 화면은 지금 보는 사람 것만 거른다 */
   notifications: AppNotification[]
@@ -134,8 +136,11 @@ function completeIfDone(g: Gathering): Gathering {
 
 export const useV3 = create<State>((set, get) => {
   /** 술자리를 바꾸고, 바뀐 만큼 알림을 쌓는다(행동한 본인은 빼고) — 서버의 이벤트 → 알림 흉내 */
-  const commit = (s: State, prev: Gathering, next: Gathering): Partial<State> => {
-    if (next === prev) return {}
+  const commit = (s: State, prev: Gathering, after: Gathering): Partial<State> => {
+    if (after === prev) return {}
+    // 자동 정산(FC-020) — 어떤 동작이든(응답·참여·대리 응답·인원 변경·차수 삭제) "모두 모였다"로 바뀐 순간 정산한다.
+    // 알림 규칙처럼 전·후만 보고 정해서, 경로마다 정산 코드를 흩뿌리지 않는다. 서버는 같은 판정을 트랜잭션 안에서 한다
+    const next = !allIn(prev) && allIn(after) ? settleNow(after, true) : after
     const startId = Math.max(0, ...s.notifications.map((n) => n.id)) + 1
     const fresh = notificationsFor(prev, next)
       .filter((n) => n.userId !== s.me.id)
@@ -205,6 +210,8 @@ export const useV3 = create<State>((set, get) => {
         timeline: [...src.timeline, { id: Math.max(0, ...src.timeline.map((t) => t.id)) + 1, type: 'SYSTEM', body: `${me.displayName}님이 추가 차수의 총무가 되었어요`, createdAt: now }],
         spoonGivers: [],
         firstSeq: lastSeq + 1,
+        // 다음 차 인원의 시작값은 고른 사람 + 나(FC-020) — R2에서 바꿀 수 있다
+        headcount: Math.max(HEADCOUNT_MIN, picked.size),
       }
       set((s) => ({ rooms: { ...s.rooms, [id]: g, [src.id]: src.gatheringId ? src : { ...src, gatheringId } } }))
       return id
@@ -448,26 +455,36 @@ export const useV3 = create<State>((set, get) => {
         return 'DENIED'
       }
       if (g.inputRevision !== inputRevision) return 'STALE'
-
-      const preview = mockPreview(g)
-      const autoNames = preview.lines.filter((l) => l.auto).map((l) => nameOf(g, l.participantId))
-      const settled: Gathering = {
-        ...g,
-        status: 'SETTLING',
-        responses: withAutoResponses(g),
-        transfers: preview.transfers.map((t, i) => ({ id: i + 1, status: 'WAITING' as const, ...t })),
-      }
-      const hostName = hostOf(g).displayName
-      const body = autoNames.length > 0
-        ? `${hostName}님이 정산했어요 · ${autoNames.join('·')}님은 응답이 없어 전 차수 참석·알코올로 계산됐어요`
-        : `${hostName}님이 정산했어요`
-      // 보낼 돈이 하나도 없으면(총무 혼자 다 냈고 나머지가 모두 면제 등) 바로 완료
-      const next = completeIfDone(push(settled, { type: 'SYSTEM', body }))
-      set((s) => commit(s, g, next))
+      set((s) => commit(s, g, settleNow(g, false)))
       return 'OK'
     },
+
+    setHeadcount: (roomId, headcount) =>
+      update(roomId, (g) => {
+        if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
+        const n = Math.min(HEADCOUNT_MAX, Math.max(HEADCOUNT_MIN, Math.round(headcount)))
+        return n === g.headcount ? g : { ...g, headcount: n }
+      }),
   }
 })
+
+/**
+ * 정산(서버 흉내) — 미리보기대로 송금을 만들고 금액을 고정한다. 수동([지금 계산하기])과 자동(FC-020)이 같이 쓴다.
+ * 응답 없는 칸은 전 차수 참석·알코올(AUTO)로 채운다. 보낼 돈이 하나도 없으면 바로 완료
+ */
+function settleNow(g: Gathering, auto: boolean): Gathering {
+  const preview = mockPreview(g)
+  const autoNames = preview.lines.filter((l) => l.auto).map((l) => nameOf(g, l.participantId))
+  const settled: Gathering = {
+    ...g,
+    status: 'SETTLING',
+    responses: withAutoResponses(g),
+    transfers: preview.transfers.map((t, i) => ({ id: i + 1, status: 'WAITING' as const, ...t })),
+  }
+  const who = auto ? '모두 응답해서 자동으로 계산했어요' : `${hostOf(g).displayName}님이 정산했어요`
+  const body = autoNames.length > 0 ? `${who} · ${autoNames.join('·')}님은 응답이 없어 전 차수 참석·알코올로 계산됐어요` : who
+  return completeIfDone(push(settled, { type: 'SYSTEM', body }))
+}
 
 /** 한 칸(참여자 × 차수)의 응답을 바꾸거나 새로 넣는다 */
 function setResponse(list: RoundResponse[], r: RoundResponse): RoundResponse[] {

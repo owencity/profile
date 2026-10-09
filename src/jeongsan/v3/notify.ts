@@ -61,6 +61,8 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
 
   // ── 정산됨: 참여자 모두에게 "입금액을 확인해주세요" ──
   if (prev.status === 'OPEN' && next.status !== 'OPEN') {
+    // 총무에게(FC-020 SETTLED_HOST) — 자동 정산이면 총무는 누가 마지막 응답을 넣었는지 모른다. 직접 정산했으면 본인이라 빠진다
+    out.push({ userId: host.userId, roomId: next.id, link: room, title: '계산이 끝났어요. 단톡방에 입금 요청을 보내주세요', body: next.title })
     const autoIds = new Set(next.responses.filter((r) => r.source === 'AUTO').map((r) => r.participantId))
     for (const p of next.participants) {
       if (p.id === host.id) continue

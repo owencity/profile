@@ -28,7 +28,7 @@ import { seenKey, useV3 } from './store'
 import type { SettlePreview } from './mockServer'
 import type { Gathering, Id } from './model'
 import { entryChoiceLabel, toEntryRooms } from './serverModel'
-import { shareMessage, shareUrl } from './share'
+import { paymentRequestMessage, shareMessage, shareUrl } from './share'
 import { participantOfUser, roundsPaidBy } from './model'
 import type { ActionKind } from './nextAction'
 
@@ -138,6 +138,25 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
       setToast('초대 문구와 링크를 복사했어요. 단톡방에 붙여 넣어주세요')
     } catch {
       setToast(`이 링크를 보내주세요: ${url}`)
+    }
+  }
+
+  /** 입금 요청(FC-020) — 정산 뒤 사람별 금액·계좌를 단톡방에. 공유 시트가 없으면 복사 */
+  const requestPayment = async (g: Gathering) => {
+    const text = paymentRequestMessage(g, shareUrl(window.location.origin, g.shareToken))
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${g.title} — 입금 요청`, text })
+        return
+      }
+    } catch (e) {
+      if ((e as DOMException)?.name === 'AbortError') return
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setToast('입금 요청 문구를 복사했어요. 단톡방에 붙여 넣어주세요')
+    } catch {
+      setToast('복사하지 못했어요. 보낼 돈 화면에서 금액을 확인해주세요')
     }
   }
 
@@ -314,8 +333,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         g={g}
         round={round}
         onBack={back}
-        onSave={async (draft, andNext, mine) => {
-          const r = await gateway.saveRound(g.id, draft, mine)
+        onSave={async (draft, andNext, mine, headcount) => {
+          const r = await gateway.saveRound(g.id, draft, mine, headcount)
           if ('error' in r) { setToast(r.error); return }
           navigate(andNext ? `/jungsan/r/${g.id}/round/new` : `/jungsan/r/${g.id}`)
         }}
@@ -397,6 +416,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
           document.querySelector('.js-incoming')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
           return
         case 'SHARE': return void shareRoom(g)
+        case 'REQUEST_PAYMENT': return void requestPayment(g)
         case 'SETTLE': return navigate(`/jungsan/r/${g.id}/settle`)
         case 'EDIT_FIRST_ROUND': return navigate(`/jungsan/r/${g.id}/round/new`)
         case 'RESPOND':

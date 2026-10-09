@@ -14,6 +14,8 @@ export type ServerParticipant = {
 }
 export type ServerUnit = {
   id: number; hostParticipantId: number; status: Gathering['status']; inputRevision: number
+  /** 총무가 넣은 인원(FC-020). 서버가 아직 안 주면 undefined */
+  headcount?: number | null
   completedAt: string | null; participantIds: number[]
   me: { included: boolean; settlementViewed: boolean }
 }
@@ -87,6 +89,7 @@ export function toRoom(g: ServerGathering, u: ServerUnit): Gathering {
     status: u.status,
     shareToken: g.shareToken,
     inputRevision: u.inputRevision,
+    headcount: u.headcount ?? undefined,
     completedAt: u.completedAt ?? undefined,
     participants: g.participants.filter((p) => members.has(p.id)).map(toParticipant),
     // 차수 이름은 프론트가 붙인다(FC-014 D4). seq 는 술자리 전체 번호라 B의 첫 차수는 "3차"가 된다
