@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { profile } from '../profile'
-import { portfolio, STATUS_STYLES, formatCareerDuration } from './data'
+import { portfolio, STATUS_STYLES } from './data'
 import { ProjectContent } from './ProjectContent'
 import { ProjectModal } from './ProjectModal'
 
@@ -240,51 +240,6 @@ export function PortfolioHome() {
           </div>
         </section>
 
-        <SectionHeading emoji="🔍" title="Profile" />
-        <section className="grid items-start gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 sm:p-6">
-            <p className="text-sm font-semibold text-blue-700">
-              경력 ({formatCareerDuration(portfolio.career.startDate)})
-            </p>
-            <p className="mt-2 text-base font-semibold text-zinc-900 sm:text-lg">
-              {portfolio.career.company}
-            </p>
-            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.career.period}</p>
-            <p className="mt-3 text-base leading-7 text-zinc-900">
-              {portfolio.career.project}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
-            <p className="text-sm font-semibold text-zinc-900">학력</p>
-            <p className="mt-2 text-base font-semibold text-zinc-900 sm:text-lg">
-              {portfolio.education.degree}
-            </p>
-            <p className="mt-0.5 text-sm text-zinc-900">{portfolio.education.degreePeriod}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-900">이전 학력</p>
-            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.priorSchool}</p>
-            <p className="mt-1.5 text-sm text-zinc-900">{portfolio.education.priorSchoolPeriod}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-900">교육</p>
-            <p className="mt-1.5 text-base text-zinc-900">{portfolio.education.bootcamp}</p>
-            <p className="mt-4 text-sm font-semibold text-zinc-900">자격증</p>
-            <ul className="mt-1.5 space-y-1 text-base text-zinc-900">
-              {portfolio.education.certificates.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <SectionHeading emoji="🛠" title="Skills" />
-        <section className="grid gap-4 sm:grid-cols-2">
-          <SkillCard title="Backend" tone="blue" items={portfolio.skills.backend} />
-          <SkillCard
-            title="Tools & Observability"
-            tone="emerald"
-            items={portfolio.skills.tools}
-          />
-        </section>
-
         <SectionHeading emoji="🚀" title="Projects" />
         {portfolio.projectGroups.map((group) => {
           const visibleProjects = group.projects.filter((project) => !project.hidden)
@@ -433,42 +388,3 @@ function ContactRow({
   )
 }
 
-function SkillCard({
-  title,
-  tone,
-  items,
-}: {
-  title: string
-  tone: 'blue' | 'emerald'
-  items: string[]
-}) {
-  const toneStyles =
-    tone === 'blue'
-      ? {
-          border: 'border-blue-100',
-          bg: 'bg-blue-50/60',
-          chip: 'bg-blue-100 text-blue-700',
-          label: 'text-blue-700',
-        }
-      : {
-          border: 'border-emerald-100',
-          bg: 'bg-emerald-50/60',
-          chip: 'bg-emerald-100 text-emerald-700',
-          label: 'text-emerald-700',
-        }
-  return (
-    <div className={`rounded-2xl border ${toneStyles.border} ${toneStyles.bg} p-5 sm:p-6`}>
-      <p className={`text-sm font-semibold ${toneStyles.label}`}>{title}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span
-            key={item}
-            className={`rounded-full px-3 py-1 text-sm font-medium ${toneStyles.chip}`}
-          >
-            {item}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
