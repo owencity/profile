@@ -16,6 +16,8 @@ export type ServerUnit = {
   id: number; hostParticipantId: number; status: Gathering['status']; inputRevision: number
   /** 총무가 넣은 인원(FC-020). 서버가 아직 안 주면 undefined */
   headcount?: number | null
+  /** 자동 계산이 멈춘 이유(API v8). 정상이면 null */
+  autoSettlementError?: string | null
   completedAt: string | null; participantIds: number[]
   me: { included: boolean; settlementViewed: boolean }
 }
@@ -90,8 +92,10 @@ export function toRoom(g: ServerGathering, u: ServerUnit): Gathering {
     shareToken: g.shareToken,
     inputRevision: u.inputRevision,
     headcount: u.headcount ?? undefined,
+    autoSettlementError: u.autoSettlementError ?? undefined,
     completedAt: u.completedAt ?? undefined,
-    participants: g.participants.filter((p) => members.has(p.id)).map(toParticipant),
+    // 명단은 서버가 준 단위 순서 그대로 — 총무 먼저, 그다음 이 단위에 들어온 순서. "인원 안"을 이 순서로 센다(API v8)
+    participants: u.participantIds.flatMap((id) => g.participants.filter((p) => p.id === id)).map(toParticipant),
     // 차수 이름은 프론트가 붙인다(FC-014 D4). seq 는 술자리 전체 번호라 B의 첫 차수는 "3차"가 된다
     rounds: rounds.map((r) => ({ id: r.id, seq: r.seq, label: `${r.seq}차`, total: r.total, payerParticipantId: r.payerParticipantId, drinks: r.drinks })),
     responses: g.responses.filter((x) => roundIds.has(x.roundId) && members.has(x.participantId)),

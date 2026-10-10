@@ -163,3 +163,24 @@ describe('로그아웃·탈퇴', () => {
     expect(m.useV3.getState().me.id).toBe(0)
   })
 })
+
+describe('알림 (API v8)', () => {
+  it('서버가 준 제목을 그대로 쓰고, 명단에서 빠진 사람의 알림은 내 술자리로 보낸다', async () => {
+    fakeServer(
+      { status: 200, body: { ...ME, displayName: '김동규', needsName: false } },
+      { status: 200, body: [] },
+      {
+        status: 200, body: [
+          { id: 1, type: 'MEMBER_EXCLUDED', gatheringId: 9, settlementUnitId: 9, title: '10/9 술자리에서 빠졌어요', body: '인원(4명) 밖이라 이번 정산에서 빠졌어요', createdAt: '2026-10-10T00:00:00Z', readAt: null },
+          { id: 2, type: 'SETTLED', gatheringId: 9, settlementUnitId: 9, title: '정산이 나왔어요', body: '김동규님께 15,000원', createdAt: '2026-10-10T00:00:00Z', readAt: null },
+        ],
+      },
+    )
+    const m = await load('https://api.test')
+    await m.gateway.loadMe()
+    await m.gateway.loadMine()
+    const [gone, settled] = m.useV3.getState().notifications
+    expect(gone).toMatchObject({ title: '10/9 술자리에서 빠졌어요', body: '인원(4명) 밖이라 이번 정산에서 빠졌어요', link: '/jungsan' })
+    expect(settled.link).toBe('/jungsan/r/9/pay')
+  })
+})

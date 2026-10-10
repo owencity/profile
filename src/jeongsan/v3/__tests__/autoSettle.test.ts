@@ -172,3 +172,39 @@ describe('인원보다 더 들어오면 (CTO 결정 2026-10-09)', () => {
     expect(respondedCount(g())).toBe(3)
   })
 })
+
+describe('인원 밖 사람이 결제자면 (API v8 REMOVE_PAYER, CTO 승인 2026-10-10)', () => {
+  /** 정민수(15, 인원 밖)를 2차 결제자로 — 총무가 차수를 고친다 */
+  const make2ndPaidByExtra = () => {
+    const r2 = g().rounds[1]
+    s().saveRound(OPEN, { id: r2.id, total: r2.total, drinks: r2.drinks, payerParticipantId: 15 })
+  }
+
+  it('인원이 다 응답해도 확정하지 않고 멈춘 이유를 남긴다 — 빼면 그 차수의 돈을 받을 사람이 사라진다', () => {
+    s().setHeadcount(OPEN, 4)
+    make2ndPaidByExtra()
+    answerAll(4)
+    expect(g().status).toBe('OPEN')
+    expect(g().autoSettlementError).toBe('REMOVE_PAYER')
+    const a = nextAction(g(), 1)
+    expect(a.banner).toBe('인원 밖 정민수님이 결제자라 자동 계산을 멈췄어요')
+    expect(a.action).toEqual({ kind: 'INCLUDE_EXTRA', label: '5명 모두 포함하기' })
+  })
+
+  it('총무가 낸 사람을 바꾸면 다시 판정해 정산된다', () => {
+    s().setHeadcount(OPEN, 4)
+    make2ndPaidByExtra()
+    answerAll(4)
+    actAs(1)
+    const r2 = g().rounds[1]
+    s().saveRound(OPEN, { id: r2.id, total: r2.total, drinks: r2.drinks, payerParticipantId: 11 })
+    expect(g().status).toBe('SETTLING')
+    expect(g().autoSettlementError).toBeUndefined()
+  })
+
+  it('그 밖의 이유로 멈추면 [지금 계산하기]로 마무리하게 한다', () => {
+    const a = nextAction({ ...g(), headcount: 5, autoSettlementError: 'NO_ROUNDS' }, 1)
+    expect(a.banner).toBe('자동 계산이 멈췄어요 · 금액을 확인하고 지금 계산해주세요')
+    expect(a.action?.kind).toBe('SETTLE')
+  })
+})

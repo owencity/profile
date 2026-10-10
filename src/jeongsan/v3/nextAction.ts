@@ -6,7 +6,7 @@
  */
 import type { Gathering, Id } from './model'
 import {
-  daysUntilDelete, extraParticipants, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
+  daysUntilDelete, extraParticipants, extraPayers, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
   unrespondedParticipants, won,
 } from './model'
 
@@ -54,6 +54,17 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
       if (g.rounds.length === 0) return { banner: '1차 금액을 넣어주세요', tone: 'todo', action: { kind: 'EDIT_FIRST_ROUND', label: '1차 입력' } }
       if (g.participants.length === 1) return { banner: '링크를 보내서 사람들을 불러주세요', tone: 'todo', action: { kind: 'SHARE', label: '링크 공유' } }
       // 인원보다 더 들어왔으면 총무 확인이 먼저(CTO 결정 2026-10-09) — 그대로면 인원만큼만 계산되고 뒤에 온 사람은 빠진다
+      // 인원이 다 응답했는데 서버가 자동 계산을 멈췄다(API v8) — 총무가 풀어야 한다
+      if (g.autoSettlementError) {
+        const payers = extraPayers(g)
+        return g.autoSettlementError === 'REMOVE_PAYER' && payers.length > 0
+          ? {
+              banner: `인원 밖 ${payers.map((p) => p.displayName).join('·')}님이 결제자라 자동 계산을 멈췄어요`,
+              note: '모두 포함하거나, 낸 사람을 바꾸거나, 지금 계산하기로 마무리할 수 있어요',
+              tone: 'todo', action: { kind: 'INCLUDE_EXTRA', label: `${g.participants.length}명 모두 포함하기` },
+            }
+          : { banner: '자동 계산이 멈췄어요 · 금액을 확인하고 지금 계산해주세요', tone: 'todo', action: { kind: 'SETTLE', label: '지금 계산하기' } }
+      }
       const extras = extraParticipants(g)
       if (extras.length > 0) {
         return {

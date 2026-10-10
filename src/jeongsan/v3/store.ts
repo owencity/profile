@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, extraParticipants } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, extraParticipants, extraPayers } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -140,7 +140,8 @@ export const useV3 = create<State>((set, get) => {
     if (after === prev) return {}
     // 자동 정산(FC-020) — 어떤 동작이든(응답·참여·대리 응답·인원 변경·차수 삭제) "모두 모였다"로 바뀐 순간 정산한다.
     // 알림 규칙처럼 전·후만 보고 정해서, 경로마다 정산 코드를 흩뿌리지 않는다. 서버는 같은 판정을 트랜잭션 안에서 한다
-    const next = !allIn(prev) && allIn(after) ? settleNow(after, true) : after
+    // 보류 중(autoSettlementError)이면 변경마다 다시 판정한다 — 서버도 차수 수정·인원 변경 뒤 다시 판정한다
+    const next = allIn(after) && (!allIn(prev) || prev.autoSettlementError) ? autoSettle(after) : after
     const startId = Math.max(0, ...s.notifications.map((n) => n.id)) + 1
     const fresh = notificationsFor(prev, next)
       .filter((n) => n.userId !== s.me.id)
@@ -463,7 +464,7 @@ export const useV3 = create<State>((set, get) => {
       update(roomId, (g) => {
         if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
         const n = Math.min(HEADCOUNT_MAX, Math.max(HEADCOUNT_MIN, Math.round(headcount)))
-        return n === g.headcount ? g : { ...g, headcount: n }
+        return n === g.headcount ? g : { ...g, headcount: n, autoSettlementError: undefined }
       }),
   }
 })
@@ -495,6 +496,15 @@ function settleNow(source: Gathering, auto: boolean): Gathering {
   const who = auto ? '모두 응답해서 자동으로 계산했어요' : `${hostOf(g).displayName}님이 정산했어요`
   const body = autoNames.length > 0 ? `${who} · ${autoNames.join('·')}님은 응답이 없어 전 차수 참석·알코올로 계산됐어요` : who
   return completeIfDone(push(settled, { type: 'SYSTEM', body }))
+}
+
+/**
+ * 자동 계산(FC-020) — 인원 밖 사람이 결제자면 빼면 그 차수의 돈을 받을 사람이 사라져서 확정하지 않고 사유만 남긴다
+ * (서버 AUTO_SETTLEMENT REMOVE_PAYER, CTO 승인 2026-10-10). 총무가 포함하거나 낸 사람을 바꾸면 다시 판정한다
+ */
+function autoSettle(g: Gathering): Gathering {
+  if (extraPayers(g).length > 0) return { ...g, autoSettlementError: 'REMOVE_PAYER' }
+  return settleNow({ ...g, autoSettlementError: undefined }, true)
 }
 
 /** 한 칸(참여자 × 차수)의 응답을 바꾸거나 새로 넣는다 */

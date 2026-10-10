@@ -68,6 +68,8 @@ async function mutate(gid: Id, call: () => Promise<unknown>): Promise<string | n
 
 /** 알림 종류 → 누르면 갈 곳(FC-005). 송금 관련은 보낼 돈(P3), 그 밖은 정산방 */
 const PAY_TYPES = new Set(['SETTLED', 'NOT_RECEIVED', 'PAYOUT_REGISTERED'])
+/** 명단에서 빠진 사람에게 가는 알림 — 그 정산방은 더 열 수 없다 */
+const GONE_TYPES = new Set(['MEMBER_EXCLUDED', 'REMOVED'])
 function toNotification(n: ServerNotification, meId: Id): AppNotification {
   const rooms = Object.values(s().rooms)
   const roomId = n.settlementUnitId ?? rooms.find((g) => (g.gatheringId ?? g.id) === n.gatheringId)?.id ?? 0
@@ -75,9 +77,11 @@ function toNotification(n: ServerNotification, meId: Id): AppNotification {
     id: n.id,
     userId: meId,
     roomId,
-    title: n.body,
-    body: '',
-    link: PAY_TYPES.has(n.type) ? `/jungsan/r/${roomId}/pay` : `/jungsan/r/${roomId}`,
+    // 서버가 사람이 읽는 제목을 준다(FC-018 반영, API v8). 옛 서버처럼 비어 있으면 본문을 제목으로
+    title: n.title || n.body,
+    body: n.title ? n.body : '',
+    // 명단에서 빠진 사람은 그 정산방을 더는 못 연다 — 내 술자리로
+    link: GONE_TYPES.has(n.type) ? '/jungsan' : PAY_TYPES.has(n.type) ? `/jungsan/r/${roomId}/pay` : `/jungsan/r/${roomId}`,
     createdAt: n.createdAt,
     read: n.readAt !== null,
   }

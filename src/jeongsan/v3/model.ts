@@ -90,6 +90,11 @@ export type Gathering = {
    * 없으면(옛 술자리·아직 안 넣음) 총무가 [지금 계산하기]로 정산한다
    */
   headcount?: number
+  /**
+   * 자동 계산이 멈춘 이유(API v8 AUTO_SETTLEMENT) — 인원은 다 응답했는데 확정하지 못했다. 정상이면 없다.
+   * `REMOVE_PAYER`: 인원 밖 사람이 결제자라 빼면 그 차수의 돈을 받을 사람이 사라진다(CTO 승인 2026-10-10). 그 밖은 계산 오류 코드
+   */
+  autoSettlementError?: string
   /** 이 정산방의 첫 차수 번호(목데이터) — 다음 차 총무의 정산방은 술자리 전체 번호를 이어받는다. 없으면 1 */
   firstSeq?: number
   /** 다음에 넣을 차수 번호(API 모드) — 서버는 술자리 전체에서 번호를 매긴다. 없으면 이 정산방 차수로 센다 */
@@ -185,6 +190,10 @@ export const extraParticipants = (g: Gathering) =>
   g.headcount === undefined ? [] : g.participants.slice(g.headcount)
 
 /** 인원 입력 범위(FC-020) — 서버 검증과 같다 */
+/** 인원 밖인데 결제자인 사람 — 자동 계산에서 뺄 수 없다(REMOVE_PAYER) */
+export const extraPayers = (g: Gathering) =>
+  extraParticipants(g).filter((p) => g.rounds.some((r) => r.payerParticipantId === p.id))
+
 export const HEADCOUNT_MIN = 2
 export const HEADCOUNT_MAX = 50
 

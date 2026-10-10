@@ -66,6 +66,19 @@ describe('정산 단위 하나 = 정산방 하나', () => {
     expect(nextAction(b, 2).action?.kind).toBeDefined()
   })
 
+  it('명단은 서버가 준 단위 순서(총무 먼저, 그다음 들어온 순서)대로 — "인원 안"을 이 순서로 센다', () => {
+    const u = { ...asB.settlementUnits[0], participantIds: [1, 3, 2] }
+    const room = toRooms({ ...asB, settlementUnits: [u] })[0]
+    expect(room.participants.map((p) => p.id)).toEqual([1, 3, 2])
+  })
+
+  it('자동 계산이 멈춘 이유를 정산방에 싣는다(API v8)', () => {
+    const u = { ...asB.settlementUnits[1], headcount: 2, autoSettlementError: 'REMOVE_PAYER' }
+    const room = toRooms({ ...asB, settlementUnits: [asB.settlementUnits[0], u] })[1]
+    expect(room.headcount).toBe(2)
+    expect(room.autoSettlementError).toBe('REMOVE_PAYER')
+  })
+
   it('정산금액을 열어봤는지는 단위별(D5)', () => {
     expect(settlementViewedOf(asB, 1)).toBe(false)
   })
