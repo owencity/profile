@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" role="img" style="color:#131A20"
-     aria-label="종전에는 JSP와 Seasar2가 MySQL 5를 거쳐 VMware 온프레미스 환경에 수동으로 배포됐고, 이후에는 Git과 Jenkins를 거쳐 Staging(dev)에서 먼저 검증한 뒤 IDC 온프레미스 서버(Prod)에 자동 빌드·배포되며, 프론트엔드와 Spring Boot가 PostgreSQL과 통신하고 Spring Boot가 RabbitMQ를 거쳐 자사몰 API와 연동하는 인프라 구성 비교도">
-  <rect width="900" height="470" fill="#F7F9FA"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 790" role="img" style="color:#131A20"
+     aria-label="종전에는 JSP와 Seasar2가 서버사이드 렌더링으로 MySQL 5를 거쳐 VMware 온프레미스에 수동 배포되는 한 덩어리 구조였다. 신규 구조에서는 개발자가 dev에서 올리면 IDC 서버 안의 Jenkins가 셸 스크립트로 Docker 이미지를 빌드해 컨테이너로 배포한다. 런타임에서는 Client 요청이 같은 IDC 서버의 Nginx로 들어와 경로에 따라 갈라진다. 일반 요청은 프론트엔드 정적 자산으로, /api 요청은 Docker로 띄운 Spring Boot로 바로 전달된다. Spring Boot는 같은 Docker 안의 PostgreSQL과 통신하고 RabbitMQ를 거쳐 외부 자사몰 API와 연동한다. 관측 스택인 Loki와 Grafana도 같은 Docker 안에 애플리케이션과 분리된 별도 컨테이너로 떠 있어, 앱을 배포하거나 재시작해도 로그 수집이 끊기지 않는다. Grafana의 알림 규칙은 웹훅으로 연결돼, 조건에 걸리면 메신저로 알림이 발송된다.">
+  <rect width="1000" height="790" fill="#F7F9FA"/>
   <defs>
     <marker id="lia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -11,85 +11,106 @@
     <marker id="liag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#0B8A73"/>
     </marker>
+    <marker id="liabig" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#131A20"/>
+    </marker>
   </defs>
 
-  <text x="16" y="40" font-family="ui-monospace, monospace" font-size="13" fill="#A63A2B" font-weight="700">레거시 아키텍처</text>
+  <text x="16" y="42" font-family="ui-monospace, monospace" font-size="15" fill="#A63A2B" font-weight="700">레거시 아키텍처</text>
 
-  <rect x="90" y="56" width="170" height="56" fill="none" stroke="#A63A2B" stroke-width="1.6"/>
-  <text x="175" y="80" text-anchor="middle" font-size="13" fill="#A63A2B">JSP + Seasar2</text>
-  <text x="175" y="98" text-anchor="middle" font-size="11.5" fill="#A63A2B" opacity=".85">서버사이드 렌더링</text>
+  <rect x="90" y="60" width="190" height="62" fill="none" stroke="#A63A2B" stroke-width="1.6"/>
+  <text x="185" y="87" text-anchor="middle" font-size="15" fill="#A63A2B">JSP + Seasar2</text>
+  <text x="185" y="107" text-anchor="middle" font-size="12.5" fill="#A63A2B">서버사이드 렌더링</text>
 
-  <line x1="260" y1="84" x2="298" y2="84" stroke="#A63A2B" stroke-width="1.4" marker-end="url(#liar)"/>
+  <line x1="280" y1="91" x2="318" y2="91" stroke="#A63A2B" stroke-width="1.5" marker-end="url(#liar)"/>
 
-  <rect x="298" y="56" width="130" height="56" fill="none" stroke="#A63A2B" stroke-width="1.6"/>
-  <text x="363" y="88" text-anchor="middle" font-size="13" fill="#A63A2B">MySQL 5</text>
+  <rect x="318" y="60" width="145" height="62" fill="none" stroke="#A63A2B" stroke-width="1.6"/>
+  <text x="390" y="97" text-anchor="middle" font-size="15" fill="#A63A2B">MySQL 5</text>
 
-  <line x1="428" y1="84" x2="466" y2="84" stroke="#A63A2B" stroke-width="1.4" marker-end="url(#liar)"/>
+  <line x1="463" y1="91" x2="501" y2="91" stroke="#A63A2B" stroke-width="1.5" marker-end="url(#liar)"/>
 
-  <rect x="466" y="56" width="210" height="56" fill="none" stroke="#A63A2B" stroke-width="1.4" stroke-dasharray="5 4"/>
-  <text x="571" y="78" text-anchor="middle" font-size="13" fill="#A63A2B">VMware (온프레미스)</text>
-  <text x="571" y="96" text-anchor="middle" font-size="11.5" fill="#A63A2B" opacity=".85">자체 배포 · 수동</text>
+  <rect x="501" y="60" width="230" height="62" fill="none" stroke="#A63A2B" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="616" y="87" text-anchor="middle" font-size="15" fill="#A63A2B">VMware</text>
+  <text x="616" y="107" text-anchor="middle" font-size="12.5" fill="#A63A2B">자체 배포 · 수동</text>
 
-  <line x1="16" y1="140" x2="884" y2="140" stroke="currentColor" opacity=".2" stroke-dasharray="3 5"/>
+  <line x1="500" y1="148" x2="500" y2="192" stroke="#131A20" stroke-width="2.6" marker-end="url(#liabig)"/>
 
-  <text x="16" y="178" font-family="ui-monospace, monospace" font-size="13" fill="#0B8A73" font-weight="700">신규 아키텍처</text>
+  <text x="16" y="224" font-family="ui-monospace, monospace" font-size="15" fill="#0B8A73" font-weight="700">신규 아키텍처</text>
 
-  <text x="160" y="178" font-size="12" fill="currentColor" opacity=".6">배포 파이프라인</text>
+  <rect x="165" y="256" width="680" height="502" fill="none" stroke="#131A20" stroke-width="1.3" stroke-dasharray="7 5"/>
+  <text x="181" y="282" font-family="ui-monospace, monospace" font-size="13" fill="#131A20">IDC 서버</text>
 
-  <rect x="40" y="192" width="90" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="85" y="222" text-anchor="middle" font-size="12.5" fill="currentColor">개발자</text>
+  <rect x="24" y="300" width="112" height="58" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="80" y="335" text-anchor="middle" font-size="14.5" fill="currentColor">dev</text>
 
-  <line x1="130" y1="218" x2="150" y2="218" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <line x1="136" y1="329" x2="330" y2="329" stroke="#0B8A73" stroke-width="1.7" marker-end="url(#liag)"/>
+  <text x="180" y="319" font-size="12" fill="#0B8A73" font-weight="700">push</text>
 
-  <rect x="150" y="192" width="90" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="195" y="222" text-anchor="middle" font-size="12.5" fill="currentColor">Git</text>
+  <rect x="330" y="300" width="210" height="58" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="435" y="325" text-anchor="middle" font-size="14.5" fill="#0B8A73" font-weight="700">Jenkins</text>
+  <text x="435" y="345" text-anchor="middle" font-size="12" fill="#0B8A73">셸 스크립트로 빌드 · 배포</text>
 
-  <line x1="240" y1="218" x2="260" y2="218" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <line x1="435" y1="358" x2="435" y2="392" stroke="#0B8A73" stroke-width="1.7" marker-end="url(#liag)"/>
+  <text x="446" y="380" font-size="12" fill="#0B8A73">컨테이너 기동</text>
 
-  <rect x="260" y="192" width="130" height="52" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
-  <text x="325" y="214" text-anchor="middle" font-size="12.5" fill="#0B8A73" font-weight="700">Jenkins</text>
-  <text x="325" y="232" text-anchor="middle" font-size="11" fill="#0B8A73" opacity=".85">배포 스크립트(sh) 실행</text>
+  <rect x="330" y="392" width="500" height="348" fill="#0B8A73" fill-opacity=".03" stroke="#0B8A73" stroke-width="1.3" stroke-dasharray="7 5"/>
+  <text x="346" y="418" font-family="ui-monospace, monospace" font-size="13" fill="#0B8A73" font-weight="700">Docker</text>
 
-  <line x1="390" y1="218" x2="410" y2="218" stroke="#0B8A73" stroke-width="1.4" marker-end="url(#liag)"/>
+  <rect x="24" y="476" width="112" height="60" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="80" y="512" text-anchor="middle" font-size="14.5" fill="currentColor">Client</text>
 
-  <rect x="410" y="192" width="120" height="52" fill="none" stroke="#0B8A73" stroke-width="1.6"/>
-  <text x="470" y="214" text-anchor="middle" font-size="12.5" fill="#0B8A73">Staging (dev)</text>
-  <text x="470" y="232" text-anchor="middle" font-size="11" fill="#0B8A73" opacity=".85">배포 전 검증</text>
+  <line x1="136" y1="506" x2="181" y2="506" stroke="currentColor" stroke-width="1.5" marker-end="url(#lia)"/>
 
-  <line x1="530" y1="218" x2="550" y2="218" stroke="#0B8A73" stroke-width="1.4" marker-end="url(#liag)"/>
+  <rect x="181" y="474" width="122" height="66" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <text x="242" y="502" text-anchor="middle" font-size="14.5" fill="currentColor" font-weight="700">Nginx</text>
+  <text x="242" y="523" text-anchor="middle" font-size="12" fill="currentColor">경로로 분기</text>
 
-  <rect x="550" y="192" width="250" height="52" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
-  <text x="675" y="214" text-anchor="middle" font-size="12.5" fill="#0B8A73" font-weight="700">Prod (IDC 서버 · 온프레미스)</text>
-  <text x="675" y="232" text-anchor="middle" font-size="11.5" fill="#0B8A73" opacity=".85">Docker 빌드 · 배포</text>
+  <line x1="242" y1="540" x2="242" y2="576" stroke="currentColor" stroke-width="1.5" marker-end="url(#lia)"/>
+  <text x="251" y="563" font-size="12.5" fill="currentColor">/</text>
 
-  <text x="90" y="282" font-size="12" fill="currentColor" opacity=".6">런타임 구조</text>
+  <rect x="181" y="576" width="122" height="60" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="242" y="601" text-anchor="middle" font-size="13.5" fill="currentColor">프론트엔드</text>
+  <text x="242" y="621" text-anchor="middle" font-size="12" fill="currentColor">정적 자산 응답</text>
 
-  <rect x="90" y="296" width="110" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="145" y="328" text-anchor="middle" font-size="12.5" fill="currentColor">Client</text>
+  <line x1="303" y1="497" x2="355" y2="497" stroke="#0B8A73" stroke-width="1.7" marker-end="url(#liag)"/>
+  <text x="305" y="487" font-size="12" fill="#0B8A73" font-weight="700">/api/*</text>
 
-  <line x1="200" y1="323" x2="230" y2="323" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <rect x="355" y="466" width="155" height="62" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <text x="432" y="493" text-anchor="middle" font-size="14.5" fill="currentColor" font-weight="700">Spring Boot</text>
+  <text x="432" y="513" text-anchor="middle" font-size="12" fill="currentColor">REST API</text>
 
-  <rect x="230" y="296" width="110" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="285" y="328" text-anchor="middle" font-size="12.5" fill="currentColor">프론트엔드</text>
+  <line x1="510" y1="497" x2="550" y2="497" stroke="currentColor" stroke-width="1.5" marker-end="url(#lia)"/>
 
-  <line x1="340" y1="323" x2="370" y2="323" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <rect x="550" y="466" width="150" height="62" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="625" y="504" text-anchor="middle" font-size="14.5" fill="currentColor">PostgreSQL</text>
 
-  <rect x="370" y="296" width="140" height="54" fill="none" stroke="currentColor" stroke-width="1.8"/>
-  <text x="440" y="328" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="700">Spring Boot</text>
+  <line x1="432" y1="528" x2="432" y2="568" stroke="currentColor" stroke-width="1.5" marker-end="url(#lia)"/>
 
-  <line x1="510" y1="323" x2="540" y2="323" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <rect x="355" y="568" width="155" height="58" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="432" y="603" text-anchor="middle" font-size="14.5" fill="currentColor">RabbitMQ</text>
 
-  <rect x="540" y="296" width="140" height="54" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="610" y="328" text-anchor="middle" font-size="12.5" fill="currentColor">PostgreSQL</text>
+  <line x1="510" y1="597" x2="864" y2="597" stroke="currentColor" stroke-width="1.5" marker-end="url(#lia)"/>
 
-  <line x1="440" y1="350" x2="440" y2="392" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <rect x="864" y="568" width="122" height="58" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="925" y="592" text-anchor="middle" font-size="13.5" fill="currentColor">자사몰 API</text>
+  <text x="925" y="612" text-anchor="middle" font-size="12" fill="currentColor">외부 연동</text>
 
-  <rect x="370" y="392" width="140" height="52" fill="none" stroke="currentColor" stroke-width="1.6"/>
-  <text x="440" y="422" text-anchor="middle" font-size="12.5" fill="currentColor">RabbitMQ</text>
+  <path d="M355 514 L344 514 L344 696 L355 696" fill="none" stroke="#131A20" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#liabig)"/>
 
-  <line x1="510" y1="418" x2="540" y2="418" stroke="currentColor" stroke-width="1.4" marker-end="url(#lia)"/>
+  <rect x="355" y="666" width="155" height="62" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="432" y="693" text-anchor="middle" font-size="14.5" fill="#0B8A73" font-weight="700">Loki</text>
+  <text x="432" y="713" text-anchor="middle" font-size="12" fill="#0B8A73">앱 · Nginx 로그 수집</text>
 
-  <rect x="540" y="392" width="170" height="52" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="625" y="414" text-anchor="middle" font-size="12.5" fill="currentColor">자사몰 API</text>
-  <text x="625" y="432" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">외부 연동</text>
+  <line x1="510" y1="697" x2="550" y2="697" stroke="#0B8A73" stroke-width="1.5" marker-end="url(#liag)"/>
+
+  <rect x="550" y="666" width="155" height="62" fill="none" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="627" y="693" text-anchor="middle" font-size="14.5" fill="#0B8A73" font-weight="700">Grafana</text>
+  <text x="627" y="713" text-anchor="middle" font-size="12" fill="#0B8A73">대시보드 · 알림 규칙</text>
+
+  <line x1="705" y1="697" x2="864" y2="697" stroke="#0B8A73" stroke-width="1.7" marker-end="url(#liag)"/>
+  <text x="757" y="687" font-size="12" fill="#0B8A73" font-weight="700">웹훅</text>
+
+  <rect x="864" y="666" width="122" height="62" fill="none" stroke="#0B8A73" stroke-width="1.6"/>
+  <text x="925" y="693" text-anchor="middle" font-size="13.5" fill="#0B8A73" font-weight="700">메신저 알림</text>
+  <text x="925" y="713" text-anchor="middle" font-size="11.5" fill="#0B8A73">조건 충족 시 발송</text>
 </svg>

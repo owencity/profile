@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -44 900 462" role="img" style="color:#131A20"
+     aria-label="Blue-Green 무중단 배포 도해. 1단계 배포 중에는 트래픽 라우터가 운영 중인 Blue(현재 버전)로만 트래픽을 보내고 Green(새 버전)은 헬스체크를 통과할 때까지 트래픽을 받지 않는다. 2단계 전환에서는 라우터가 트래픽을 Green으로 넘기고 Blue는 지우지 않고 직전 환경으로 그대로 남겨둔다. 문제가 생기면 다시 빌드하지 않고 트래픽만 Blue로 되돌려 30초 안에 복구한다.">
+  <rect x="0" y="-44" width="900" height="462" fill="#F7F9FA"/>
+  <text x="16" y="-14" font-family="ui-monospace, monospace" font-size="14" fill="#131A20" font-weight="700">Blue-Green 무중단 배포</text>
+  <defs>
+    <marker id="bgA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#131A20"/>
+    </marker>
+    <marker id="bgG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0B8A73"/>
+    </marker>
+    <marker id="bgM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8A8F94"/>
+    </marker>
+    <marker id="bgR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#A63A2B"/>
+    </marker>
+  </defs>
+
+  <!-- ===== ① 배포 중 ===== -->
+  <text x="16" y="36" font-family="ui-monospace, monospace" font-size="13" fill="#131A20" font-weight="700">① 배포 중 — 트래픽은 Blue(현재 버전)에만</text>
+
+  <rect x="24" y="62" width="84" height="94" fill="none" stroke="#131A20" stroke-width="1.6"/>
+  <text x="66" y="115" text-anchor="middle" font-size="13" fill="#131A20">사용자</text>
+
+  <line x1="108" y1="109" x2="148" y2="109" stroke="#131A20" stroke-width="1.4" marker-end="url(#bgA)"/>
+
+  <rect x="148" y="82" width="140" height="54" fill="none" stroke="#131A20" stroke-width="1.6"/>
+  <text x="218" y="104" text-anchor="middle" font-size="13" fill="#131A20">트래픽 라우터</text>
+  <text x="218" y="122" text-anchor="middle" font-size="11.5" fill="#131A20" opacity=".7">Nginx</text>
+
+  <path d="M288 100 L330 80" fill="none" stroke="#0B8A73" stroke-width="1.8" marker-end="url(#bgG)"/>
+  <path d="M288 120 L330 148" fill="none" stroke="#8A8F94" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#bgM)"/>
+  <text x="232" y="158" font-size="11" fill="#8A8F94">트래픽 없음</text>
+
+  <rect x="330" y="56" width="214" height="50" fill="#0B8A73" fill-opacity=".07" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="437" y="77" text-anchor="middle" font-size="13" fill="#0B8A73" font-weight="700">Blue — v1</text>
+  <text x="437" y="94" text-anchor="middle" font-size="11.5" fill="#0B8A73">운영 중 — 트래픽 수신</text>
+
+  <rect x="330" y="126" width="214" height="50" fill="none" stroke="#8A8F94" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="437" y="147" text-anchor="middle" font-size="13" fill="#8A8F94" font-weight="700">Green — v2</text>
+  <text x="437" y="164" text-anchor="middle" font-size="11.5" fill="#8A8F94">새 버전 기동 · 헬스체크 중</text>
+
+  <line x1="544" y1="151" x2="582" y2="151" stroke="#8A8F94" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#bgM)"/>
+  <rect x="582" y="126" width="294" height="50" fill="none" stroke="#8A8F94" stroke-width="1.4"/>
+  <text x="729" y="147" text-anchor="middle" font-size="12" fill="#131A20">Jenkins — 헬스체크 30초 간격 · 5회 연속</text>
+  <text x="729" y="164" text-anchor="middle" font-size="11.5" fill="#131A20" opacity=".7">통과해야 전환, 그 전까지 사용자는 Blue만 본다</text>
+
+  <line x1="16" y1="212" x2="884" y2="212" stroke="#D7DCE0" stroke-width="1" stroke-dasharray="3 4"/>
+
+  <!-- ===== ② 전환 ===== -->
+  <text x="16" y="248" font-family="ui-monospace, monospace" font-size="13" fill="#0B8A73" font-weight="700">② 전환 — 트래픽만 Green으로, Blue는 지우지 않는다</text>
+
+  <rect x="24" y="274" width="84" height="94" fill="none" stroke="#131A20" stroke-width="1.6"/>
+  <text x="66" y="327" text-anchor="middle" font-size="13" fill="#131A20">사용자</text>
+
+  <line x1="108" y1="321" x2="148" y2="321" stroke="#131A20" stroke-width="1.4" marker-end="url(#bgA)"/>
+
+  <rect x="148" y="294" width="140" height="54" fill="none" stroke="#131A20" stroke-width="1.6"/>
+  <text x="218" y="316" text-anchor="middle" font-size="13" fill="#131A20">트래픽 라우터</text>
+  <text x="218" y="334" text-anchor="middle" font-size="11.5" fill="#131A20" opacity=".7">Nginx — 전환 지점</text>
+
+  <path d="M288 312 L330 292" fill="none" stroke="#8A8F94" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#bgM)"/>
+  <path d="M288 332 L330 360" fill="none" stroke="#0B8A73" stroke-width="1.8" marker-end="url(#bgG)"/>
+
+  <rect x="330" y="268" width="214" height="50" fill="none" stroke="#8A8F94" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="437" y="289" text-anchor="middle" font-size="13" fill="#8A8F94" font-weight="700">Blue — v1</text>
+  <text x="437" y="306" text-anchor="middle" font-size="11.5" fill="#8A8F94">직전 환경 그대로 유지</text>
+
+  <rect x="330" y="338" width="214" height="50" fill="#0B8A73" fill-opacity=".07" stroke="#0B8A73" stroke-width="1.8"/>
+  <text x="437" y="359" text-anchor="middle" font-size="13" fill="#0B8A73" font-weight="700">Green — v2</text>
+  <text x="437" y="376" text-anchor="middle" font-size="11.5" fill="#0B8A73">운영 중</text>
+
+  <!-- 복구 경로 -->
+  <path d="M600 293 L548 293" fill="none" stroke="#A63A2B" stroke-width="1.6" marker-end="url(#bgR)"/>
+  <rect x="600" y="268" width="276" height="50" fill="none" stroke="#A63A2B" stroke-width="1.6"/>
+  <text x="738" y="289" text-anchor="middle" font-size="12.5" fill="#A63A2B" font-weight="700">복구 — 트래픽만 Blue로 되돌림</text>
+  <text x="738" y="306" text-anchor="middle" font-size="11.5" fill="#A63A2B" opacity=".85">재빌드 없음 · 10분 → 30초</text>
+
+  <rect x="600" y="338" width="276" height="50" fill="none" stroke="#8A8F94" stroke-width="1.4"/>
+  <text x="738" y="359" text-anchor="middle" font-size="12" fill="#131A20">충분히 관찰한 뒤 Blue 회수</text>
+  <text x="738" y="376" text-anchor="middle" font-size="11.5" fill="#131A20" opacity=".7">되돌릴 수 없는 단계는 마지막에</text>
+
+</svg>

@@ -16,7 +16,7 @@
   <line x1="250" y1="70" x2="250" y2="106" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
 
   <rect x="150" y="106" width="200" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="250" y="133" text-anchor="middle" font-size="13.5" fill="currentColor">대상 이력 조회</text>
+  <text x="250" y="133" text-anchor="middle" font-size="13.5" fill="currentColor">발행 대상 조회</text>
 
   <line x1="250" y1="150" x2="250" y2="170" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
 
@@ -33,7 +33,7 @@
 
   <rect x="150" y="292" width="200" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
   <text x="250" y="313" text-anchor="middle" font-size="13.5" fill="currentColor">큐에 메시지 발행</text>
-  <text x="250" y="329" text-anchor="middle" font-size="12" fill="currentColor">이력 단위</text>
+  <text x="250" y="329" text-anchor="middle" font-size="12" fill="currentColor">데이터 단위</text>
 
   <line x1="250" y1="336" x2="250" y2="372" stroke="currentColor" stroke-width="1.4" marker-end="url(#a2)"/>
 

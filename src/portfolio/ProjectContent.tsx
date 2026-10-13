@@ -3,6 +3,7 @@ import {
   CATEGORY_STYLES,
   STATUS_STYLES,
   type PortfolioProject,
+  type ProjectBullet,
   type ProjectDiagram,
   type ProjectSolution,
 } from './data'
@@ -35,7 +36,7 @@ export function ProjectContent({
         </span>
         {project.period && <span className="text-xs text-zinc-900">{project.period}</span>}
       </div>
-      <h1 className="mt-3 pr-8 text-xl font-bold tracking-tight text-zinc-900 sm:text-2xl">
+      <h1 className="mt-3 pr-8 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
         {project.title}
       </h1>
 
@@ -43,18 +44,33 @@ export function ProjectContent({
         <DiagramFigure diagram={project.diagram} forPdf={forPdf} className="mt-6" />
       )}
 
-      {project.problem && (
+
+      {project.diagrams?.map((d) => (
+        <DiagramFigure key={d.src} diagram={d} forPdf={forPdf} className="mt-4" />
+      ))}
+
+      {project.problemPoints && project.problemPoints.length > 0 ? (
         <DetailSection title="문제">
-          <p className="text-sm leading-7 text-zinc-900">{project.problem}</p>
+          <BulletList bullets={project.problemPoints} forPdf={forPdf} />
         </DetailSection>
+      ) : (
+        project.problem && (
+          <DetailSection title="문제">
+            <p className="text-lg leading-9 text-zinc-900">{project.problem}</p>
+          </DetailSection>
+        )
       )}
 
-      {project.solutionGroups && project.solutionGroups.length > 0 ? (
+      {project.solutionPoints && project.solutionPoints.length > 0 ? (
+        <DetailSection title="해결">
+          <BulletList bullets={project.solutionPoints} forPdf={forPdf} emphasizeTitle />
+        </DetailSection>
+      ) : project.solutionGroups && project.solutionGroups.length > 0 ? (
         <DetailSection title="해결">
           <div className="space-y-6">
             {project.solutionGroups.map((group) => (
               <div key={group.title}>
-                <p className="text-sm font-bold text-zinc-900">{group.title}</p>
+                <p className="text-base font-bold text-zinc-900">{group.title}</p>
                 <div className="mt-3 space-y-4 border-l-2 border-zinc-100 pl-4">
                   {group.items.map((s) => (
                     <SolutionItem key={s.label} solution={s} forPdf={forPdf} />
@@ -77,10 +93,14 @@ export function ProjectContent({
         )
       )}
 
-      {hasResult && (
+      {project.resultPoints && project.resultPoints.length > 0 ? (
+        <DetailSection title="결과">
+          <BulletList bullets={project.resultPoints} forPdf={forPdf} />
+        </DetailSection>
+      ) : hasResult && (
         <DetailSection title="결과">
           {(project.result?.before || project.result?.after) && (
-            <div className="mb-3 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+            <div className="mb-3 flex max-w-[640px] items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
               <div className="flex-1 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-900">
                   Before
@@ -99,46 +119,11 @@ export function ProjectContent({
             </div>
           )}
           {project.result?.note && (
-            <p className="text-sm leading-6 text-zinc-900">{project.result.note}</p>
+            <p className="text-lg leading-9 text-zinc-900">{project.result.note}</p>
           )}
         </DetailSection>
       )}
 
-      {project.links && project.links.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
-          {project.links.map((link) => (
-            <a
-              key={link.url}
-              href={link.url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
-            >
-              🔗 {link.label}
-            </a>
-          ))}
-        </div>
-      )}
-
-      {project.summary.length > 0 ? (
-        <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-          <p className="text-xs font-semibold text-indigo-700">3줄 요약</p>
-          <ul className="mt-2 space-y-1.5 text-sm leading-6 text-zinc-900">
-            {project.summary.map((line, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-indigo-400" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <div className="mt-6 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm leading-6 text-zinc-900">
-            아직 상세 내용을 정리 중인 프로젝트입니다.
-          </p>
-        </div>
-      )}
 
       {project.techStack.length > 0 && (
         <div className="mt-8 flex flex-wrap gap-1.5 border-t border-zinc-100 pt-6">
@@ -156,6 +141,46 @@ export function ProjectContent({
   )
 }
 
+function BulletList({
+  bullets,
+  forPdf,
+  emphasizeTitle,
+}: {
+  bullets: ProjectBullet[]
+  forPdf?: boolean
+  emphasizeTitle?: boolean
+}) {
+  return (
+    <ul className="space-y-4">
+      {bullets.map((b) => (
+        <li key={b.text}>
+          <div className="flex gap-3">
+            <span className="mt-[0.95rem] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-900" />
+            <span
+              className={`text-lg leading-9 text-zinc-900${emphasizeTitle ? ' font-bold' : ''}`}
+            >
+              {b.text}
+            </span>
+          </div>
+          {b.sub && b.sub.length > 0 && (
+            <ul className="mt-2 space-y-2 pl-[1.3rem]">
+              {b.sub.map((line) => (
+                <li key={line} className="flex gap-3">
+                  <span className="mt-[0.95rem] h-1.5 w-1.5 flex-shrink-0 rounded-full border border-zinc-900" />
+                  <span className="text-[17px] leading-9 text-zinc-900">{line}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {b.diagram && (
+            <DiagramFigure diagram={b.diagram} forPdf={forPdf} className="mt-3" />
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function SolutionItem({
   solution,
   forPdf,
@@ -165,8 +190,8 @@ function SolutionItem({
 }) {
   return (
     <div>
-      <p className="text-sm font-semibold text-zinc-900">{solution.label}</p>
-      <p className="mt-1 text-sm leading-6 text-zinc-900">{solution.desc}</p>
+      <p className="text-base font-semibold text-zinc-900">{solution.label}</p>
+      <p className="mt-1 text-lg leading-9 text-zinc-900">{solution.desc}</p>
       {solution.diagram && (
         <DiagramFigure diagram={solution.diagram} forPdf={forPdf} className="mt-3" />
       )}
@@ -183,20 +208,34 @@ function DiagramFigure({
   forPdf?: boolean
   className?: string
 }) {
+  const image = <img src={forPdf ? diagram.pdfSrc : diagram.src} alt={diagram.alt} className="w-full" />
+
   return (
-    <figure className={`rounded-xl border border-zinc-200 bg-zinc-50 p-3 ${className ?? ''}`}>
-      <img src={forPdf ? diagram.pdfSrc : diagram.src} alt={diagram.alt} className="w-full" />
-      <figcaption className="mt-3 border-t border-zinc-200 pt-3 text-xs leading-6 text-zinc-900">
-        {diagram.caption}
-      </figcaption>
+    <figure
+      className={`mx-auto max-w-[1240px] rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition ${
+        diagram.href ? 'hover:border-blue-400' : ''
+      } ${className ?? ''}`}
+    >
+      {diagram.href ? (
+        <a href={diagram.href} target="_blank" rel="noreferrer" className="block">
+          {image}
+        </a>
+      ) : (
+        image
+      )}
+      {diagram.caption && (
+        <figcaption className="mt-3 max-w-[100ch] border-t border-zinc-200 pt-3 text-sm leading-7 text-zinc-900">
+          {diagram.caption}
+        </figcaption>
+      )}
     </figure>
   )
 }
 
 function DetailSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="mt-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-900">{title}</p>
+    <div className="mt-8">
+      <p className="text-lg font-bold tracking-tight text-blue-700">{title}</p>
       <div className="mt-2">{children}</div>
     </div>
   )

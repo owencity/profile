@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 300" role="img" style="color:#131A20"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -44 920 344" role="img" style="color:#131A20"
      aria-label="로컬 Docker 환경에서 PostgreSQL 16과 MySQL 8.4를 버퍼 1.5GB로 개발·반복하지만 자원을 공유해 검증력이 약하고, 동일 compose에 OCI 오버라이드를 적용해 OCI 4vCPU·24GB 전용 환경(버퍼 6GB)에서 같은 사양으로 한 번 더 측정한다. GitHub Actions가 workflow_dispatch로 SSH·rsync를 통해 OCI에서 run_all.sh를 실행시키고 결과를 아티팩트로 회수하는 구성도">
-  <rect width="900" height="300" fill="#F7F9FA"/>
+  <rect x="0" y="-44" width="900" height="344" fill="#F7F9FA"/>
+  <text x="16" y="-16" font-family="ui-monospace, monospace" font-size="14" fill="#131A20" font-weight="700">측정 환경 — <tspan fill="#1D4ED8" text-decoration="underline">github.com/owencity/PostgreSQL_MySQL</tspan></text>
   <defs>
     <marker id="dbi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -66,5 +67,5 @@
   <text x="645" y="190" text-anchor="middle" font-size="10" fill="#0B8A73">results/</text>
   <text x="645" y="202" text-anchor="middle" font-size="10" fill="#0B8A73">아티팩트</text>
 
-  <text x="20" y="278" font-size="11.5" fill="currentColor" opacity=".7">로컬은 다른 프로세스와 자원을 공유해 검증력이 약해, OCI 전용 서버에서 같은 사양으로 한 번 더 측정했습니다.</text>
+  <text x="20" y="278" font-size="11.5" fill="currentColor">로컬은 다른 프로세스와 자원을 공유해 검증력이 약해, OCI 전용 서버에서 같은 사양으로 한 번 더 측정했습니다.</text>
 </svg>

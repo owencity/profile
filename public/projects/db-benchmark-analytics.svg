@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" style="color:#131A20"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -44 720 344" role="img" style="color:#131A20"
      aria-label="집계·정렬 중심 분석 쿼리 4종의 실행시간 비교(log 스케일). 월별집계 7배, 상품누적 38배, 고객상위 21배, 최대 테이블(1300만 행) 입출고 이력 69배로 PostgreSQL이 빠르다">
-  <rect width="720" height="300" fill="#F7F9FA"/>
+  <rect x="0" y="-44" width="720" height="344" fill="#F7F9FA"/>
+  <text x="16" y="-16" font-family="ui-monospace, monospace" font-size="14" fill="#131A20" font-weight="700">③ 대규모 분석 쿼리 — 집계·정렬 4종</text>
 
   <rect x="40" y="18" width="12" height="12" fill="currentColor" opacity=".45"/>
   <text x="58" y="28" font-size="11.5" fill="currentColor" opacity=".75">MySQL 8.4</text>

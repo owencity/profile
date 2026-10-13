@@ -27,22 +27,20 @@ export function ProjectModal({ slug, onClose }: ProjectModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-zinc-900/50 p-4 backdrop-blur-sm sm:items-center sm:p-8"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-zinc-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-3"
     >
       <div
-        className="relative my-8 w-full max-w-4xl rounded-2xl bg-white shadow-2xl sm:my-0"
-        onClick={(e) => e.stopPropagation()}
+        className="relative my-0 w-full max-w-none rounded-none bg-white shadow-2xl sm:rounded-2xl"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="닫기"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-700"
+          className="fixed right-5 top-5 z-20 flex h-16 w-16 items-center justify-center rounded-full border-2 border-zinc-300 bg-white text-zinc-900 shadow-lg transition hover:border-zinc-900 hover:bg-zinc-900 hover:text-white sm:right-8 sm:top-8"
         >
           <svg
-            width="16"
-            height="16"
+            width="30"
+            height="30"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -53,7 +51,7 @@ export function ProjectModal({ slug, onClose }: ProjectModalProps) {
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        <div className="max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+        <div className="max-h-[100dvh] overflow-y-auto p-5 pt-20 sm:max-h-[98vh] sm:p-10 sm:pt-12 lg:px-16">
           <ProjectContent project={project} />
         </div>
       </div>
