@@ -84,7 +84,7 @@ export const portfolio = {
   photoUrl: '/portfolio-avatar.jpg',
   mascotUrl: '/brand.png',
   introParagraphs: [
-    '레거시 전환을 직접 제안해 주도하고, 10만 행 대량 데이터 검증 시간을 98% 이상 단축하며, 현업 사용자와 요구사항을 구체화하고 데이터 처리 성능·정합성·시스템 연동을 개선해 온 Java/Spring 백엔드 개발자입니다.',
+    '레거시 전환을 직접 제안해 주도하고, 10만 행 데이터 검증 시간을 98% 이상 단축하며, 현업 사용자와 요구사항을 구체화하고 데이터 처리 성능·정합성·시스템 연동을 개선해 온 Java/Spring 백엔드 개발자입니다.',
   ],
   contact: {
     email: 'skyko6530@gmail.com',
@@ -367,7 +367,7 @@ export const portfolio = {
       },
       {
         slug: 'chunk-batch-optimization',
-        title: '대량 상품 검증 성능 개선',
+        title: '상품 검증 성능 개선',
         category: '데이터 처리',
         status: '완료',
         org: '유통 상품 마스터 데이터 관리 시스템',
@@ -451,7 +451,7 @@ export const portfolio = {
       },
       {
         slug: 'excel-upload-pipeline',
-        title: '대량 엑셀 업로드 메모리 최적화',
+        title: '엑셀 업로드 메모리 최적화',
         category: '데이터 처리',
         status: '완료',
         org: '유통 상품 마스터 데이터 관리 시스템',
