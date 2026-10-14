@@ -195,48 +195,23 @@ export function PortfolioHome() {
         </div>
 
         {/* Hero / Intro */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="grid gap-8 sm:grid-cols-[280px_minmax(0,1fr)] sm:items-start sm:gap-12">
-            <div className="relative">
-              <img
-                className="w-full rounded-xl object-contain"
-                src={portfolio.photoUrl}
-                alt={`${profile.name} 프로필 사진`}
-                loading="lazy"
-              />
-              <img
-                src={portfolio.mascotUrl}
-                alt=""
-                aria-hidden
-                loading="lazy"
-                className="absolute -left-4 -top-4 h-16 w-16 -rotate-12 rounded-full border-2 border-white bg-white object-cover p-0.5 shadow-md sm:h-20 sm:w-20"
-              />
-            </div>
-
-            <div>
-              <div className="space-y-4 text-base leading-7 text-zinc-700 sm:text-lg sm:leading-8">
-                {portfolio.introParagraphs.map((paragraph, i) => (
-                  <p key={i} className={i === 0 ? 'font-bold text-zinc-900' : undefined}>
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-
-              <div className="mt-6 grid gap-3 text-base text-zinc-600 sm:grid-cols-2 sm:text-lg">
-                <ContactRow
-                  icon="✉️"
-                  text={portfolio.contact.email}
-                  href={`mailto:${portfolio.contact.email}`}
-                  pdfLinkId="email"
-                />
-                <ContactRow
-                  icon="🐙"
-                  text={portfolio.contact.githubLabel}
-                  href={portfolio.contact.githubUrl}
-                  pdfLinkId="github"
-                />
-              </div>
-            </div>
+        <section className="mb-14 sm:mb-20">
+          <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl">
+            김동규 포트폴리오
+          </h1>
+          <div className="mt-7 max-w-[92ch] space-y-5">
+            {portfolio.introParagraphs.map((paragraph, i) => (
+              <p
+                key={i}
+                className={
+                  i === 0
+                    ? 'text-xl font-bold leading-9 text-zinc-900 sm:text-2xl sm:leading-10'
+                    : 'text-base leading-8 text-zinc-700 sm:text-lg sm:leading-9'
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
         </section>
 
@@ -355,36 +330,4 @@ function SectionHeading({ emoji, title }: { emoji: string; title: string }) {
   )
 }
 
-function ContactRow({
-  icon,
-  text,
-  href,
-  pdfLinkId,
-}: {
-  icon: string
-  text: string
-  href?: string
-  pdfLinkId?: string
-}) {
-  const content = (
-    <span className="flex items-center gap-2.5">
-      <span aria-hidden className="text-xl">
-        {icon}
-      </span>
-      <span>{text}</span>
-    </span>
-  )
-  if (!href) return <div>{content}</div>
-  return (
-    <a
-      className="transition hover:text-indigo-600"
-      href={href}
-      target={href.startsWith('http') ? '_blank' : undefined}
-      rel="noreferrer"
-      data-pdf-link={pdfLinkId}
-    >
-      {content}
-    </a>
-  )
-}
 
