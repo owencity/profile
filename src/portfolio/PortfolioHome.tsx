@@ -194,25 +194,11 @@ export function PortfolioHome() {
           </span>
         </div>
 
-        {/* Hero / Intro */}
-        <section className="mb-14 sm:mb-20">
+        {/* Hero */}
+        <section className="mb-12 sm:mb-16">
           <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl">
             김동규 포트폴리오
           </h1>
-          <div className="mt-7 max-w-[92ch] space-y-5">
-            {portfolio.introParagraphs.map((paragraph, i) => (
-              <p
-                key={i}
-                className={
-                  i === 0
-                    ? 'text-xl font-bold leading-9 text-zinc-900 sm:text-2xl sm:leading-10'
-                    : 'text-base leading-8 text-zinc-700 sm:text-lg sm:leading-9'
-                }
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
         </section>
 
         <SectionHeading emoji="🚀" title="Projects" />
