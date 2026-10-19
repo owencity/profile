@@ -36,6 +36,17 @@ export const drinksTotal = (drinks: DrinkItem[]): Money =>
   drinks.reduce((sum, d) => sum + d.unitPrice * d.quantity, 0)
 
 /** 저장 전에 막아야 하는 것. 빈 배열이면 저장해도 된다. */
+/**
+ * 술 항목 아래 안내 — 총무가 두 나눔 방식을 화면에서 바로 알게(2026-10-19 CTO).
+ * 술을 비우면 차수 금액 전체를 참석자끼리 N분의 1, 술을 넣으면 그 술값만 알코올 고른 사람끼리 나눈다
+ * (CALC_RULES §2.1 — 계산은 서버가 한다. 여기는 문구만). 앱 `RoundRules.kt` 와 같은 문구.
+ */
+export function drinkSplitHint(drinkCount: number): string {
+  return drinkCount === 0
+    ? '비워두면 참석한 사람끼리 똑같이 나눠요(N분의 1)'
+    : '술값은 알코올 고른 사람끼리만 나눠요. 나머지는 참석한 사람끼리 똑같이'
+}
+
 export function validateRound(d: RoundDraft, g: Gathering): string[] {
   const errors: string[] = []
   if (d.total <= 0) errors.push('금액을 넣어주세요')

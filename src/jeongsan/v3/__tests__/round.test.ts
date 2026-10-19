@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Gathering } from '../model'
 import { MOCK_ROOMS } from '../mock'
-import { MAX_ROUND_TOTAL, drinksTotal, parseAmount, relabel, validateRound } from '../round'
+import { MAX_ROUND_TOTAL, drinkSplitHint, drinksTotal, parseAmount, relabel, validateRound } from '../round'
 
 const g = (): Gathering => structuredClone(MOCK_ROOMS.find((x) => x.id === 101)!)
 const ok = { total: 100_000, drinks: [{ name: '소주', unitPrice: 5_000, quantity: 4 }], payerParticipantId: 11 }
@@ -66,5 +66,14 @@ describe('차수 이름은 순서로 정한다', () => {
       { id: 3, seq: 3, label: '3차' },
     ])
     expect(out.map((r) => [r.id, r.label])).toEqual([[1, '1차'], [3, '2차']])
+  })
+})
+
+describe('술 항목 안내 — 두 나눔 방식', () => {
+  it('술을 비우면 참석한 사람끼리 N분의 1이라고 알려준다', () => {
+    expect(drinkSplitHint(0)).toBe('비워두면 참석한 사람끼리 똑같이 나눠요(N분의 1)')
+  })
+  it('술을 넣으면 술값은 알코올 고른 사람끼리만 나눈다고 알려준다', () => {
+    expect(drinkSplitHint(2)).toBe('술값은 알코올 고른 사람끼리만 나눠요. 나머지는 참석한 사람끼리 똑같이')
   })
 })

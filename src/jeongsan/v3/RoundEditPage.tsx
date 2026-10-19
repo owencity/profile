@@ -9,7 +9,7 @@ import type { DrinkItem, Gathering, Id, ResponseType, Round } from './model'
 import { HEADCOUNT_MAX, HEADCOUNT_MIN, hostOf, nextRoundLabel, responseOf, won } from './model'
 import { ResponseRow } from './ResponseRow'
 import type { RoundDraft } from './round'
-import { DRINK_PRESETS, drinksTotal, parseAmount, validateRound } from './round'
+import { DRINK_PRESETS, drinkSplitHint, drinksTotal, parseAmount, validateRound } from './round'
 import { BackButton } from './BackButton'
 
 type Props = {
@@ -87,7 +87,8 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
       </section>
 
       <section className="js-field">
-        <div className="js-lab">어떤 술을 마셨나요? <small>안 마신 차수면 비워두세요</small></div>
+        <div className="js-lab">어떤 술을 마셨나요?</div>
+        <div className="js-splithint" aria-live="polite">{drinkSplitHint(drinks.length)}</div>
         <div className="js-presets">
           {DRINK_PRESETS.map((p) => (
             <button key={p.name} type="button" className="js-preset" onClick={() => addDrink(p)}>+ {p.name}</button>
