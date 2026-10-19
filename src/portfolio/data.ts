@@ -192,7 +192,7 @@ export const portfolio = {
       },
       {
         slug: 'postgresql-vs-mysql-benchmark',
-        title: 'DB 선택 — PostgreSQL vs MySQL 직접 측정',
+        title: 'DB 선택 — PostgreSQL vs MySQL 벤치마크',
         category: '마이그레이션',
         status: '완료',
         org: '유통 상품 마스터 데이터 관리 시스템',
@@ -253,7 +253,13 @@ export const portfolio = {
         ],
         solutionPoints: [
           {
-            text: '한 번 정하면 되돌리기 어려운 선택이라, 개인적으로 측정을 진행했습니다. 다섯 가지 항목을 세워 두 엔진을 같은 조건에서 비교했습니다.',
+            text: '한 번 정하면 되돌리기 어려운 선택이라, 다섯 가지 항목을 세워 두 엔진을 같은 조건에서 비교했습니다.',
+          },
+          {
+            text: '무엇을 왜 재야 하는지는 제가 설계하고, 측정 스크립트 구현과 실행은 AI 도구에 맡겨 빠르게 돌렸습니다. 대신 나온 숫자를 그대로 결론으로 쓰지 않고, 측정이 공정했는지를 제가 다시 확인했습니다.',
+          },
+          {
+            text: '실제로 동시 쓰기에서 PostgreSQL이 1.44배 빠르다는 결과가 나왔을 때 "MVCC라 그렇다"고 적지 않고, 양쪽이 서로 다른 드라이버를 쓰고 있다는 걸 찾아냈습니다. 조건을 맞춰 다시 재니 격차는 1.22배로 줄었습니다.',
           },
         ],
         resultPoints: [
@@ -264,7 +270,7 @@ export const portfolio = {
             text: '동시 재고차감에서 MySQL은 과다판매 257건, PostgreSQL은 0건이었습니다.',
           },
           {
-            text: '지연시간을 뺀 모든 항목에서 우위가 분명해, 직접 측정한 결과를 근거로 PostgreSQL 도입을 결정했습니다.',
+            text: '지연시간을 뺀 모든 항목에서 우위가 분명해, 측정 결과를 근거로 PostgreSQL 도입을 결정했습니다.',
           },
         ],
       },
