@@ -31,10 +31,11 @@ export function RespondPage({ g, meId, onBack, onSubmit }: Props) {
     <div className="js-shell narrow js-p2">
       <header className="js-rtop">
         <BackButton onClick={onBack} to="정산방으로" />
-        <div className="js-rtitle"><b>{already ? '응답 고치기' : '응답하기'}</b></div>
+        {/* 제목은 술자리 이름 — 알림·링크로 바로 들어온 사람이 어느 술자리인지 알게(2026-10-19 CTO) */}
+        <div className="js-rtitle"><b>{g.title}</b></div>
       </header>
 
-      <p className="js-lead">차수마다 하나만 고르면 끝이에요.</p>
+      <p className="js-lead"><b>{already ? '응답 고치기' : '응답하기'}</b> · 차수마다 하나만 고르면 끝이에요.</p>
 
       {editable.length > 1 && (
         <section className="js-field">

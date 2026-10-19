@@ -262,7 +262,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
 
   // ── L2 이름 확인 — 첫 로그인이면 내 술자리 대신 한 번 ──
   if (isV3Home(route) && me.needsName) {
-    return wrap(<NamePage key={me.id} me={me} onBack={onLeave} onConfirm={gateway.confirmName} />)
+    return wrap(<NamePage key={me.id} me={me} onLogout={async () => { await gateway.logout(); onLeave() }} onConfirm={gateway.confirmName} />)
   }
 
   // ── H1 내 술자리 ──
