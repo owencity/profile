@@ -221,17 +221,32 @@ export function PortfolioHome() {
           if (visibleProjects.length === 0) return null
           return (
           <div key={group.name} className="mb-10 last:mb-0">
-            <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              {group.org && (
+                <span className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 py-1">
+                  <img
+                    src={group.org.logo}
+                    alt=""
+                    aria-hidden
+                    className="h-5 w-auto object-contain"
+                  />
+                  <span className="text-sm font-bold tracking-tight text-zinc-900">
+                    {group.org.label}
+                  </span>
+                </span>
+              )}
               <h3 className="text-lg font-bold text-zinc-900">{group.name}</h3>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  group.kind === '회사 프로젝트'
-                    ? 'bg-zinc-100 text-zinc-700'
-                    : 'bg-sky-50 text-sky-700'
-                }`}
-              >
-                {group.kind}
-              </span>
+              {!group.org && (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    group.kind === '회사 프로젝트'
+                      ? 'bg-zinc-100 text-zinc-700'
+                      : 'bg-sky-50 text-sky-700'
+                  }`}
+                >
+                  {group.kind}
+                </span>
+              )}
               {group.period && <span className="text-sm text-zinc-500">{group.period}</span>}
             </div>
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

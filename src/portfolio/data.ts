@@ -31,6 +31,8 @@ export type ProjectGroup = {
   name: string
   kind: '회사 프로젝트' | '사이드 프로젝트'
   period?: string
+  /** 그룹 헤더에 표시할 소속 — 약칭과 로고 */
+  org?: { label: string; logo: string }
   projects: PortfolioProject[]
 }
 
@@ -114,6 +116,7 @@ export const portfolio = {
       name: '상품 마스터 데이터 관리 시스템(PIM/MDM) 구축',
       kind: '회사 프로젝트',
       period: '2025.06 ~ 2026.08',
+      org: { label: 'MK', logo: '/mk-logo.png' },
       projects: [
       {
         slug: 'legacy-stack-migration',
