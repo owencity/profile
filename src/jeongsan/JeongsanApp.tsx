@@ -70,10 +70,9 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }
   const logout = () => setLoggedIn(false)
 
-  // v3 참여 입구(P1)는 로그인 확인 **앞**에서 받는다 — 링크를 누른 사람이 술자리부터 보고,
-  // [참여]를 누를 때 로그인한다. 로그인 전·후 모두 같은 <AppV3>라 고르던 응답이 유지된다.
-  // 실제 로그인은 카카오 인가로 페이지를 떠나므로 고르던 응답을 sessionStorage 에 남겨
-  // 돌아와서 이어 붙여야 한다(flow-changes FC-009).
+  // v3 참여 입구(P1)는 로그인 확인 **앞**에서 받는다 — 링크를 누른 사람이 술자리 미리보기부터 보고,
+  // [카카오로 로그인하고 참여하기]로 로그인한 뒤 같은 주소로 돌아와 응답을 고른다(returnTo).
+  // 응답은 로그인 **뒤**에 고르므로 카카오 인가로 페이지를 떠나도 잃을 입력이 없다(CTO 결정 2026-10-19).
   // 개인정보처리방침·지원 — 로그인과 상관없이 누구나(스토어 심사관 포함) 읽을 수 있어야 한다
   if (isV3PublicRoute(route)) {
     const home = () => navigate('/jungsan')

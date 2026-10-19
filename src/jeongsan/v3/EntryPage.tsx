@@ -3,7 +3,11 @@
  *
  * 총무·술자리·차수를 보여주고, **그 자리에서 차수별 응답까지 고르게** 한다(P1+P2 합침, 2026-10-03).
  * 참여자가 누르는 화면이 하나 줄어든다. 링크를 연 것만으로는 참여되지 않는다 — 아래 버튼을 눌러야
- * 명단에 들어간다. 로그인 전에도 보이고, 버튼을 누를 때 로그인한다.
+ * 명단에 들어간다.
+ *
+ * **로그인 전에는 미리보기만** 보여주고(누가 초대했는지·술자리·차수 금액), 응답은 로그인한 뒤에 고른다
+ * (CTO 결정 2026-10-19). 카카오 로그인은 페이지를 떠났다 돌아오므로, 먼저 고르게 하면 돌아왔을 때
+ * 고른 응답이 사라져 한 번 더 골라야 했다. 앱(딥링크 → 로그인 → 이 화면)과 같은 순서다.
  */
 import { useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
@@ -69,8 +73,6 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
   const answers = () => g.rounds.map((r) => ({ roundId: r.id, type: draft[r.id]! }))
   const join = () => {
     if (!filled) return
-    // 로그인이 안 됐으면 먼저 로그인. 목데이터는 바로 돌아오므로 이어서 참여한다
-    if (!loggedIn && !onLogin()) return
     onJoin(answers(), askName ? name.trim() : undefined)
   }
   const allSame = (t: ResponseType) => setDraft(Object.fromEntries(g.rounds.map((r) => [r.id, t])))
@@ -89,7 +91,7 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
         <span className="sub">{fmtDate(g.date)} · {participantCount ?? g.participants.length}명 참여 중</span>
       </section>
 
-      {choices && choices.length > 1 && (
+      {loggedIn && choices && choices.length > 1 && (
         <section className="js-field" aria-label="참여할 차수">
           <div className="js-lab">어느 총무의 차수에 참여하나요?</div>
           <div className="js-allsame">
@@ -113,7 +115,28 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
         </div>
       </section>
 
-      {g.rounds.length === 0 ? (
+      {!loggedIn ? (
+        // 로그인 전 — 미리보기만. 응답 버튼은 로그인하고 돌아온 뒤에 보인다
+        <>
+          <p className="js-lead">
+            {g.rounds.length === 0
+              ? '총무가 아직 금액을 넣는 중이에요. 로그인하고 참여해두면 금액이 들어올 때 알려드릴게요.'
+              : '로그인하면 차수마다 불참·논알코올·알코올 중 하나만 고르면 끝이에요.'}
+          </p>
+          {g.rounds.length > 0 && (
+            <ul className="js-resplist">
+              {g.rounds.map((r) => (
+                <li key={r.id} className="js-respitem">
+                  <div className="hd">
+                    <b>{r.label}</b>
+                    <span>{won(r.total)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : g.rounds.length === 0 ? (
         <p className="js-lead">총무가 아직 금액을 넣는 중이에요. 먼저 참여해두면 금액이 들어올 때 알려드릴게요.</p>
       ) : (
         <>
@@ -143,7 +166,7 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
       )}
 
       {/* 첫 로그인이면 L2(이름 확인)를 여기서 같이 — 화면을 하나 더 거치지 않게 */}
-      {askName && (
+      {loggedIn && askName && (
         <section className="js-field">
           <label htmlFor="entry-name" className="js-lab">정산방에서 쓸 이름</label>
           <div className="js-nameguide">{NAME_GUIDE}</div>
@@ -153,12 +176,20 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
       )}
 
       <div className="js-r2btns stick">
-        {!g.rounds.every((r) => draft[r.id]) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
-        <button className={`js-cta${loggedIn ? '' : ' kakao'}`} disabled={!filled} onClick={join}>
-          {loggedIn
-            ? g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'
-            : '카카오로 로그인하고 참여하기'}
-        </button>
+        {loggedIn ? (
+          <>
+            {!g.rounds.every((r) => draft[r.id]) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
+            <button className="js-cta" disabled={!filled} onClick={join}>
+              {g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'}
+            </button>
+          </>
+        ) : (
+          <>
+            {/* 로그인만으로는 명단에 들어가지 않는다 — 돌아와서 [참여하고 응답 완료]를 눌러야 참여 */}
+            <div className="js-hint center">로그인한 뒤 응답을 고르면 참여돼요</div>
+            <button className="js-cta kakao" onClick={() => onLogin()}>카카오로 로그인하고 참여하기</button>
+          </>
+        )}
       </div>
     </div>
   )
