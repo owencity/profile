@@ -28,7 +28,7 @@ import { seenKey, useV3 } from './store'
 import type { SettlePreview } from './mockServer'
 import type { Gathering, Id } from './model'
 import { entryChoiceLabel, toEntryRooms } from './serverModel'
-import { paymentRequestMessage, shareMessage, shareUrl } from './share'
+import { paymentRequestMessage, shareMessage, shareUrl, prefersShareSheet } from './share'
 import { participantOfUser, roundsPaidBy } from './model'
 import type { ActionKind } from './nextAction'
 
@@ -119,14 +119,14 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   }, [settleKey])
 
   /**
-   * 링크 공유 — 폰 브라우저(카톡 인앱 포함)는 OS 공유 시트(Web Share API), 안 되면 문구+링크를 복사한다.
+   * 링크 공유 — 폰 브라우저(카톡 인앱 포함)는 OS 공유 시트(Web Share API), PC·공유 불가면 문구+링크를 복사한다.
    * 스펙(SCREENS §7)의 "카카오톡 공유(JS SDK)"는 카카오 앱 키·도메인 등록이 필요해 그때 이 자리에 먼저 끼운다.
    */
   const shareRoom = async (g: Gathering) => {
     const url = shareUrl(window.location.origin, g.shareToken)
     const text = shareMessage(g, url)
     try {
-      if (navigator.share) {
+      if (prefersShareSheet(!!navigator.share, window.matchMedia?.('(pointer: coarse)').matches ?? false)) {
         await navigator.share({ title: `${g.title} — 정산어택`, text })
         return
       }
@@ -145,7 +145,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   const requestPayment = async (g: Gathering) => {
     const text = paymentRequestMessage(g, shareUrl(window.location.origin, g.shareToken))
     try {
-      if (navigator.share) {
+      if (prefersShareSheet(!!navigator.share, window.matchMedia?.('(pointer: coarse)').matches ?? false)) {
         await navigator.share({ title: `${g.title} — 입금 요청`, text })
         return
       }

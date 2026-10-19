@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import { MOCK_ROOMS } from '../mock'
 import { isV3Route } from '../routes'
-import { shareMessage, shareUrl } from '../share'
+import { shareMessage, shareUrl, prefersShareSheet } from '../share'
 
 const room = (id: number) => structuredClone(MOCK_ROOMS.find((g) => g.id === id)!)
 
@@ -40,5 +40,17 @@ describe('공유 문구', () => {
 describe('경로', () => {
   it('내 술자리에서 여는 계좌 화면은 v3가 맡는다', () => {
     expect(isV3Route('/jungsan/me/account')).toBe(true)
+  })
+})
+
+describe('공유 방식', () => {
+  it('폰(터치 화면)에서만 OS 공유 시트를 연다', () => {
+    expect(prefersShareSheet(true, true)).toBe(true)
+  })
+  it('PC는 공유 기능이 있어도 공유 창 대신 바로 복사한다 — 윈도우 공유 창에는 카카오톡도 링크 복사도 없다', () => {
+    expect(prefersShareSheet(true, false)).toBe(false)
+  })
+  it('공유 기능이 없는 브라우저는 복사한다', () => {
+    expect(prefersShareSheet(false, true)).toBe(false)
   })
 })

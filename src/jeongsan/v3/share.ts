@@ -10,6 +10,12 @@ import { hostOf, nameOf, won } from './model'
 /** 공유 주소 — 참여 입구(P1). 배포 도메인이 아니어도(로컬·미리보기) 지금 열린 곳 기준으로 만든다 */
 export const shareUrl = (origin: string, token: string) => `${origin.replace(/\/$/, '')}/jungsan/j/${token}`
 
+/**
+ * OS 공유 시트를 쓸지 — 폰(터치 화면)만. PC 브라우저의 공유 창(윈도우 공유)은 카카오톡이 없고 링크 복사도 없어서
+ * 총무가 링크를 꺼내지 못했다(2026-10-20). PC는 문구와 링크를 바로 복사한다.
+ */
+export const prefersShareSheet = (hasShareApi: boolean, coarsePointer: boolean) => hasShareApi && coarsePointer
+
 export function shareMessage(g: Gathering, url: string): string {
   const host = hostOf(g).displayName
   const ask = g.status === 'OPEN'
