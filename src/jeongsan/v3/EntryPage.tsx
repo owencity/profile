@@ -18,6 +18,8 @@ import { ResponseRow } from './ResponseRow'
 import { BackButton } from './BackButton'
 import { MAX_NAME, NAME_GUIDE, validateName } from './name'
 import { TermsAgree } from './TermsAgree'
+import type { LoginProvider } from './api'
+import { AppleMark } from '../LoginPage'
 
 type Props = {
   /** 링크가 가리키는 술자리. 없으면 잘못되거나 사라진 링크 */
@@ -25,7 +27,8 @@ type Props = {
   meUserId: Id
   loggedIn: boolean
   /** 로그인. 이 자리에서 바로 로그인되면 true(목데이터), 페이지를 떠나면 false */
-  onLogin: () => boolean
+  /** 로그인 — 카카오(기본) 또는 Apple. 이 자리에서 바로 로그인되면 true(목데이터), 페이지를 떠나면 false */
+  onLogin: (provider?: LoginProvider) => boolean
   /** 첫 로그인이라 실명을 아직 안 받았으면 true — P1 안에서 L2(이름 확인)를 같이 받는다 */
   askName?: boolean
   /** name: askName이었을 때 받은 실명 */
@@ -191,7 +194,9 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
           <>
             {/* 로그인만으로는 명단에 들어가지 않는다 — 돌아와서 [참여하고 응답 완료]를 눌러야 참여 */}
             <div className="js-hint center">로그인한 뒤 응답을 고르면 참여돼요</div>
-            <button className="js-cta kakao" onClick={() => onLogin()}>카카오로 로그인하고 참여하기</button>
+            <button className="js-cta kakao" onClick={() => onLogin('kakao')}>카카오로 로그인하고 참여하기</button>
+            {/* Apple 계정만 있는 사람(앱스토어 심사관 포함)도 참여할 수 있게 — 앱의 Apple 로그인과 같은 계정이 된다 */}
+            <button className="js-cta apple" onClick={() => onLogin('apple')}><AppleMark /> Apple로 로그인하고 참여하기</button>
           </>
         )}
       </div>

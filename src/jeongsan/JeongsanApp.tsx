@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import './jeongsan.css'
 import { api, isApiMode } from './v3/api'
+import type { LoginProvider } from './v3/api'
 import { gateway } from './v3/gateway'
 import { LoginPage } from './LoginPage'
 import { PixelCitySky } from './PixelCitySky'
@@ -64,9 +65,10 @@ export default function JeongsanApp({ route, navigate }: Props) {
    * 실제 흐름: 서버가 카카오 인가 화면으로 302 시킨다(API.md §2.1). 로그인 뒤 **지금 보던 주소로** 돌아오게
    * `returnTo`를 넘긴다(FC-014 1-2) — 카톡 링크(P1)로 들어온 사람이 첫 화면으로 튕기지 않게. mock 은 상태만 켠다
    */
-  const login = () => {
+  const login = (provider: LoginProvider = 'kakao') => {
     if (!isApiMode()) { setLoggedIn(true); return true }
-    window.location.href = api.kakaoLoginUrl(route.startsWith('/jungsan/') ? route : undefined)
+    const back = route.startsWith('/jungsan/') ? route : undefined
+    window.location.href = provider === 'apple' ? api.appleLoginUrl(back) : api.kakaoLoginUrl(back)
     return false
   }
   const logout = () => setLoggedIn(false)
@@ -94,7 +96,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
         <PixelCitySky />
         {/* 좌우 여백 배경. 넓은 화면에서만, 그리고 로그인 화면이 아닐 때만(CSS 가 결정). */}
         <SideStreet />
-        <LoginPage onLogin={() => { login() }} />
+        <LoginPage onLogin={(p) => { login(p) }} />
       </div>
     )
   }

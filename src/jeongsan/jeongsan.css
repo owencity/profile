@@ -255,6 +255,8 @@
   box-shadow: var(--sh);
 }
 .js-cta.kakao { background: #fee500; color: #191600; box-shadow: var(--sh); }
+/* Apple 로그인 버튼 지침 — 검은 바탕·흰 글자·Apple 로고 */
+.js-cta.apple { background: #000; color: #fff; box-shadow: var(--sh); margin-top: 8px; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; }
 .js-cta2 {
   width: 100%; margin-top: 9px; border: var(--bd-l); color: var(--ink2);
   background: #fff; border-radius: var(--r); padding: 13px; text-align: center;

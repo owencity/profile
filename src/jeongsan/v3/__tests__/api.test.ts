@@ -78,6 +78,11 @@ describe('요청 형식', () => {
     expect(m.api.kakaoLoginUrl('/jungsan/j/k7Qx2')).toBe('https://api.test/api/v1/auth/kakao/login?returnTo=%2Fjungsan%2Fj%2Fk7Qx2')
     expect(m.api.kakaoLoginUrl()).toBe('https://api.test/api/v1/auth/kakao/login')
   })
+
+  it('Apple 로그인도 같은 방식으로 돌아올 주소를 붙인다 — Apple 계정만 있는 사람도 웹 링크로 참여할 수 있게', async () => {
+    const m = await load('https://api.test')
+    expect(m.api.appleLoginUrl('/jungsan/j/k7Qx2')).toBe('https://api.test/api/v1/auth/apple/login?returnTo=%2Fjungsan%2Fj%2Fk7Qx2')
+  })
 })
 
 describe('서버 응답 → 화면 모델', () => {

@@ -21,6 +21,7 @@ import { EntryPage } from './EntryPage'
 import { AccountPage } from './AccountPage'
 import { NamePage } from './NamePage'
 import { isApiMode } from './api'
+import type { LoginProvider } from './api'
 import { myBlocks, visibleTimeline } from './safety'
 import { gateway } from './gateway'
 import { entryRoute } from './home'
@@ -40,7 +41,7 @@ type Props = {
   onLeave: () => void
   /** 참여 입구(P1)만 로그인 전에도 열린다. 그 밖의 v3 화면은 늘 로그인 뒤라 기본값 true */
   loggedIn?: boolean
-  onLogin?: () => boolean
+  onLogin?: (provider?: LoginProvider) => boolean
 }
 
 /** 링크 입구(P1)의 서버 미리보기 — 토큰별로 한 번 읽는다 */

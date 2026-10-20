@@ -12,6 +12,7 @@
  */
 import { googleEnabled } from './api'
 import { Shell } from './ui'
+import type { LoginProvider } from './v3/api'
 
 /** 아이콘 시안 C — 딥블루 배경 + 오렌지 버스트 + ÷ */
 export function AppIcon({ size = 88 }: { size?: number }) {
@@ -63,7 +64,7 @@ export function AppIcon({ size = 88 }: { size?: number }) {
   )
 }
 
-export function LoginPage({ onLogin }: { onLogin: () => void }) {
+export function LoginPage({ onLogin }: { onLogin: (provider: LoginProvider) => void }) {
   return (
     <Shell>
       <div className="js-login">
@@ -81,14 +82,27 @@ export function LoginPage({ onLogin }: { onLogin: () => void }) {
         </div>
       </div>
 
-      <button className="js-cta kakao" style={{ marginTop: 20 }} onClick={onLogin}>
+      <button className="js-cta kakao" style={{ marginTop: 20 }} onClick={() => onLogin('kakao')}>
         카카오로 3초만에 시작하기
       </button>
+      {/* Apple 계정만 있는 사람(앱스토어 심사관 포함)도 웹 링크로 들어올 수 있게 — 앱의 Apple 로그인과 같은 계정이 된다 */}
+      <button className="js-cta apple" onClick={() => onLogin('apple')}>
+        <AppleMark /> Apple로 계속하기
+      </button>
       {googleEnabled && (
-        <button className="js-cta2 google" onClick={onLogin}>
+        <button className="js-cta2 google" onClick={() => onLogin('kakao')}>
           구글로 시작하기
         </button>
       )}
     </Shell>
+  )
+}
+
+/** Apple 로고(단색) — Apple 로그인 버튼 지침대로 글자 왼쪽에 둔다 */
+export function AppleMark() {
+  return (
+    <svg width="15" height="18" viewBox="0 0 814 1000" aria-hidden="true" style={{ flex: 'none' }}>
+      <path fill="currentColor" d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 201-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-127C44 789 0 671 0 559 0 380 117 285 232 285c61 0 112 40 150 40 37 0 94-43 164-43 26 0 122 3 185 92zM554 157c29-35 49-83 49-131 0-7-1-13-2-19-47 2-103 31-136 70-26 30-51 78-51 127 0 7 1 15 2 17 3 1 8 1 13 1 42 0 95-28 125-65z" />
+    </svg>
   )
 }

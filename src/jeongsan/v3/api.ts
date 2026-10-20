@@ -86,14 +86,21 @@ const U = (gid: number, uid: number) => `/api/v1/gatherings/${gid}/settlement-un
 
 // ── 엔드포인트 ─────────────────────────────────────────
 
+/** 로그인 수단 — 웹은 카카오·Apple. 서버가 그 회사 인가 화면으로 302 시킨다 */
+export type LoginProvider = 'kakao' | 'apple'
+
+const loginUrl = (provider: LoginProvider, returnTo?: string) =>
+  `${BASE}/api/v1/auth/${provider}/login${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`
+
 export const api = {
   /** 로그인 여부 + 내 정보. 401이면 로그아웃 상태 */
   me: () => request<MeResponse>('GET', '/api/v1/auth/me'),
   /** 실명 최초 등록(FC-013). 400 형식 오류 · 409 `DISPLAY_NAME_ALREADY_SET` */
   putDisplayName: (displayName: string) => request<MeResponse>('PUT', '/api/v1/users/me/display-name', { displayName }),
   /** 카카오 로그인 시작 주소. 로그인 뒤 돌아올 경로(FC-014 1-2) — `/jungsan/`으로 시작하는 것만 서버가 받는다 */
-  kakaoLoginUrl: (returnTo?: string) =>
-    `${BASE}/api/v1/auth/kakao/login${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`,
+  kakaoLoginUrl: (returnTo?: string) => loginUrl('kakao', returnTo),
+  /** Apple 로그인 시작 주소(웹 Services ID `app.jeongsan.web`, FC-021) — Apple 계정만 있는 사람·심사관이 웹 링크로 참여할 수 있게 */
+  appleLoginUrl: (returnTo?: string) => loginUrl('apple', returnTo),
   /** 로그아웃 — 서버 세션을 끊고 쿠키를 지운다 */
   logout: () => request<unknown>('POST', '/api/v1/auth/logout'),
   /** 회원 탈퇴 — 계정·연결 정보를 지우고 쿠키도 지운다 */
