@@ -15,6 +15,7 @@ import type { SettlePreview } from './mockServer'
 import { mockPreview } from './mockServer'
 import { validateName } from './name'
 import type { RoundDraft } from './round'
+import type { ReportReason } from './safety'
 import type { ServerGathering, ServerJoinPreview } from './serverModel'
 import { toPreview, toRooms } from './serverModel'
 import { useV3 } from './store'
@@ -32,6 +33,8 @@ const MESSAGES: Record<string, string> = {
   REMOVE_PAYER: '결제자는 뺄 수 없어요. 차수의 낸 사람을 먼저 바꿔주세요',
   TRANSFER_ALREADY_SENT: '이미 보낸 사람이 있어서 되돌릴 수 없어요',
   NO_ROUNDS: '차수를 먼저 넣어주세요',
+  MESSAGE_NOT_ALLOWED: '부적절한 표현이 있어요. 고쳐서 다시 보내주세요',
+  MESSAGE_BANNED: '신고가 확인되어 메시지를 보낼 수 없어요. 지원 페이지로 문의해주세요',
 }
 
 export const messageOf = (e: unknown): string =>
@@ -326,6 +329,57 @@ export const gateway = {
     }
     const { gid } = ctx(roomId)
     return mutate(gid, () => api.sendMessage(gid, text))
+  },
+
+  /** 메시지 신고(FC-024) — 성공하면 그 메시지는 나에게서 바로 사라진다 */
+  async reportMessage(roomId: Id, entryId: Id, reason: ReportReason): Promise<string | null> {
+    if (!isApiMode()) {
+      s().reportMessage(roomId, entryId, reason)
+      return null
+    }
+    const { gid } = ctx(roomId)
+    const err = await mutate(gid, () => api.reportMessage(gid, entryId, reason))
+    if (!err) s().reportMessage(roomId, entryId, reason)
+    return err
+  },
+
+  /** 이 사람 차단(FC-024) — 그 사람의 메시지가 모든 술자리에서 나에게 안 보인다. 명단·금액은 그대로 */
+  async blockParticipant(roomId: Id, participantId: Id): Promise<string | null> {
+    if (!isApiMode()) {
+      s().blockParticipant(roomId, participantId)
+      return null
+    }
+    const { gid } = ctx(roomId)
+    const err = await mutate(gid, () => api.block(gid, participantId))
+    if (!err) s().blockParticipant(roomId, participantId)
+    return err
+  },
+
+  /** 내 차단 목록을 서버에서 읽는다(계정 화면) */
+  async loadBlocks(): Promise<string | null> {
+    if (!isApiMode()) return null
+    try {
+      s().setMyBlocks((await api.blocks()).map((b) => ({ blockedUserId: b.userId, displayName: b.displayName })))
+      return null
+    } catch (e) {
+      return messageOf(e)
+    }
+  },
+
+  /** 차단 풀기 — 술자리를 다시 읽어 그 사람의 메시지가 다시 보이게 한다 */
+  async unblock(userId: Id): Promise<string | null> {
+    if (!isApiMode()) {
+      s().unblockUser(userId)
+      return null
+    }
+    try {
+      await api.unblock(userId)
+      s().unblockUser(userId)
+      await this.loadMine()
+      return null
+    } catch (e) {
+      return messageOf(e)
+    }
   },
 
   /** 받을 계좌(A1) — 사람 단위. 저장 뒤 내 정보와 내 술자리를 다시 읽는다(계좌 공개가 바뀐다) */

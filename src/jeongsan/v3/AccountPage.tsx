@@ -4,7 +4,7 @@
  * 은행은 버튼으로 고르고(직접 치지 않게), 직접 치는 건 계좌번호와 예금주뿐이다. 예금주는 표시 이름이 기본값.
  */
 import { useState } from 'react'
-import type { Payout, User } from './model'
+import type { Id, Payout, User } from './model'
 import { BANKS, cleanAccountNo, validatePayout } from './payout'
 import { BackButton } from './BackButton'
 
@@ -17,9 +17,12 @@ type Props = {
   /** 내 술자리에서 연 경우만(API 모드) — 계정 메뉴(로그아웃·탈퇴)를 맨 아래에 둔다 */
   onLogout?: () => void
   onDeleteAccount?: () => void
+  /** 내가 차단한 사람(FC-024) — 내 술자리에서 연 경우만. 비어 있어도 "차단한 사람이 없어요"를 보여 준다 */
+  blocks?: { userId: Id; displayName: string }[]
+  onUnblock?: (userId: Id) => void
 }
 
-export function AccountPage({ me, backTo = '정산방으로', onBack, onSave, onLogout, onDeleteAccount }: Props) {
+export function AccountPage({ me, backTo = '정산방으로', onBack, onSave, onLogout, onDeleteAccount, blocks, onUnblock }: Props) {
   const [armed, setArmed] = useState(false)
   const [bank, setBank] = useState(me.payout?.bank ?? '')
   const [accountNo, setAccountNo] = useState(me.payout?.accountNo ?? '')
@@ -91,6 +94,24 @@ export function AccountPage({ me, backTo = '정산방으로', onBack, onSave, on
       )}
 
       {/* 계정 — 탈퇴는 되돌릴 수 없어 두 번 눌러야 한다(차수 지우기와 같은 방식). 앱과 같은 자리·같은 문구 */}
+      {blocks && (
+        <section className="js-field" aria-label="차단한 사람">
+          <div className="js-lab">차단한 사람</div>
+          {blocks.length === 0 ? (
+            <p className="js-lead small">차단한 사람이 없어요. 정산방 메시지의 [⋯]에서 차단할 수 있어요.</p>
+          ) : (
+            <ul className="js-blocklist">
+              {blocks.map((b) => (
+                <li key={b.userId}>
+                  <b>{b.displayName}</b>
+                  <button type="button" className="js-mini ghost" onClick={() => onUnblock?.(b.userId)}>차단 풀기</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {(onLogout || onDeleteAccount) && (
         <section className="js-field js-account-menu" aria-label="계정">
           <div className="js-lab">계정</div>

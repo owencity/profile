@@ -13,6 +13,9 @@ import type { ActionKind } from './nextAction'
 import { canSettleNow, nextAction } from './nextAction'
 import { BackButton } from './BackButton'
 import { ParticipantSheet } from './ParticipantSheet'
+import { MessageSheet } from './MessageSheet'
+import type { ReportReason } from './safety'
+import { canModerate } from './safety'
 import { SHOW_EXEMPT } from './features'
 
 type Props = {
@@ -35,10 +38,15 @@ type Props = {
   /** 이 술자리에 내가 총무인 정산방이 이미 있으면 그 id — 있으면 새로 만들지 않고 그리로 안내한다 */
   myNextRoomId?: Id
   onOpenMyNext?: () => void
+  /** 남의 메시지 신고(FC-024). 타임라인은 이미 신고·차단이 걸러진 것을 받는다 */
+  onReport: (entryId: Id, reason: ReportReason) => void
+  /** 그 메시지를 쓴 사람 차단(FC-024) — 메시지만 숨긴다 */
+  onBlock: (participantId: Id) => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext, myNextRoomId, onOpenMyNext }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
+  const [msgMenu, setMsgMenu] = useState<Id | null>(null)
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
   const isHost = g.hostUserId === meUserId
@@ -93,6 +101,20 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
           onRemove={() => { onRemove(managing); setManaging(null) }}
         />
       )}
+      {msgMenu !== null && (() => {
+        const e = g.timeline.find((x) => x.id === msgMenu)
+        if (!e?.authorParticipantId) return null
+        const author = e.authorParticipantId
+        return (
+          <MessageSheet
+            authorName={nameOf(g, author)}
+            body={e.body}
+            onClose={() => setMsgMenu(null)}
+            onReport={(reason) => { onReport(e.id, reason); setMsgMenu(null) }}
+            onBlock={() => { onBlock(author); setMsgMenu(null) }}
+          />
+        )
+      })()}
 
       {g.rounds.length > 0 && (
         <section className="js-rounds" aria-label="차수">
@@ -134,7 +156,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         </section>
       )}
 
-      <Timeline g={g} meId={me?.id} />
+      <Timeline g={g} meId={me?.id} meUserId={meUserId} onMenu={setMsgMenu} />
 
       <Dock
         actionLabel={act.action?.label}
@@ -238,7 +260,7 @@ function fmtTime(iso: string) {
     : `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-function Timeline({ g, meId }: { g: Gathering; meId?: Id }) {
+function Timeline({ g, meId, meUserId, onMenu }: { g: Gathering; meId?: Id; meUserId: Id; onMenu: (entryId: Id) => void }) {
   // 타임라인 상자 안에서만 맨 아래로 — scrollIntoView는 창 전체까지 끌어내려 화면 위가 잘렸다
   const box = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -250,8 +272,11 @@ function Timeline({ g, meId }: { g: Gathering; meId?: Id }) {
       {g.timeline.map((e) => {
         if (e.type === 'MESSAGE') {
           const mine = e.authorParticipantId === meId
+          const other = canModerate(g, e, meUserId)
           return (
-            <div key={e.id} className={`js-tlmsg${mine ? ' mine' : ''}`}>
+            <div key={e.id} className={`js-tlmsg${mine ? ' mine' : ''}${other ? ' other' : ''}`}>
+              {/* 남의 메시지에만 신고·차단 메뉴(FC-024, App Store 1.2) */}
+              {other && <button type="button" className="js-tlmore" aria-label={`${nameOf(g, e.authorParticipantId!)}님 메시지 신고·차단`} onClick={() => onMenu(e.id)}>⋯</button>}
               {!mine && <b>{nameOf(g, e.authorParticipantId!)}</b>}
               <p>{e.body}</p>
               <time>{fmtTime(e.createdAt)}</time>

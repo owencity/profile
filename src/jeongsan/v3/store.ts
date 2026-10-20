@@ -14,6 +14,8 @@ import type { RoundDraft } from './round'
 import { relabel } from './round'
 import { autoTitle } from './home'
 import { validateName } from './name'
+import type { Block, Moderation, ReportReason } from './safety'
+import { EMPTY_MODERATION, entryKey } from './safety'
 
 type State = {
   me: User
@@ -71,6 +73,16 @@ type State = {
   removeParticipant: (roomId: Id, participantId: Id) => string | null
   /** 목데이터의 사람들 — 보는 사람 전환 때 여기서 꺼낸다(등록한 계좌가 전환 뒤에도 남게) */
   users: User[]
+  /**
+   * 메시지 신고·차단(FC-024). 목데이터는 여기서 숨김을 흉내 내고, API 모드는 서버가 걸러 준 타임라인에
+   * 같은 판정을 한 번 더 한다(신고·차단 직후 다시 읽기 전에도 바로 사라지게). 사유는 서버로만 간다
+   */
+  moderation: Moderation
+  reportMessage: (roomId: Id, entryId: Id, reason: ReportReason) => void
+  blockParticipant: (roomId: Id, participantId: Id) => void
+  unblockUser: (userId: Id) => void
+  /** API 모드 — 서버가 준 내 차단 목록으로 바꾼다 */
+  setMyBlocks: (blocks: Omit<Block, 'blockerUserId'>[]) => void
   /**
    * 내 받을 계좌 등록·변경(A1). 사람 단위라 내가 들어간 **진행 중인** 술자리 모두에 반영한다
    * (완료된 술자리는 바꾸지 않는다 — 이미 끝난 송금의 기록이다).
@@ -165,6 +177,33 @@ export const useV3 = create<State>((set, get) => {
     notifications: apiMode ? [] : MOCK_NOTIFICATIONS,
     paySeen: [],
     users: apiMode ? [] : MOCK_USERS,
+    moderation: EMPTY_MODERATION,
+
+    reportMessage: (roomId, entryId) =>
+      set((s) => {
+        const g = s.rooms[roomId]
+        if (!g) return s
+        const key = entryKey(g, entryId)
+        if (s.moderation.reports.some((r) => r.key === key && r.reporterUserId === s.me.id)) return s
+        return { moderation: { ...s.moderation, reports: [...s.moderation.reports, { key, reporterUserId: s.me.id }] } }
+      }),
+    blockParticipant: (roomId, participantId) =>
+      set((s) => {
+        const p = s.rooms[roomId]?.participants.find((x) => x.id === participantId)
+        if (!p || p.userId === s.me.id) return s
+        if (s.moderation.blocks.some((b) => b.blockerUserId === s.me.id && b.blockedUserId === p.userId)) return s
+        const block = { blockerUserId: s.me.id, blockedUserId: p.userId, displayName: p.displayName }
+        return { moderation: { ...s.moderation, blocks: [...s.moderation.blocks, block] } }
+      }),
+    unblockUser: (userId) =>
+      set((s) => ({ moderation: { ...s.moderation, blocks: s.moderation.blocks.filter((b) => !(b.blockerUserId === s.me.id && b.blockedUserId === userId)) } })),
+    setMyBlocks: (blocks) =>
+      set((s) => ({
+        moderation: {
+          ...s.moderation,
+          blocks: [...s.moderation.blocks.filter((b) => b.blockerUserId !== s.me.id), ...blocks.map((b) => ({ ...b, blockerUserId: s.me.id }))],
+        },
+      })),
 
     setMe: (me) =>
       set((s) => ({ me, users: s.users.some((u) => u.id === me.id) ? s.users.map((u) => (u.id === me.id ? me : u)) : [...s.users, me] })),

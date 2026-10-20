@@ -403,3 +403,20 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 
 /* 내 술자리 카드의 계정 링크 — 계좌 링크보다 한 단계 옅게 */
 .js-acctline.sub { color: var(--ink3); font-weight: 600; text-decoration: none; }
+
+/* ── 메시지 신고·차단(FC-024) ── */
+.js-tlmsg { position: relative; }
+.js-tlmore { position: absolute; top: 2px; right: 2px; border: 0; background: none; color: var(--ink3); font: inherit; font-size: 15px; line-height: 1; padding: 2px 4px; cursor: pointer; }
+.js-tlmsg.other { padding-right: 26px; }
+.js-msgquote { margin: 0; padding: 8px 10px; border: 2px solid var(--line); background: #fff; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; max-height: 120px; overflow-y: auto; }
+.js-msgmenu { display: flex; flex-direction: column; gap: 8px; }
+.js-reasons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.js-reason { font: inherit; font-size: 14px; font-weight: 800; padding: 10px; border: 2px solid var(--line); background: #fff; cursor: pointer; }
+.js-reason.on { border-color: var(--ink); background: var(--ink); color: #fff; }
+.js-cta.warn { background: var(--warn); }
+.js-blocklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.js-blocklist li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 2px solid var(--line); background: #fff; }
+.js-blocklist li b { flex: 1; font-size: 14px; }
+.js-terms { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; line-height: 1.45; cursor: pointer; }
+.js-terms input { width: 18px; height: 18px; margin-top: 1px; flex: none; }
+.js-terms a { color: var(--p700); }

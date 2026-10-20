@@ -105,6 +105,12 @@ export const api = {
   gathering: (gid: number) => request<ServerGathering>('GET', `/api/v1/gatherings/${gid}`),
   createGathering: (title?: string) => request<ServerGathering>('POST', '/api/v1/gatherings', title ? { title } : {}),
   sendMessage: (gid: number, text: string) => request<unknown>('POST', `/api/v1/gatherings/${gid}/messages`, { text }),
+  // 메시지 신고·차단(FC-024) — 신고한 메시지·차단한 사람의 메시지는 서버가 내 timeline 에서 빼고 준다
+  reportMessage: (gid: number, entryId: number, reason: string) =>
+    request<unknown>('POST', `/api/v1/gatherings/${gid}/messages/${entryId}/reports`, { reason }),
+  block: (gatheringId: number, participantId: number) => request<unknown>('POST', '/api/v1/me/blocks', { gatheringId, participantId }),
+  blocks: () => request<{ userId: number; displayName: string; blockedAt: string }[]>('GET', '/api/v1/me/blocks'),
+  unblock: (userId: number) => request<unknown>('DELETE', `/api/v1/me/blocks/${userId}`),
   joinPreview: (token: string) => request<ServerJoinPreview>('GET', `/api/v1/join/${encodeURIComponent(token)}`),
   join: (token: string, settlementUnitId: number, responses: Answer[]) =>
     request<{ gatheringId: number; participantId: number }>('POST', `/api/v1/join/${encodeURIComponent(token)}`, { settlementUnitId, responses }),

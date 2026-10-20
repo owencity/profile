@@ -184,3 +184,37 @@ describe('알림 (API v8)', () => {
     expect(settled.link).toBe('/jungsan/r/9/pay')
   })
 })
+
+describe('메시지 신고·차단 (FC-024)', () => {
+  it('신고는 그 메시지 주소로 사유만 보낸다', async () => {
+    const calls = fakeServer({ status: 204 })
+    const m = await load('https://api.test')
+    await m.api.reportMessage(1, 42, 'ABUSE')
+    expect(calls[0].url).toBe('https://api.test/api/v1/gatherings/1/messages/42/reports')
+    expect(calls[0].init.method).toBe('POST')
+    expect(JSON.parse(String(calls[0].init.body))).toEqual({ reason: 'ABUSE' })
+  })
+
+  it('차단은 술자리와 참여자로 보낸다 — 프론트는 상대의 계정 id를 모른다', async () => {
+    const calls = fakeServer({ status: 204 })
+    const m = await load('https://api.test')
+    await m.api.block(1, 13)
+    expect(calls[0].url).toBe('https://api.test/api/v1/me/blocks')
+    expect(JSON.parse(String(calls[0].init.body))).toEqual({ gatheringId: 1, participantId: 13 })
+  })
+
+  it('차단 풀기는 계정 id로 지운다', async () => {
+    const calls = fakeServer({ status: 204 })
+    const m = await load('https://api.test')
+    await m.api.unblock(3)
+    expect(calls[0].url).toBe('https://api.test/api/v1/me/blocks/3')
+    expect(calls[0].init.method).toBe('DELETE')
+  })
+
+  it('금칙어로 거절되면 고쳐서 다시 보내라는 문구를 보여준다', async () => {
+    fakeServer({ status: 422, body: { code: 'MESSAGE_NOT_ALLOWED', message: 'x' } })
+    const m = await load('https://api.test')
+    const err = await m.api.sendMessage(1, '...').catch((e) => e)
+    expect(m.messageOf(err)).toBe('부적절한 표현이 있어요. 고쳐서 다시 보내주세요')
+  })
+})

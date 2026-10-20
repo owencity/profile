@@ -21,6 +21,7 @@ import { EntryPage } from './EntryPage'
 import { AccountPage } from './AccountPage'
 import { NamePage } from './NamePage'
 import { isApiMode } from './api'
+import { myBlocks, visibleTimeline } from './safety'
 import { gateway } from './gateway'
 import { entryRoute } from './home'
 import { isV3Home } from './routes'
@@ -46,13 +47,15 @@ type Props = {
 type Entry = { token: string; rooms: Gathering[]; count: number } | { token: string; error: string }
 
 export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () => true }: Props) {
-  const { me, rooms, actAs, notifications, paySeen, setExempt, users } = useV3()
+  const { me, rooms, actAs, notifications, paySeen, setExempt, users, moderation } = useV3()
   const isPaySeen = (roomId: Id) => paySeen.includes(seenKey(roomId, me.id))
   const myAlerts = notifications.filter((n) => n.userId === me.id)
   const api = isApiMode()
 
   // 화면을 옮기면 맨 위부터 — 앞 화면의 스크롤 위치가 남아 머리말이 잘린 채 열렸다
   useEffect(() => { window.scrollTo(0, 0) }, [route])
+  // 계정 화면을 열 때 서버의 내 차단 목록을 읽는다(FC-024) — 다른 기기에서 차단·해제한 것도 보이게
+  useEffect(() => { if (api && loggedIn && route === '/jungsan/me/account') void gateway.loadBlocks() }, [api, loggedIn, route])
 
   // 잠깐 떴다 사라지는 안내(링크 복사, 서버 오류 등)
   const [toast, setToast] = useState<string | null>(null)
@@ -296,6 +299,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
   if (route === '/jungsan/me/account') {
     return wrap(
       <AccountPage key={me.id} me={me} backTo="내 술자리로" onBack={() => navigate('/jungsan')}
+        blocks={myBlocks(moderation, me.id).map((b) => ({ userId: b.blockedUserId, displayName: b.displayName }))}
+        onUnblock={async (uid) => { if (await ok(gateway.unblock(uid))) setToast('차단을 풀었어요') }}
         // 계정 메뉴는 서버 계정이 있을 때만(목데이터에는 로그아웃할 계정이 없다)
         onLogout={api ? async () => { await gateway.logout(); onLeave() } : undefined}
         onDeleteAccount={api ? async () => {
@@ -444,13 +449,21 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
 
     return wrap(
       <RoomPage
-        g={g}
+        // 신고·차단한 메시지는 빼고 그린다(FC-024) — 서버도 같은 기준으로 걸러 주지만, 다시 읽기 전에도 바로 사라지게
+        g={{ ...g, timeline: visibleTimeline(g, me.id, moderation) }}
         meUserId={me.id}
         onBack={() => navigate('/jungsan')}
         onAction={onAction}
         onEditRound={(rid) => navigate(`/jungsan/r/${g.id}/round/${rid}`)}
         onAddRound={() => navigate(`/jungsan/r/${g.id}/round/new`)}
         onSend={(t) => void ok(gateway.sendMessage(g.id, t))}
+        onReport={async (entryId, reason) => {
+          if (await ok(gateway.reportMessage(g.id, entryId, reason))) setToast('신고했어요. 24시간 안에 확인할게요')
+        }}
+        onBlock={async (pid) => {
+          const name = g.participants.find((p) => p.id === pid)?.displayName
+          if (await ok(gateway.blockParticipant(g.id, pid))) setToast(`${name}님을 차단했어요. 내 계정에서 풀 수 있어요`)
+        }}
         onConfirm={(tid) => void ok(gateway.confirmIncoming(g.id, tid))}
         onNotReceived={(tid) => void ok(gateway.notReceived(g.id, tid))}
         // 면제는 서버 API 보류(SETTLEMENT_UNITS §4.2) — 화면에서도 꺼져 있다(features.SHOW_EXEMPT)
