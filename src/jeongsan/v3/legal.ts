@@ -18,7 +18,7 @@ export const CONTACT_EMAIL = 'skyko6530@gmail.com'
 export const SERVER_LOCATION = '싱가포르(Oracle Cloud ap-singapore-1)'
 
 /** 시행일 — 내용을 바꾸면 날짜도 바꾼다 */
-export const EFFECTIVE_DATE = '2026년 10월 10일'
+export const EFFECTIVE_DATE = '2026년 10월 21일'
 
 /**
  * 국외 이전(개인정보 보호법 제28조의8) — 서버가 싱가포르에 있어 고지한다. 웹은 Vercel(미국)이 화면을 내보내며 접속 기록을 남긴다.

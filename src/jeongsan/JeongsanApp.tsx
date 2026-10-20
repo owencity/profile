@@ -14,6 +14,7 @@ import { SideStreet } from './SideStreet'
 import { AppV3 } from './v3/AppV3'
 import { isV3JoinRoute, isV3PublicRoute, isV3Route } from './v3/routes'
 import { PrivacyPage, SupportPage } from './v3/PrivacyPage'
+import { TermsPage } from './v3/TermsPage'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -76,6 +77,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
   // 개인정보처리방침·지원 — 로그인과 상관없이 누구나(스토어 심사관 포함) 읽을 수 있어야 한다
   if (isV3PublicRoute(route)) {
     const home = () => navigate('/jungsan')
+    if (route === '/jungsan/terms') return <TermsPage onHome={home} />
     return route === '/jungsan/privacy' ? <PrivacyPage onHome={home} /> : <SupportPage onHome={home} />
   }
 

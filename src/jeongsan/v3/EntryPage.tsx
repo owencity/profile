@@ -17,6 +17,7 @@ import { RESPONSE_LABEL, SELF_CHOICES, hostOf, participantOfUser, won } from './
 import { ResponseRow } from './ResponseRow'
 import { BackButton } from './BackButton'
 import { MAX_NAME, NAME_GUIDE, validateName } from './name'
+import { TermsAgree } from './TermsAgree'
 
 type Props = {
   /** 링크가 가리키는 술자리. 없으면 잘못되거나 사라진 링크 */
@@ -46,6 +47,8 @@ const fmtDate = (iso: string) => {
 export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome, participantCount, choices, onPick }: Props) {
   const [draft, setDraft] = useState<Record<Id, ResponseType | undefined>>({})
   const [name, setName] = useState('')
+  // 첫 로그인이면 여기서 이용약관 동의도 받는다(FC-024, L2와 같다)
+  const [agreed, setAgreed] = useState(false)
 
   const notice = (title: string, body: string, action?: { label: string; onClick: () => void }) => (
     <div className="js-shell narrow js-p1">
@@ -69,7 +72,7 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
 
   const host = hostOf(g)
   const nameErrors = askName ? validateName(name) : []
-  const filled = g.rounds.every((r) => draft[r.id]) && nameErrors.length === 0
+  const filled = g.rounds.every((r) => draft[r.id]) && nameErrors.length === 0 && (!askName || agreed)
   const answers = () => g.rounds.map((r) => ({ roundId: r.id, type: draft[r.id]! }))
   const join = () => {
     if (!filled) return
@@ -178,6 +181,7 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
       <div className="js-r2btns stick">
         {loggedIn ? (
           <>
+            {askName && <TermsAgree checked={agreed} onChange={setAgreed} />}
             {!g.rounds.every((r) => draft[r.id]) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
             <button className="js-cta" disabled={!filled} onClick={join}>
               {g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'}

@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { nameWithNick, type User } from './model'
 import { MAX_NAME, NAME_GUIDE, validateName } from './name'
+import { TermsAgree } from './TermsAgree'
 
 type Props = {
   me: User
@@ -24,13 +25,15 @@ export function NamePage({ me, onLogout, onConfirm }: Props) {
   // 서버가 거절한 이유(예: 이미 이름을 정함). 입력을 고치면 지운다
   const [serverError, setServerError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // 이용약관 동의(FC-024) — 체크해야 시작할 수 있다
+  const [agreed, setAgreed] = useState(false)
   const errors = serverError ? [serverError] : validateName(name)
   const preview = name.trim() || '김동규'
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTried(true)
-    if (busy || validateName(name).length > 0) return
+    if (busy || !agreed || validateName(name).length > 0) return
     setBusy(true)
     setServerError(await onConfirm(name.trim()))
     setBusy(false)
@@ -68,7 +71,8 @@ export function NamePage({ me, onLogout, onConfirm }: Props) {
       {tried && errors.length > 0 && <div className="js-errs" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
 
       <div className="js-r2btns stick">
-        <button type="submit" className="js-cta" disabled={busy}>{busy ? '저장하는 중…' : '이 이름으로 시작'}</button>
+        <TermsAgree checked={agreed} onChange={setAgreed} />
+        <button type="submit" className="js-cta" disabled={busy || !agreed}>{busy ? '저장하는 중…' : '이 이름으로 시작'}</button>
         <button type="button" className="js-linkbtn js-namelogout" onClick={onLogout}>잘못 로그인했나요? 로그아웃</button>
       </div>
     </form>

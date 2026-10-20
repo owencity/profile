@@ -11,7 +11,7 @@ export const isV3Home = (route: string) => route === '/jungsan' || route === '/j
 export const isV3JoinRoute = (route: string) => /^\/jungsan\/j\/[^/]+$/.test(route)
 
 /** 로그인 없이 열리는 안내 페이지 — 스토어 심사에 넣는 개인정보처리방침·지원 주소 */
-export const isV3PublicRoute = (route: string) => route === '/jungsan/privacy' || route === '/jungsan/support'
+export const isV3PublicRoute = (route: string) => route === '/jungsan/privacy' || route === '/jungsan/support' || route === '/jungsan/terms'
 
 /**
  * v3 라우터가 맡는 경로인가(참여 입구 제외). 옛 라우터(`JeongsanApp`)가 로그인 확인 뒤 이걸 보고
