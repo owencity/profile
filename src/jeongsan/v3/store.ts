@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, extraParticipants, extraPayers } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, nextUnitHeadcount, extraParticipants, extraPayers } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -212,7 +212,7 @@ export const useV3 = create<State>((set, get) => {
         spoonGivers: [],
         firstSeq: lastSeq + 1,
         // 다음 차 인원의 시작값은 고른 사람 + 나(FC-020) — R2에서 바꿀 수 있다
-        headcount: Math.max(HEADCOUNT_MIN, picked.size),
+        headcount: nextUnitHeadcount(picked.size),
       }
       set((s) => ({ rooms: { ...s.rooms, [id]: g, [src.id]: src.gatheringId ? src : { ...src, gatheringId } } }))
       return id

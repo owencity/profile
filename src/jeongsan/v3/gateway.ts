@@ -10,6 +10,7 @@
 import { ApiError, api, isApiMode, toUser } from './api'
 import type { ServerNotification } from './api'
 import type { AppNotification, Gathering, Id, Payout, ResponseType } from './model'
+import { nextUnitHeadcount } from './model'
 import type { SettlePreview } from './mockServer'
 import { mockPreview } from './mockServer'
 import { validateName } from './name'
@@ -187,8 +188,8 @@ export const gateway = {
     const me = s().rooms[roomId]?.participants.find((p) => p.userId === s().me.id)
     try {
       const ids = [...new Set([...(me ? [me.id] : []), ...participantIds])]
-      // 다음 차 인원의 시작값은 고른 사람 + 나(FC-020) — R2에서 바꿀 수 있다
-      const u = await api.createUnit(gid, uuid(), ids, ids.length)
+      // 다음 차 인원의 시작값은 고른 사람 + 나, 최소 2(FC-020·FC-023) — R2에서 바꿀 수 있다
+      const u = await api.createUnit(gid, uuid(), ids, nextUnitHeadcount(ids.length))
       await refresh(gid)
       return { id: u.id }
     } catch (e) {

@@ -50,3 +50,15 @@ describe('다음 차는 내가 계산했어요', () => {
     expect(s().rooms[id].title).toBe(autoTitle(new Date()))
   })
 })
+
+describe('다음 차 시작 인원 (FC-023)', () => {
+  it('나 혼자 시작해도 1이 아니라 최소 2명으로 보낸다 — 서버는 1명 목표를 거절한다', async () => {
+    const { nextUnitHeadcount } = await import('../model')
+    expect(nextUnitHeadcount(1)).toBe(2)
+  })
+  it('고른 사람 + 나가 그대로 시작 인원이 되고, 50명을 넘지 않는다', async () => {
+    const { nextUnitHeadcount } = await import('../model')
+    expect(nextUnitHeadcount(4)).toBe(4)
+    expect(nextUnitHeadcount(80)).toBe(50)
+  })
+})

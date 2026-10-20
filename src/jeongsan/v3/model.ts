@@ -197,6 +197,12 @@ export const extraPayers = (g: Gathering) =>
 export const HEADCOUNT_MIN = 2
 export const HEADCOUNT_MAX = 50
 
+/**
+ * 다음 차 정산 단위의 시작 인원 — 고른 사람 + 나, 단 최소 2명(FC-023). [나 혼자 시작하기]도 1이 아니라 2로 보낸다 —
+ * 서버는 1명 목표를 400으로 거절한다. 나머지 한 명은 링크로 들어오면 된다. R2에서 바꿀 수 있다
+ */
+export const nextUnitHeadcount = (memberCount: number) => Math.min(HEADCOUNT_MAX, Math.max(HEADCOUNT_MIN, memberCount))
+
 /** 이 참여자가 결제자인 차수 */
 export const roundsPaidBy = (g: Gathering, participantId: Id) =>
   g.rounds.filter((r) => r.payerParticipantId === participantId)
