@@ -17,6 +17,7 @@ const table: SettlementTable = { gatheringId: 1, settlementUnitId: 10, title: pr
     cells: [1, 2, 3, 4].map((participantId, cellIndex) => ({ participantId, type: cellIndex === 2 ? 'SOBER' : 'DRANK', food: index ? 26000 : 7100, alcohol: index ? 0 : [3000, 3000, 0, 3000][cellIndex], amount: index ? 26000 : [10100, 10100, 7100, 10100][cellIndex], source: cellIndex === 3 ? 'AUTO' : 'SELF' })) })),
   adjustments: [], grandTotal: 141400, transfers: [2, 3, 4].map((participantId, index) => ({ fromParticipantId: participantId, toParticipantId: 1, amount: [36100, 33100, 36100][index] })),
 } }
+let activeTable = table
 const json = (body: unknown, status = 200) => new Response(status === 204 ? null : JSON.stringify(body), { status })
 window.fetch = async (input, init) => {
   const url = new URL(String(input), window.location.origin)
@@ -24,7 +25,7 @@ window.fetch = async (input, init) => {
   if (path.endsWith('/auth/me')) return json({ code: 'UNAUTHENTICATED' }, 401)
   if (path === '/api/v1/join/fixture') return json(preview)
   if (path === '/api/v1/guest/session') return json(null, 204)
-  if (path.endsWith('/settlement/table')) return json(table)
+  if (path.endsWith('/settlement/table')) return json(activeTable)
   if (path === '/api/v1/guest/gatherings/1/me') return me ? json(me) : json({ code: 'NOT_PARTICIPANT' }, 403)
   if (path === '/api/v1/guest/join/fixture') {
     const body = JSON.parse(String(init?.body))
@@ -40,6 +41,15 @@ export function Harness() {
   const [host, setHost] = useState(false)
   const [version, setVersion] = useState(0)
   const [width, setWidth] = useState(390)
+  function manyPeople() {
+    const lines = Array.from({ length: 25 }, (_, i) => ({ participantId: i + 1, name: i === 24 ? '긴이름확인참여자' : '김하나', total: i < 12 ? 3000 : 2000, paidTotal: i === 0 ? 62000 : 0 }))
+    activeTable = { ...table, title: '25명 술자리', table: { grandTotal: 62000, lines, adjustments: [],
+      rounds: [1, 2].map((seq) => ({ roundId: seq, seq, payerParticipantId: 1, total: seq === 1 ? 37000 : 25000, foodTotal: 25000, alcoholTotal: seq === 1 ? 12000 : 0, displayTotal: seq === 1 ? 37000 : 25000,
+        cells: lines.map((line, i) => ({ participantId: line.participantId, type: i < 12 ? 'DRANK' : 'SOBER', source: i === 24 ? 'AUTO' : 'SELF', food: 1000, alcohol: seq === 1 && i < 12 ? 1000 : 0, amount: seq === 1 && i < 12 ? 2000 : 1000 })) })),
+      transfers: lines.slice(1).map((line) => ({ fromParticipantId: line.participantId, toParticipantId: 1, amount: line.total })),
+    } }
+    setHost(true); setVersion((value) => value + 1)
+  }
   function saveRenderedImage() {
     const image = document.querySelector<HTMLImageElement>('.js-capture-image')
     if (!image) return
@@ -51,6 +61,6 @@ export function Harness() {
     money = { ...money, status: 'SETTLING', isEstimate: false, settledAt: table.generatedAt, transfers: money.transfers.map((transfer) => ({ ...transfer, id: 1, status: 'WAITING', payout: { bank: '검증은행', accountNo: '00123456789', holder: '김총무' } })) }
     setVersion((value) => value + 1)
   }
-  return <><nav style={{ padding: 12, background: '#fff0cc' }}>로컬 가상 응답 · 운영 데이터 아님 <button onClick={() => setHost(!host)}>{host ? '참여 화면' : '총무 표'}</button><button onClick={settle}>정산 확정 fixture</button><button onClick={() => setWidth(width === 390 ? 320 : 390)}>{width === 390 ? '320px' : '390px'}</button><button onClick={saveRenderedImage}>검증용 PNG 보존</button></nav><div style={{ width, maxWidth: '100%', margin: 'auto' }}>{host ? <div className="js-root"><div className="js-shell"><SettlementTablePanel gatheringId={1} unitId={10} onClose={() => setHost(false)} /></div></div> : <JeongsanApp key={version} route="/jungsan/j/fixture" navigate={() => undefined} />}</div></>
+  return <><nav style={{ padding: 12, background: '#fff0cc' }}>로컬 가상 응답 · 운영 데이터 아님 <button onClick={() => setHost(!host)}>{host ? '참여 화면' : '총무 표'}</button><button onClick={manyPeople}>25명 표</button><button onClick={() => { activeTable = table; setVersion((v) => v + 1) }}>4명 표</button><button onClick={settle}>정산 확정 fixture</button><button onClick={() => setWidth(width === 390 ? 320 : 390)}>{width === 390 ? '320px' : '390px'}</button><button onClick={saveRenderedImage}>검증용 PNG 보존</button></nav><div style={{ width, maxWidth: '100%', margin: 'auto' }}>{host ? <div className="js-root"><div className="js-shell"><SettlementTablePanel key={version} gatheringId={1} unitId={10} onClose={() => setHost(false)} /></div></div> : <JeongsanApp key={version} route="/jungsan/j/fixture" navigate={() => undefined} />}</div></>
 }
 createRoot(document.getElementById('root')!).render(<Harness />)

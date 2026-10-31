@@ -14,24 +14,18 @@ export type SettlementTable = {
 export const fetchSettlementTable = (gatheringId: number, unitId: number) =>
   request<SettlementTable>('GET', `/api/v1/gatherings/${gatheringId}/settlement-units/${unitId}/settlement/table`)
 
-/** 화면 밖 열뿐 아니라 긴 차수 목록도 나눠서 캡처에 누락되지 않게 한다. 금액은 재계산하지 않는다. */
-export function capturePages(view: SettlementTable) {
-  const pages: { lines: TableLine[]; rounds: TableRound[]; adjustments: TableAdjustment[]; transfers: SettlementTable['table']['transfers'] }[] = []
-  const peoplePerPage = view.table.grandTotal.toLocaleString('ko-KR').length > 9 ? 1 : 2
-  for (let personStart = 0; personStart < view.table.lines.length; personStart += peoplePerPage) {
-    const lines = view.table.lines.slice(personStart, personStart + peoplePerPage)
-    for (let roundStart = 0; roundStart < view.table.rounds.length; roundStart += 2) {
-      pages.push({ lines, rounds: view.table.rounds.slice(roundStart, roundStart + 2), adjustments: [], transfers: [] })
-    }
-    // 조정이 많은 정산도 마지막 페이지 높이를 무한히 늘리지 않는다.
-    for (let adjustmentStart = 0; adjustmentStart < view.table.adjustments.length; adjustmentStart += 4) {
-      pages.push({ lines, rounds: [], adjustments: view.table.adjustments.slice(adjustmentStart, adjustmentStart + 4), transfers: [] })
-    }
-    const transfers = view.table.transfers.filter((transfer) => lines.some((line) => line.participantId === transfer.fromParticipantId))
-    for (let transferStart = 0; transferStart < transfers.length; transferStart += 6) {
-      pages.push({ lines, rounds: [], adjustments: [], transfers: transfers.slice(transferStart, transferStart + 6) })
-    }
-  }
+export type TablePage = { kind: 'round' | 'adjustment' | 'summary' | 'transfer'; lines: TableLine[]; round?: TableRound; adjustment?: TableAdjustment; transfers: SettlementTable['table']['transfers'] }
+
+/** 인원이 늘어도 열은 유지하고 긴 캡처만 행으로 나눈다. 금액은 서버 표시값 그대로다. */
+export function capturePages(view: SettlementTable, rowsPerPage = 8): TablePage[] {
+  if (!Number.isSafeInteger(rowsPerPage) || rowsPerPage < 1) throw new RangeError('rowsPerPage must be positive')
+  const pages: TablePage[] = []
+  const groups: TableLine[][] = []
+  for (let start = 0; start < view.table.lines.length; start += rowsPerPage) groups.push(view.table.lines.slice(start, start + rowsPerPage))
+  for (const round of view.table.rounds) for (const lines of groups) pages.push({ kind: 'round', lines, round, transfers: [] })
+  for (const adjustment of view.table.adjustments) for (const lines of groups) pages.push({ kind: 'adjustment', lines, adjustment, transfers: [] })
+  for (const lines of groups) pages.push({ kind: 'summary', lines, transfers: [] })
+  for (let start = 0; start < view.table.transfers.length; start += rowsPerPage) pages.push({ kind: 'transfer', lines: [], transfers: view.table.transfers.slice(start, start + rowsPerPage) })
   return pages
 }
 

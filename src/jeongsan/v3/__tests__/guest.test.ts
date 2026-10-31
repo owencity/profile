@@ -75,23 +75,25 @@ describe('비회원 쿠키와 API 계약', () => {
 })
 
 describe('캡처 페이지 누락 방지', () => {
-  const lines = Array.from({ length: 7 }, (_, index) => ({ participantId: index + 1, name: '동명이인', total: 1000 + index, paidTotal: 0 }))
+  const lines = Array.from({ length: 25 }, (_, index) => ({ participantId: index + 1, name: '동명이인', total: 1000 + index, paidTotal: 0 }))
   const rounds = Array.from({ length: 5 }, (_, index) => ({ roundId: index + 1, seq: index + 1, payerParticipantId: 1, total: 10000, foodTotal: 10000, alcoholTotal: 0, displayTotal: 9999, cells: [] }))
   const adjustments = Array.from({ length: 5 }, (_, index) => ({ recipientParticipantId: index + 1, cells: { '1': -1, '2': 1 } }))
   const transfers = lines.slice(1).map((line) => ({ fromParticipantId: line.participantId, toParticipantId: 1, amount: line.total }))
   const view: SettlementTable = { gatheringId: 1, settlementUnitId: 2, title: '검증', status: 'SETTLING', isEstimate: false, generatedAt: '2026-10-31T12:00:00Z', inputHash: 'fixture', inputRevision: 3, table: { lines, rounds, adjustments, transfers, grandTotal: 50000 } }
   it('동명이인을 ID로 나누며 모든 사람×차수를 정확히 한 번 담는다', () => {
     const pages = capturePages(view)
-    const combinations = pages.flatMap((page) => page.lines.flatMap((line) => page.rounds.map((round) => `${line.participantId}-${round.roundId}`)))
-    expect(combinations).toHaveLength(35)
-    expect(new Set(combinations).size).toBe(35)
-    expect(pages.every((page) => page.lines.length <= 2 && page.rounds.length <= 2 && page.adjustments.length <= 4 && page.transfers.length <= 6)).toBe(true)
+    const combinations = pages.flatMap((page) => page.round ? page.lines.map((line) => `${line.participantId}-${page.round!.roundId}`) : [])
+    expect(combinations).toHaveLength(125)
+    expect(new Set(combinations).size).toBe(125)
+    expect(pages.every((page) => page.lines.length <= 8 && page.transfers.length <= 8)).toBe(true)
+    expect(pages.filter((page) => page.kind === 'summary').flatMap((page) => page.lines)).toEqual(lines)
+    expect(capturePages(view, Number.MAX_SAFE_INTEGER)[0].lines).toEqual(lines)
   })
   it('조정과 송금 안내도 누락/중복 없이 원래 금액으로 전달한다', () => {
     const pages = capturePages(view)
     expect(pages.flatMap((page) => page.transfers)).toEqual(transfers)
     for (const line of lines) {
-      expect(pages.filter((page) => page.lines.some((candidate) => candidate.participantId === line.participantId)).flatMap((page) => page.adjustments)).toEqual(adjustments)
+      expect(pages.filter((page) => page.adjustment && page.lines.some((candidate) => candidate.participantId === line.participantId)).map((page) => page.adjustment)).toEqual(adjustments)
       expect(pages.flatMap((page) => page.lines).find((candidate) => candidate.participantId === line.participantId)?.total).toBe(line.total)
     }
   })
@@ -102,9 +104,17 @@ describe('캡처 페이지 누락 방지', () => {
     expect(cellNote({ ...cell, type: 'EXEMPT', source: 'HOST' })).toBe('면제')
     expect(cellNote({ ...cell, source: 'AUTO' })).toBe('알코올·자동')
   })
-  it('긴 금액은 한 사람씩 나누며 원 금액을 축약하지 않는다', () => {
+  it('긴 금액도 사람을 열로 나누지 않으며 원 금액을 축약하지 않는다', () => {
     const pages = capturePages({ ...view, table: { ...view.table, grandTotal: 1_000_000_000_000 } })
-    expect(pages.every((page) => page.lines.length === 1)).toBe(true)
+    expect(pages[0].lines).toEqual(lines.slice(0, 8))
     expect(pages.flatMap((page) => page.transfers)).toEqual(transfers)
+  })
+  it('10명은 차수마다 8행과 2행으로 나누고 뒤에 요약을 표시한다', () => {
+    const pages = capturePages({ ...view, table: { ...view.table, lines: lines.slice(0, 10), rounds: rounds.slice(0, 1), adjustments: [], transfers: [] } })
+    expect(pages.map((page) => [page.kind, page.lines.length])).toEqual([['round', 8], ['round', 2], ['summary', 8], ['summary', 2]])
+  })
+  it('차수가 비어도 전체 정산은 유지하고 잘못된 행 수는 거절한다', () => {
+    expect(capturePages({ ...view, table: { ...view.table, rounds: [], adjustments: [], transfers: [] } }).every((page) => page.kind === 'summary')).toBe(true)
+    expect(() => capturePages(view, 0)).toThrow(RangeError)
   })
 })
