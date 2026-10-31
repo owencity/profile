@@ -36,3 +36,16 @@
 .js-capture-card .js-money-value[data-long="true"] { font-size: 10px; }
 .js-capture-card p { margin-top: 6px; font-size: 10px; }
 .js-capture-image { display: block; max-width: 100%; height: auto; }
+.js-settlement-export { display: grid; gap: 10px; padding: 12px; background: #fff0cc; border: 2px solid #aab8cd; }
+.js-export-offscreen { position: fixed; left: -100000px; top: 0; pointer-events: none; }
+.js-export-canvas { box-sizing: border-box; padding: 20px; background: #fff; color: #172338; font-family: Pretendard, sans-serif; font-size: 16px; overflow-wrap: anywhere; }
+.js-export-canvas table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.js-export-canvas th, .js-export-canvas td { border: 1px solid #aab8cd; padding: 12px 8px; text-align: right; }
+.js-export-canvas th { text-align: center; background: #eaf1fd; }
+.js-export-canvas thead th, .js-export-canvas .js-export-total > * { background: #fff0cc; font-weight: 800; }
+.js-export-canvas .js-export-round th { background: #dde8fa; text-align: left; }
+.js-export-canvas .js-export-send > * { background: #fff0cc; border: 2px solid #284979; }
+.js-export-send td { text-align: center; }
+.js-export-send strong { display: block; font-size: 22px; color: #123b73; }
+.js-export-send span { display: block; font-size: 14px; }
+.js-export-send div + div { margin-top: 12px; border-top: 1px solid #aab8cd; padding-top: 12px; }

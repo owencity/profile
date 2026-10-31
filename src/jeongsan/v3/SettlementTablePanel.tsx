@@ -4,6 +4,7 @@ import type { SettlementTable, TablePage } from './settlementTable'
 import { messageOf } from './gateway'
 import { won } from './model'
 import './guest.css'
+import { SettlementImage } from './SettlementImage'
 
 export function SettlementTablePanel({ gatheringId, unitId, onClose }: { gatheringId: number; unitId: number; onClose: () => void }) {
   const [view, setView] = useState<SettlementTable | null>(null)
@@ -20,6 +21,7 @@ export function SettlementTablePanel({ gatheringId, unitId, onClose }: { gatheri
     <div className="js-allsame"><button className="js-mini" onClick={onClose}>정산방으로</button><button className="js-mini" onClick={refresh}>최신 표 보기</button>{view && <button className="js-mini" aria-pressed={capture} onClick={() => setCapture(!capture)}>{capture ? '전체 표로 보기' : '캡처용으로 보기'}</button>}</div>
     {error ? <p role="alert">{error}</p> : !view ? <p role="status">정산표를 불러오고 있어요…</p> : <>
       <h2>{view.title} · 정산표</h2>
+      <SettlementImage key={`${gatheringId}-${unitId}-${revision}-${view.inputHash}`} view={view} />
       <p>{view.isEstimate ? '응답이 바뀌면 금액도 바뀌는 예상 표예요.' : '확정된 정산표예요.'} 캡처한 이미지는 자동으로 갱신되지 않아요.</p>
       <p className="js-hint">안주·음료는 함께 나누고 술은 알코올 참여자끼리 나눠요. 셀의 원 미만 금액은 하단 조정에 반영되어 최종 합계와 일치해요.</p>
       {capture ? <><p>참여자를 한 줄씩 표시하고, 긴 표는 8행씩 나눴어요. 각 장을 캡처하거나 이미지로 열어 저장해주세요.</p>{capturePages(view).map((page, index, pages) => <CaptureCard key={`${revision}-${index}`} view={view} page={page} index={index} count={pages.length} />)}</> : capturePages(view, Number.MAX_SAFE_INTEGER).map((page, index) => <MoneyTable key={index} view={view} page={page} />)}
