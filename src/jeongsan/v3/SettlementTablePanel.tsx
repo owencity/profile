@@ -23,7 +23,7 @@ export function SettlementTablePanel({ gatheringId, unitId, onClose }: { gatheri
       <h2>{view.title} · 정산표</h2>
       <SettlementImage key={`${gatheringId}-${unitId}-${revision}-${view.inputHash}`} view={view} />
       <p>{view.isEstimate ? '응답이 바뀌면 금액도 바뀌는 예상 표예요.' : '확정된 정산표예요.'} 캡처한 이미지는 자동으로 갱신되지 않아요.</p>
-      <p className="js-hint">안주·음료는 함께 나누고 술은 알코올 참여자끼리 나눠요. 셀의 원 미만 금액은 하단 조정에 반영되어 최종 합계와 일치해요.</p>
+      <p className="js-hint">안주는 함께 나누고 술은 알코올 참여자끼리 나눠요. 셀의 원 미만 금액은 하단 조정에 반영되어 최종 합계와 일치해요.</p>
       {capture ? <><p>참여자를 한 줄씩 표시하고, 긴 표는 8행씩 나눴어요. 각 장을 캡처하거나 이미지로 열어 저장해주세요.</p>{capturePages(view).map((page, index, pages) => <CaptureCard key={`${revision}-${index}`} view={view} page={page} index={index} count={pages.length} />)}</> : capturePages(view, Number.MAX_SAFE_INTEGER).map((page, index) => <MoneyTable key={index} view={view} page={page} />)}
     </>}
   </section>
@@ -35,7 +35,7 @@ function MoneyTable({ view, page }: { view: SettlementTable; page: TablePage }) 
   const title = round ? `${round.seq}차 · 결제 ${nameOf(round.payerParticipantId)} · ${won(round.total)}`
     : page.adjustment ? `원 단위 조정 · ${nameOf(page.adjustment.recipientParticipantId)} 결제분`
       : page.kind === 'summary' ? `전체 정산 · 총 결제 ${won(view.table.grandTotal)}` : '송금 안내'
-  const headings = round ? ['이름', '참여', '안주·음료', '술', '차수 부담'] : page.adjustment ? ['이름', '조정액'] : page.kind === 'summary' ? ['이름', '전체 부담', '이미 결제'] : ['보내는 사람', '받는 사람', '금액']
+  const headings = round ? ['이름', '참여', '안주', '술', '차수 부담'] : page.adjustment ? ['이름', '조정액'] : page.kind === 'summary' ? ['이름', '전체 부담', '이미 결제'] : ['보내는 사람', '받는 사람', '금액']
   return <table className="js-money-table" data-kind={page.kind}><caption><b>{title}</b><br />{view.isEstimate ? '예상' : '확정'} · 정산 {view.settlementUnitId} · {new Date(view.generatedAt).toLocaleString('ko-KR')} 기준</caption>
     <thead><tr>{headings.map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead>
     <tbody>{page.lines.map((line) => {

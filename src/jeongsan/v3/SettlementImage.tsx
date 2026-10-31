@@ -55,7 +55,7 @@ export function SettlementImage({ view }: { view: SettlementTable }) {
         </tbody></table>
       <h3>송금 안내 · 확정 당시 금액</h3>
       {view.table.transfers.length ? view.table.transfers.map(t => <p key={`${t.fromParticipantId}-${t.toParticipantId}`}>{name(t.fromParticipantId)} → {name(t.toParticipantId)} : {money(t.amount)}원</p>) : <p>보낼 금액이 없습니다.</p>}
-      <p>안주·음료는 함께 배분합니다. 표시 금액의 원 미만 차이는 원 단위 조정에 반영됩니다.</p><p>이 이미지는 자동 갱신되지 않습니다. 입금 확인 여부는 정산방에서 확인해주세요.</p>
+      <p>표시 금액의 원 미만 차이는 원 단위 조정에 반영됩니다.</p><p>이 이미지는 자동 갱신되지 않습니다. 입금 확인 여부는 정산방에서 확인해주세요.</p>
     </div></div>, document.body)}
   </section>
 }
@@ -65,6 +65,6 @@ function Round({ view, round }: { view: SettlementTable; round: SettlementTable[
   const payer = view.table.lines.find(p => p.participantId === round.payerParticipantId)
   return <><tr className="js-export-round"><th colSpan={view.table.lines.length + 2}>{round.seq}차 · 결제자 {payer?.name ?? '참여자'} #{round.payerParticipantId} · {round.total.toLocaleString('ko-KR')}원</th></tr>
     <tr><th>참여</th><td>—</td>{cells.map((c, i) => <td key={view.table.lines[i].participantId}>{c ? cellNote(c) : '—'}</td>)}</tr>
-    {(['food', 'alcohol', 'amount'] as const).map((field, i) => <tr key={field}><th>{['안주·음료', '술', '차수 부담 (조정 전)'][i]}</th><td>{i === 2 ? '—' : (i === 0 ? round.foodTotal : round.alcoholTotal).toLocaleString('ko-KR')}</td>{cells.map((c, j) => <td key={view.table.lines[j].participantId}>{c?.[field].toLocaleString('ko-KR') ?? '—'}</td>)}</tr>)}
+    {(['food', 'alcohol', 'amount'] as const).map((field, i) => <tr key={field}><th>{['안주', '술', '차수 부담 (조정 전)'][i]}</th><td>{i === 2 ? '—' : (i === 0 ? round.foodTotal : round.alcoholTotal).toLocaleString('ko-KR')}</td>{cells.map((c, j) => <td key={view.table.lines[j].participantId}>{c?.[field].toLocaleString('ko-KR') ?? '—'}</td>)}</tr>)}
   </>
 }
