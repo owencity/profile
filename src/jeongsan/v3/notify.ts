@@ -13,7 +13,7 @@ export type NewNotification = Omit<AppNotification, 'id' | 'read' | 'createdAt'>
 const userOf = (g: Gathering, participantId: number) => g.participants.find((p) => p.id === participantId)!.userId
 
 export function notificationsFor(prev: Gathering, next: Gathering): NewNotification[] {
-  const out: NewNotification[] = []
+  const out: (Omit<NewNotification, 'userId'> & { userId: number | null })[] = []
   const room = `/jungsan/r/${next.id}`
   const host = hostOf(next)
 
@@ -138,5 +138,5 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     }
   }
 
-  return out
+  return out.filter((notification): notification is NewNotification => notification.userId !== null)
 }

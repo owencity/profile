@@ -29,7 +29,8 @@ export type User = {
 
 export type Participant = {
   id: Id
-  userId: Id
+  /** 비회원·탈퇴 좌석은 회원 계정이 없다. 신원은 participantId로 구분한다. */
+  userId: Id | null
   displayName: string
   nickname?: string
   spoonCount: number

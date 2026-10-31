@@ -17,6 +17,8 @@ import { MessageSheet } from './MessageSheet'
 import type { ReportReason } from './safety'
 import { canModerate } from './safety'
 import { SHOW_EXEMPT } from './features'
+import { isApiMode } from './api'
+import { SettlementTablePanel } from './SettlementTablePanel'
 
 type Props = {
   g: Gathering
@@ -46,6 +48,7 @@ type Props = {
 
 export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
+  const [showTable, setShowTable] = useState(false)
   const [msgMenu, setMsgMenu] = useState<Id | null>(null)
   const host = hostOf(g)
   const me = participantOfUser(g, meUserId)
@@ -54,6 +57,8 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
   const canEditRounds = isHost && g.status === 'OPEN'
   const act = nextAction(g, meUserId)
   const incoming = me ? g.transfers.filter((t) => t.toParticipantId === me.id && t.status !== 'CONFIRMED') : []
+
+  if (showTable && isHost && isApiMode() && g.gatheringId !== undefined) return <div className="js-shell js-room"><SettlementTablePanel key={g.id} gatheringId={g.gatheringId} unitId={g.id} onClose={() => setShowTable(false)} /></div>
 
   return (
     <div className="js-shell js-room">
@@ -65,6 +70,8 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         </div>
         {isHost && <button className="js-more" aria-label="술자리 메뉴" onClick={() => onAction('SHARE')}>⋯</button>}
       </header>
+
+      {isHost && isApiMode() && g.gatheringId !== undefined && <button className="js-mini" onClick={() => setShowTable(true)}>정산표 보기 · 캡처</button>}
 
       <section className="js-hostcard" aria-label="총무">
         <div className="js-hostav"><HostCharacter spoons={host.spoonCount} /></div>

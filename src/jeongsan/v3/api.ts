@@ -47,7 +47,13 @@ export async function request<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DEL
   }
   if (res.status === 204) return undefined as T
   const text = await res.text()
-  const json: unknown = text ? JSON.parse(text) : undefined
+  let json: unknown
+  try {
+    json = text ? JSON.parse(text) : undefined
+  } catch {
+    // 프록시/CORS 오류의 HTML·평문을 화면에 그대로 노출하지 않는다.
+    throw new ApiError(res.status, res.ok ? 'INVALID_RESPONSE' : `HTTP_${res.status}`, '응답을 확인하지 못했어요. 잠시 뒤 다시 시도해주세요')
+  }
   if (!res.ok) {
     const e = (json ?? {}) as ErrorBody
     throw new ApiError(res.status, e.code ?? `HTTP_${res.status}`, e.message ?? '잠시 뒤 다시 시도해주세요', e.errors ?? null)

@@ -1,0 +1,34 @@
+.js-guest { display: grid; gap: 18px; padding-bottom: 40px; }
+.js-guest h1 { font-size: 24px; overflow-wrap: anywhere; }
+.js-guest-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 16px; }
+.js-guest-fields .js-field { display: grid; gap: 8px; }
+.js-guest-error { color: #b42318; margin: 0; overflow-wrap: anywhere; }
+.js-guest-error:empty { display: none; }
+.js-guest-money { display: grid; gap: 12px; border-top: 2px solid var(--line, #ccd8eb); padding-top: 16px; }
+.js-guest-money h2, .js-guest-money p { margin: 0; }
+.js-guest-money article { display: grid; gap: 10px; }
+.js-guest-total { font-size: 28px; }
+.js-account { user-select: text; overflow-wrap: anywhere; }
+.js-table-panel { display: grid; gap: 14px; min-width: 0; }
+.js-table-panel h2, .js-table-panel p { margin: 0; }
+.js-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--line, #ccd8eb); }
+.js-money-table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; background: white; color: #172338; font-size: 13px; }
+.js-money-table caption { text-align: left; padding: 9px 6px; font-size: 11px; background: #f4f7ff; }
+.js-money-table th, .js-money-table td { border: 1px solid #aab8cd; padding: 7px 5px; text-align: right; overflow-wrap: anywhere; }
+.js-table-scroll .js-money-table th, .js-table-scroll .js-money-table td { min-width: 76px; white-space: nowrap; }
+.js-money-table th { text-align: center; background: #eaf1fd; }
+.js-money-table thead th, .js-money-table tfoot th, .js-money-table tfoot td { background: #fff0cc; font-weight: 800; }
+.js-money-table small { display: block; font-size: 10px; font-weight: 400; }
+.js-money-table .js-round-heading th { text-align: left; background: #dde8fa; }
+.js-money-table .js-cell-note { font-size: 10px; text-align: center; }
+.js-capture-page { display: grid; gap: 12px; padding-bottom: 20px; border-bottom: 2px solid var(--line, #ccd8eb); }
+.js-capture-card { padding: 10px; background: #fff; color: #172338; }
+.js-capture-card header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+.js-capture-card header b { overflow-wrap: anywhere; }
+.js-capture-card header span { white-space: nowrap; }
+.js-capture-card .js-money-table { table-layout: fixed; font-size: 12px; }
+.js-capture-card .js-money-table td { white-space: nowrap; padding: 7px 2px; }
+.js-capture-card .js-money-table td.js-cell-note { white-space: normal; }
+.js-capture-card .js-money-value[data-long="true"] { font-size: 8px; }
+.js-capture-card p { margin-top: 6px; font-size: 10px; }
+.js-capture-image { display: block; max-width: 100%; height: auto; }

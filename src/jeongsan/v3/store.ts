@@ -190,7 +190,7 @@ export const useV3 = create<State>((set, get) => {
     blockParticipant: (roomId, participantId) =>
       set((s) => {
         const p = s.rooms[roomId]?.participants.find((x) => x.id === participantId)
-        if (!p || p.userId === s.me.id) return s
+        if (!p || p.userId === null || p.userId === s.me.id) return s
         if (s.moderation.blocks.some((b) => b.blockerUserId === s.me.id && b.blockedUserId === p.userId)) return s
         const block = { blockerUserId: s.me.id, blockedUserId: p.userId, displayName: p.displayName }
         return { moderation: { ...s.moderation, blocks: [...s.moderation.blocks, block] } }
