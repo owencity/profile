@@ -111,7 +111,7 @@ describe('입금 요청 문구', () => {
     actAs(1)
     expect(s().settle(OPEN, g().inputRevision)).toBe('OK')
     const room = g()
-    const text = paymentRequestMessage(room, 'https://x/jungsan/j/k7Qx2')
+    const text = paymentRequestMessage(room)
     expect(text.startsWith(`[정산어택] ${room.title} 계산 끝!`)).toBe(true)
     for (const t of room.transfers) expect(text).toContain(`${room.participants.find((p) => p.id === t.fromParticipantId)!.displayName} `)
     expect(text).toContain(ME.payout!.accountNo)
@@ -119,7 +119,7 @@ describe('입금 요청 문구', () => {
     const first = room.transfers[0]
     const done = { ...room, transfers: room.transfers.map((t) => (t.id === first.id ? { ...t, status: 'CONFIRMED' as const } : t)) }
     const who = room.participants.find((p) => p.id === first.fromParticipantId)!.displayName
-    expect(paymentRequestMessage(done, 'u')).not.toContain(`· ${who} `)
+    expect(paymentRequestMessage(done)).not.toContain(`· ${who} `)
   })
 })
 

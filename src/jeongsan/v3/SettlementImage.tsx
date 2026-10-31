@@ -36,7 +36,7 @@ export function SettlementImage({ view }: { view: SettlementTable }) {
   }
   return <section className="js-settlement-export" aria-label="확정 정산표 이미지 저장">
     <strong>정산 금액이 확정되었습니다!</strong>
-    <p>전원이 가로로 들어간 정산표 이미지를 저장해 단톡방에 공유하세요. 입금 완료 여부는 정산방에서 확인해주세요.</p>
+    <p>전원이 가로로 들어간 정산표 이미지를 저장해 단톡방에 공유하세요. 참여자는 앱 없이 보낼 대상과 금액을 확인할 수 있어요.</p>
     <button className="js-mini" disabled={busy} onClick={() => { void generate() }}>{busy ? '이미지 만드는 중…' : '전체 정산표 이미지 만들기'}</button>
     {error && <p role="alert">{error}</p>}
     {url && <><a className="js-mini" href={url} download={filename}>정산표 PNG 다운로드</a><p>아래 이미지를 확대해 확인할 수 있어요. 다운로드가 열리지 않으면 이미지를 길게 눌러 저장해주세요.</p><a href={url} target="_blank" rel="noreferrer">이미지 크게 보기</a><img className="js-capture-image" src={url} alt={`${view.title} 전원 가로형 정산표`} /></>}
@@ -55,7 +55,7 @@ export function SettlementImage({ view }: { view: SettlementTable }) {
         </tbody></table>
       <h3>송금 안내 · 확정 당시 금액</h3>
       {view.table.transfers.length ? view.table.transfers.map(t => <p key={`${t.fromParticipantId}-${t.toParticipantId}`}>{name(t.fromParticipantId)} → {name(t.toParticipantId)} : {money(t.amount)}원</p>) : <p>보낼 금액이 없습니다.</p>}
-      <p>표시 금액의 원 미만 차이는 원 단위 조정에 반영됩니다.</p><p>이 이미지는 자동 갱신되지 않습니다. 입금 확인 여부는 정산방에서 확인해주세요.</p>
+      <p>표시 금액의 원 미만 차이는 원 단위 조정에 반영됩니다.</p><p>이 이미지는 확정 당시 금액입니다. 입금 확인과 문의는 총무에게 해주세요.</p>
     </div></div>, document.body)}
   </section>
 }

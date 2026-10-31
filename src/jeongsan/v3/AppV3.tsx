@@ -147,7 +147,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
 
   /** 입금 요청(FC-020) — 정산 뒤 사람별 금액·계좌를 단톡방에. 공유 시트가 없으면 복사 */
   const requestPayment = async (g: Gathering) => {
-    const text = paymentRequestMessage(g, shareUrl(window.location.origin, g.shareToken))
+    const text = paymentRequestMessage(g)
     try {
       if (prefersShareSheet(!!navigator.share, window.matchMedia?.('(pointer: coarse)').matches ?? false)) {
         await navigator.share({ title: `${g.title} — 입금 요청`, text })
