@@ -2,7 +2,7 @@
  * R4 참여자 관리 시트(총무) — docs/SCREENS.md §5.
  *
  * 정산방 참여자 줄에서 한 사람을 누르면 아래에서 올라온다. 그 사람의 차수별 응답을 보고,
- * 차수마다 [면제]를 켜고 끄고, 정산 전이면 [이 술자리에서 내보내기].
+ * 차수마다 [면제]를 켜고 끄고, 정산 전이면 [정산 대상에서 제외].
  * 면제를 끄면 그 칸은 빈칸(응답 전)으로 돌아간다 — flow-changes FC-010.
  */
 import { useEffect, useRef, useState } from 'react'
@@ -92,7 +92,7 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
                 onClick={() => (confirm ? onRemove() : setConfirm(true))}
                 onBlur={() => setConfirm(false)}
               >
-                {confirm ? `한 번 더 누르면 ${p.displayName}님을 내보내요` : '이 술자리에서 내보내기'}
+                {confirm ? `한 번 더 누르면 ${p.displayName}님을 내보내요` : '정산 대상에서 제외'}
               </button>
             )}
           </div>

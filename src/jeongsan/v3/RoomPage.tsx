@@ -90,7 +90,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
       {/* 인원을 넣어 자동 정산을 기다리는 중 — 끝까지 안 들어오는 사람이 있으면 총무가 직접 마무리(FC-020) */}
       {canSettleNow(g, meUserId) && act.action?.kind !== 'SETTLE' && (
         <button type="button" className="js-linkbtn js-settlenow" onClick={() => onAction('SETTLE')}>
-          안 들어온 사람이 있나요? 지금 계산하기
+          명단 확인 · 정산 확정
         </button>
       )}
 

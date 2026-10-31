@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, allIn, HEADCOUNT_MIN, HEADCOUNT_MAX, nextUnitHeadcount, extraParticipants, extraPayers } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, HEADCOUNT_MIN, HEADCOUNT_MAX, nextUnitHeadcount } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -45,7 +45,7 @@ type State = {
    * 서버가 409로 거절하는 것을 흉내 내 'STALE'을 돌려준다.
    */
   settle: (roomId: Id, inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
-  /** 인원(총무 포함, FC-020) — 총무·정산 전. 2~50으로 맞춘다. 이 인원이 모두 응답하면 자동 정산 */
+  /** 인원(총무 포함, FC-020) — 총무·정산 전. 2~50으로 맞춘다. 예상 인원 안내용이며 확정은 총무가 별도로 한다 */
   setHeadcount: (roomId: Id, headcount: number) => void
 
   /** 모든 사람의 알림 — 화면은 지금 보는 사람 것만 거른다 */
@@ -150,10 +150,10 @@ export const useV3 = create<State>((set, get) => {
   /** 술자리를 바꾸고, 바뀐 만큼 알림을 쌓는다(행동한 본인은 빼고) — 서버의 이벤트 → 알림 흉내 */
   const commit = (s: State, prev: Gathering, after: Gathering): Partial<State> => {
     if (after === prev) return {}
-    // 자동 정산(FC-020) — 어떤 동작이든(응답·참여·대리 응답·인원 변경·차수 삭제) "모두 모였다"로 바뀐 순간 정산한다.
+    // FC-029: 입력은 저장하되 확정하지 않는다.
     // 알림 규칙처럼 전·후만 보고 정해서, 경로마다 정산 코드를 흩뿌리지 않는다. 서버는 같은 판정을 트랜잭션 안에서 한다
-    // 보류 중(autoSettlementError)이면 변경마다 다시 판정한다 — 서버도 차수 수정·인원 변경 뒤 다시 판정한다
-    const next = allIn(after) && (!allIn(prev) || prev.autoSettlementError) ? autoSettle(after) : after
+    // FC-029: 응답·명단 변경은 확정하지 않는다. 총무가 미리보기 후 settle을 호출한다.
+    const next = after
     const startId = Math.max(0, ...s.notifications.map((n) => n.id)) + 1
     const fresh = notificationsFor(prev, next)
       .filter((n) => n.userId !== s.me.id)
@@ -495,7 +495,7 @@ export const useV3 = create<State>((set, get) => {
         return 'DENIED'
       }
       if (g.inputRevision !== inputRevision) return 'STALE'
-      set((s) => commit(s, g, settleNow(g, false)))
+      set((s) => commit(s, g, settleNow(g)))
       return 'OK'
     },
 
@@ -509,21 +509,10 @@ export const useV3 = create<State>((set, get) => {
 })
 
 /**
- * 정산(서버 흉내) — 미리보기대로 송금을 만들고 금액을 고정한다. 수동([지금 계산하기])과 자동(FC-020)이 같이 쓴다.
+ * 정산(서버 흉내) — 미리보기대로 송금을 만들고 금액을 고정한다. 총무의 명시적 확정에서만 호출한다(FC-029).
  * 응답 없는 칸은 전 차수 참석·알코올(AUTO)로 채운다. 보낼 돈이 하나도 없으면 바로 완료
  */
-function settleNow(source: Gathering, auto: boolean): Gathering {
-  // 자동 정산은 인원 안의 사람만 — 인원 밖에 들어온 사람은 이번 정산에서 빠진다(총무가 [포함하기]를 안 눌렀다).
-  // 수동([지금 계산하기])은 총무가 명단을 보고 직접 누른 것이라 그대로 둔다(빼려면 [내보내기])
-  const extras = auto ? extraParticipants(source) : []
-  let g = source
-  if (extras.length > 0) {
-    const out = new Set(extras.map((p) => p.id))
-    g = push(
-      { ...g, participants: g.participants.filter((p) => !out.has(p.id)), responses: g.responses.filter((r) => !out.has(r.participantId)) },
-      { type: 'SYSTEM', body: `${extras.map((p) => p.displayName).join('·')}님은 인원(${g.headcount}명) 밖이라 이번 정산에서 빠졌어요` },
-    )
-  }
+function settleNow(g: Gathering): Gathering {
   const preview = mockPreview(g)
   const autoNames = preview.lines.filter((l) => l.auto).map((l) => nameOf(g, l.participantId))
   const settled: Gathering = {
@@ -532,18 +521,9 @@ function settleNow(source: Gathering, auto: boolean): Gathering {
     responses: withAutoResponses(g),
     transfers: preview.transfers.map((t, i) => ({ id: i + 1, status: 'WAITING' as const, ...t })),
   }
-  const who = auto ? '모두 응답해서 자동으로 계산했어요' : `${hostOf(g).displayName}님이 정산했어요`
+  const who = `${hostOf(g).displayName}님이 정산했어요`
   const body = autoNames.length > 0 ? `${who} · ${autoNames.join('·')}님은 응답이 없어 전 차수 참석·알코올로 계산됐어요` : who
   return completeIfDone(push(settled, { type: 'SYSTEM', body }))
-}
-
-/**
- * 자동 계산(FC-020) — 인원 밖 사람이 결제자면 빼면 그 차수의 돈을 받을 사람이 사라져서 확정하지 않고 사유만 남긴다
- * (서버 AUTO_SETTLEMENT REMOVE_PAYER, CTO 승인 2026-10-10). 총무가 포함하거나 낸 사람을 바꾸면 다시 판정한다
- */
-function autoSettle(g: Gathering): Gathering {
-  if (extraPayers(g).length > 0) return { ...g, autoSettlementError: 'REMOVE_PAYER' }
-  return settleNow({ ...g, autoSettlementError: undefined }, true)
 }
 
 /** 한 칸(참여자 × 차수)의 응답을 바꾸거나 새로 넣는다 */
