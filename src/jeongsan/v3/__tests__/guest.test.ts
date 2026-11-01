@@ -10,6 +10,16 @@ async function load() {
 }
 
 describe('비회원 쿠키와 API 계약', () => {
+  it('이름 정정은 본인 응답과 함께 보내며 다른 참여자 ID를 받지 않는다', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const { guestApi } = await load()
+    await guestApi.respond(2, 3, [{ roundId: 4, type: 'SOBER' }], { displayName: '김정정', expectedDisplayName: '김오타' })
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('/guest/gatherings/2/settlement-units/3/responses/me')
+    expect(JSON.parse(init.body)).toEqual({ answers: [{ roundId: 4, type: 'SOBER' }], displayName: '김정정', expectedDisplayName: '김오타' })
+    expect(init.credentials).toBe('include')
+  })
   it('동시 초기화는 한 요청만 보내고 완료를 기다린다', async () => {
     let finish!: (value: Response) => void
     const fetchMock = vi.fn(() => new Promise<Response>((resolve) => { finish = resolve }))

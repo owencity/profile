@@ -414,6 +414,12 @@ export const gateway = {
     return mutate(gid, () => api.removeMember(gid, uid, participantId))
   },
 
+  async renameGuest(roomId: Id, participantId: Id, displayName: string, expectedDisplayName: string): Promise<string | null> {
+    if (!isApiMode()) return '이름 정정은 실제 비회원 참여자에게 사용할 수 있어요.'
+    const { gid, uid } = ctx(roomId)
+    return mutate(gid, () => api.renameGuest(gid, uid, participantId, displayName, expectedDisplayName))
+  },
+
   /** 스푼(🥄) — 복수 총무 지급 규칙이 서버에서 미결(SETTLEMENT_UNITS §7)이라 API 모드에선 아직 열지 않는다 */
   async giveSpoon(roomId: Id): Promise<string | null> {
     if (!isApiMode()) {

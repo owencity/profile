@@ -47,7 +47,7 @@ export function GuestFlow({ token }: { token: string }) {
       {loaded.preview.settlementUnits.length > 1 && <nav className="js-allsame" aria-label="참여할 정산 선택">{loaded.preview.settlementUnits.map((candidate) => <button className="js-mini" key={candidate.id} aria-pressed={candidate.id === unit?.id} onClick={() => setPicked(candidate.id)}>{candidate.host.displayName} 총무 · {candidate.rounds.map((round) => `${round.seq}차`).join(', ') || '준비 중'}</button>)}</nav>}
       {unit ? <GuestUnit key={`${unit.id}-${refresh}`} token={token} preview={loaded.preview} unit={unit} me={loaded.me} onRefresh={reload} /> : <p>총무가 아직 차수를 준비하고 있어요.</p>}
     </>}
-    <p className="js-hint">참여했던 브라우저에서 같은 링크를 다시 열어주세요. 쿠키를 지우거나 다른 기기로 옮기면 기존 참여 정보를 찾을 수 없어요.</p>
+    <p className="js-hint">다시 수정하려면 참여했던 브라우저에서 같은 링크를 열어주세요. 카카오톡에서 참여했다면 카카오톡에서 다시 열어주세요. 다른 브라우저·기기로 바꾸거나 쿠키를 지웠다면 새로 제출하지 말고 총무에게 이름과 수정할 내용을 알려주세요.</p>
     <footer><a href="/jungsan/privacy" target="_blank" rel="noreferrer">개인정보 처리방침</a> · <a href="/jungsan/support" target="_blank" rel="noreferrer">문의</a></footer>
   </main></div>
 }
@@ -80,7 +80,8 @@ function GuestUnit({ token, preview, unit, me, onRefresh }: {
     const payload = rounds.filter((round) => !fixed(round.id)).map((round) => ({ roundId: round.id, type: answers[round.id] }))
     inFlight.current = true; setBusy(true); setError('')
     try {
-      if (included) await guestApi.respond(preview.gatheringId, unit.id, payload)
+      if (included) await guestApi.respond(preview.gatheringId, unit.id, payload,
+        name.trim() !== me!.displayName ? { displayName: name.trim(), expectedDisplayName: me!.displayName } : undefined)
       else await guestApi.join(token, name.trim(), unit.id, payload)
       onRefresh()
     } catch (failure) { setError(guestError(failure)) }
@@ -94,7 +95,8 @@ function GuestUnit({ token, preview, unit, me, onRefresh }: {
       {!included && !editable && <p>이미 정산이 시작되어 새로 참여할 수 없어요. 총무에게 확인해주세요.</p>}
       {(included || editable) && <form onSubmit={(event) => { void submit(event) }} noValidate>
         <fieldset disabled={busy} className="js-guest-fields">
-          <label className="js-field" htmlFor="guest-name"><span className="js-lab">성이름</span><span className="js-nameguide">{NAME_GUIDE}</span><input ref={nameInput} id="guest-name" className="js-inp" autoComplete="name" placeholder="예: 김동규" value={name} readOnly={me !== null} onChange={(event) => { setName(event.target.value); setError('') }} aria-describedby="guest-error" /></label>
+          <label className="js-field" htmlFor="guest-name"><span className="js-lab">성이름</span><span className="js-nameguide">{NAME_GUIDE}</span><input ref={nameInput} id="guest-name" className="js-inp" autoComplete="name" placeholder="예: 김동규" value={name} readOnly={!editable || !editing || (me !== null && (!included || !me.canEditName))} onChange={(event) => { setName(event.target.value); setError('') }} aria-describedby="guest-error" /></label>
+          {included && me?.canEditName === false && <p className="js-hint">이미 확정된 정산이 있어 이름은 바꿀 수 없어요. 총무에게 알려주세요.</p>}
           {editable && editing && rounds.length > 1 && <section><div className="js-lab">전 차수 똑같이</div><div className="js-allsame">{SELF_CHOICES.map((type) => <button type="button" className="js-mini" key={type} onClick={() => setAnswers((previous) => ({ ...previous, ...Object.fromEntries(rounds.filter((round) => !fixed(round.id)).map((round) => [round.id, type])) }))}>{RESPONSE_LABEL[type]}</button>)}</div></section>}
           <ul className="js-resplist">{rounds.map((round) => <li className="js-respitem" key={round.id}><div className="hd"><b>{round.seq}차</b></div>{editable && editing && !fixed(round.id) ? <ResponseRow label={`${round.seq}차`} value={answers[round.id]} onChange={(type) => setAnswers((previous) => ({ ...previous, [round.id]: type }))} /> : <p>{answers[round.id] ? RESPONSE_LABEL[answers[round.id]] : '미응답'}{fixed(round.id) ? ' · 총무 지정' : ''}</p>}</li>)}</ul>
           {rounds.length === 0 && <p>총무가 차수를 준비 중이에요. 먼저 참여해둘 수 있어요.</p>}

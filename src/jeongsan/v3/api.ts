@@ -135,6 +135,8 @@ export const api = {
   putHeadcount: (gid: number, uid: number, headcount: number) => request<unknown>('PUT', `${U(gid, uid)}/headcount`, { headcount }),
   addMember: (gid: number, uid: number, pid: number) => request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}`),
   removeMember: (gid: number, uid: number, pid: number) => request<unknown>('DELETE', `${U(gid, uid)}/participants/${pid}`),
+  renameGuest: (gid: number, uid: number, pid: number, displayName: string, expectedDisplayName: string) =>
+    request<void>('PUT', `${U(gid, uid)}/participants/${pid}/name`, { displayName, expectedDisplayName }),
   addRound: (gid: number, uid: number, body: RoundBody) => request<{ id: number }>('POST', `${U(gid, uid)}/rounds`, body),
   putRound: (gid: number, uid: number, rid: number, body: RoundBody) => request<{ id: number }>('PUT', `${U(gid, uid)}/rounds/${rid}`, body),
   deleteRound: (gid: number, uid: number, rid: number) => request<unknown>('DELETE', `${U(gid, uid)}/rounds/${rid}`),
