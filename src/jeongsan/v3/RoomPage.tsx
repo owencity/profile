@@ -34,6 +34,7 @@ type Props = {
   onExempt: (participantId: Id, roundId: Id, exempt: boolean) => void
   /** R4 — 총무가 정산 전 한 사람을 내보낸다 */
   onRemove: (participantId: Id) => void
+  onRename?: (participantId: Id, name: string, expected: string) => Promise<string | null>
   /** 참여자가 "다음 차는 내가 계산했어요" — 내가 총무인 새 술자리를 만든다 */
   /** 다음 차 총무 되기 — 고른 사람(나 빼고)과 함께 이 술자리 안에 내 정산 단위를 만든다(FC-015) */
   onStartNext: (participantIds: Id[]) => void
@@ -46,7 +47,7 @@ type Props = {
   onBlock: (participantId: Id) => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onRename, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
   const [showTable, setShowTable] = useState(false)
   const [msgMenu, setMsgMenu] = useState<Id | null>(null)
@@ -101,11 +102,13 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
       )}
       {managing !== null && (
         <ParticipantSheet
+          key={managing}
           g={g}
           participantId={managing}
           onClose={() => setManaging(null)}
           onExempt={(rid, ex) => onExempt(managing, rid, ex)}
           onRemove={() => { onRemove(managing); setManaging(null) }}
+          onRename={onRename ? (name, expected) => onRename(managing, name, expected) : undefined}
         />
       )}
       {msgMenu !== null && (() => {

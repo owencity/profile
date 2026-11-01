@@ -28,6 +28,15 @@ async function load(apiBase: string) {
 
 const ME = { id: 7, nickname: '🌸봄이🌸', profileImageUrl: null, displayName: null, needsName: true }
 
+it('총무의 비회원 이름 정정은 이름과 기존 값을 같은 요청에 보낸다', async () => {
+  const calls = fakeServer({ status: 204 })
+  const { api } = await load('https://api.test')
+  await api.renameGuest(1, 2, 3, '김정정', '김오타')
+  expect(calls[0].url).toBe('https://api.test/api/v1/gatherings/1/settlement-units/2/participants/3/name')
+  expect(calls[0].init.method).toBe('PUT')
+  expect(JSON.parse(String(calls[0].init.body))).toEqual({ displayName: '김정정', expectedDisplayName: '김오타' })
+})
+
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.unstubAllGlobals()

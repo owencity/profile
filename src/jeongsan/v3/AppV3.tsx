@@ -477,6 +477,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         // 면제는 서버 API 보류(SETTLEMENT_UNITS §4.2) — 화면에서도 꺼져 있다(features.SHOW_EXEMPT)
         onExempt={(pid, rid, ex) => setExempt(g.id, pid, rid, ex)}
         onRemove={(pid) => void ok(gateway.removeParticipant(g.id, pid))}
+        onRename={(pid, name, expected) => gateway.renameGuest(g.id, pid, name, expected)}
         myNextRoomId={myNext?.id}
         onOpenMyNext={() => myNext && navigate(`/jungsan/r/${myNext.id}`)}
         onStartNext={async (participantIds) => {

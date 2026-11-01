@@ -10,6 +10,7 @@ import type { Gathering, Id } from './model'
 import { RESPONSE_LABEL, nameWithNick, responseOf } from './model'
 import { removeBlockedReason } from './store'
 import { SHOW_EXEMPT } from './features'
+import { validateName } from './name'
 
 type Props = {
   g: Gathering
@@ -17,11 +18,17 @@ type Props = {
   onClose: () => void
   onExempt: (roundId: Id, exempt: boolean) => void
   onRemove: () => void
+  onRename?: (name: string, expected: string) => Promise<string | null>
 }
 
-export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove }: Props) {
+export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove, onRename }: Props) {
   const p = g.participants.find((x) => x.id === participantId)
   const [confirm, setConfirm] = useState(false)
+  const [name, setName] = useState(p?.displayName ?? '')
+  const [expectedName] = useState(p?.displayName ?? '')
+  const [nameError, setNameError] = useState('')
+  const [savingName, setSavingName] = useState(false)
+  const renaming = useRef(false)
   const sheet = useRef<HTMLDivElement>(null)
   const open = g.status === 'OPEN'
 
@@ -55,6 +62,23 @@ export function ParticipantSheet({ g, participantId, onClose, onExempt, onRemove
         </div>
 
         {!open && <p className="js-lead small">정산한 뒤에는 {SHOW_EXEMPT ? '면제·내보내기를 바꿀' : '내보낼'} 수 없어요.</p>}
+
+        {open && p.userId === null && onRename && <form onSubmit={(event) => {
+          event.preventDefault()
+          if (renaming.current) return
+          const invalid = validateName(name)[0]
+          if (invalid) { setNameError(invalid); return }
+          renaming.current = true; setSavingName(true); setNameError('')
+          void onRename(name.trim(), expectedName).then((error) => {
+            if (error) setNameError(error); else onClose()
+          }).catch(() => setNameError('저장하지 못했어요. 연결을 확인하고 다시 시도해주세요.'))
+            .finally(() => { renaming.current = false; setSavingName(false) })
+        }}>
+          <label className="js-field"><span className="js-lab">참여자 이름 정정</span><input className="js-inp" value={name} disabled={savingName} onChange={(event) => setName(event.target.value)} /></label>
+          <p className="js-hint">같은 술자리의 이름이 함께 바뀌어요. 이미 확정된 정산이 있으면 변경할 수 없어요.</p>
+          {nameError && <p role="alert">{nameError}</p>}
+          <button className="js-mini" disabled={savingName}>{savingName ? '저장 중…' : '이름 저장'}</button>
+        </form>}
 
         <ul className="js-exlist">
           {g.rounds.map((r) => {

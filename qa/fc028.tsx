@@ -29,10 +29,19 @@ window.fetch = async (input, init) => {
   if (path === '/api/v1/guest/gatherings/1/me') return me ? json(me) : json({ code: 'NOT_PARTICIPANT' }, 403)
   if (path === '/api/v1/guest/join/fixture') {
     const body = JSON.parse(String(init?.body))
-    me = { gatheringId: 1, title: preview.title, participantId: 2, displayName: body.displayName, settlementUnits: [{ id: 10, status: 'OPEN', inputRevision: 1, included: true }], rounds: preview.settlementUnits[0].rounds.map((round) => ({ ...round, settlementUnitId: 10 })), responses: body.responses.map((answer: { roundId: number; type: string }) => ({ ...answer, source: 'SELF' })) }
+    me = { gatheringId: 1, title: preview.title, participantId: 2, displayName: body.displayName, canEditName: true, settlementUnits: [{ id: 10, status: 'OPEN', inputRevision: 1, included: true }], rounds: preview.settlementUnits[0].rounds.map((round) => ({ ...round, settlementUnitId: 10 })), responses: body.responses.map((answer: { roundId: number; type: string }) => ({ ...answer, source: 'SELF' })) }
     return json(me)
   }
-  if (path.endsWith('/responses/me') && me) { me.responses = JSON.parse(String(init?.body)).answers.map((answer: { roundId: number; type: string }) => ({ ...answer, source: 'SELF' })); return json(null, 204) }
+  if (path.endsWith('/responses/me') && me) {
+    const body = JSON.parse(String(init?.body))
+    if (body.displayName && body.displayName !== me.displayName) {
+      if (!me.canEditName) return json({ code: 'GUEST_NAME_LOCKED' }, 409)
+      if (body.expectedDisplayName !== me.displayName) return json({ code: 'GUEST_NAME_STALE' }, 409)
+      me.displayName = body.displayName
+    }
+    me.responses = body.answers.map((answer: { roundId: number; type: string }) => ({ ...answer, source: 'SELF' }))
+    return json(null, 204)
+  }
   if (path.endsWith('/settlement')) return json(money)
   if (path.endsWith('/sent')) { money.transfers[0].status = 'SENT'; return json(null, 204) }
   return json({ code: 'FIXTURE_NOT_FOUND', message: path }, 404)
@@ -57,7 +66,7 @@ export function Harness() {
     link.href = image.src; link.download = 'fc028-capture.png'; link.click()
   }
   function settle() {
-    if (me) me.settlementUnits[0].status = 'SETTLING'
+    if (me) { me.settlementUnits[0].status = 'SETTLING'; me.canEditName = false }
     money = { ...money, status: 'SETTLING', isEstimate: false, settledAt: table.generatedAt, transfers: money.transfers.map((transfer) => ({ ...transfer, id: 1, status: 'WAITING', payout: { bank: '검증은행', accountNo: '00123456789', holder: '김총무' } })) }
     setVersion((value) => value + 1)
   }
