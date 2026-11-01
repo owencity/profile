@@ -43,6 +43,7 @@ export const guestApi = {
 
 export function guestError(error: unknown): string {
   if (error instanceof ApiError) {
+    if (error.code === 'GATHERING_NOT_FOUND') return '술자리 링크를 찾을 수 없어요. 만료되었거나 잘못된 링크일 수 있으니 총무에게 새 링크를 요청해주세요.'
     if (error.status === 401) return '이 브라우저의 참여 정보가 만료되었어요. 기존 참여 내역은 총무에게 확인해주세요. 이름만으로 복구할 수는 없어요.'
     if (error.code === 'NOT_SETTLEMENT_UNIT_MEMBER') return '이 정산의 참여 대상에서 제외되었어요. 총무에게 확인해주세요.'
     if (error.code === 'SETTLEMENT_UNIT_NOT_OPEN') return '총무가 정산을 확정했어요. 응답을 바꾸려면 총무에게 알려주세요.'
