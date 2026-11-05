@@ -147,7 +147,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
 
   /** 입금 요청(FC-020) — 정산 뒤 사람별 금액·계좌를 단톡방에. 공유 시트가 없으면 복사 */
   const requestPayment = async (g: Gathering) => {
-    const text = paymentRequestMessage(g, shareUrl(window.location.origin, g.shareToken))
+    const text = paymentRequestMessage(g)
     try {
       if (prefersShareSheet(!!navigator.share, window.matchMedia?.('(pointer: coarse)').matches ?? false)) {
         await navigator.share({ title: `${g.title} — 입금 요청`, text })
@@ -238,7 +238,8 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
     return wrap(
       <EntryPage
         // 보는 사람이 바뀌면 고르던 응답을 비운다
-        key={`${token}:${me.id}`}
+        key={`${token}:${me.id}:${g?.id}`}
+        responseOnly={api && loggedIn && g?.hostUserId !== me.id}
         g={g}
         meUserId={me.id}
         loggedIn={loggedIn}
@@ -249,14 +250,20 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         // 첫 로그인이면 P1에서 이름 확인(L2)을 같이 받는다 — 확인한 이름으로 참여한다
         askName={me.needsName}
         onJoin={async (answers, name) => {
-          // 실명 등록이 성공한 뒤에 참여한다 — 실패하면 참여를 보내지 않는다(FC-013, FC-014 §5)
           if (name !== undefined) {
             const err = await gateway.confirmName(name)
-            if (err) { setToast(err); return }
+            if (err) { setToast(err); return false }
+          }
+          const responseOnly = api && loggedIn && g?.hostUserId !== me.id
+          if (responseOnly && g && participantOfUser(g, me.id)) {
+            const err = await gateway.respond(g.id, answers)
+            if (err) { setToast(err); return false }
+            return true
           }
           const r = await gateway.join(token, g?.id ?? null, answers)
-          if ('error' in r) setToast(r.error)
-          else navigate(`/jungsan/r/${r.id}`)
+          if ('error' in r) { setToast(r.error); return false }
+          if (!responseOnly) navigate(`/jungsan/r/${r.id}`)
+          return true
         }}
         onOpenRoom={() => g && navigate(`/jungsan/r/${g.id}`)}
         onHome={() => navigate('/jungsan')}
@@ -432,7 +439,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
           return
         case 'SHARE': return void shareRoom(g)
         case 'REQUEST_PAYMENT': return void requestPayment(g)
-        // 인원을 들어온 사람 수로 — 모두 응답했으면 이 순간 자동 정산된다
+        // 인원을 들어온 사람 수로 — 목표 인원 안내만 수정하며 확정하지 않는다
         case 'INCLUDE_EXTRA': return void ok(gateway.setHeadcount(g.id, g.participants.length))
         case 'SETTLE': return navigate(`/jungsan/r/${g.id}/settle`)
         case 'EDIT_FIRST_ROUND': return navigate(`/jungsan/r/${g.id}/round/new`)

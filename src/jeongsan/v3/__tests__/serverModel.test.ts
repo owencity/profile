@@ -11,11 +11,21 @@ import detailB from './fixtures/detail_b.json'
 import detailC from './fixtures/detail_c.json'
 import preview from './fixtures/preview.json'
 import joinPublic from './fixtures/join_public.json'
+import { notificationsFor } from '../notify'
 
 const asB = detailB as unknown as ServerGathering // 이민지(userId 2) 시점 — 두 단위 모두에 들어 있다
 const asC = detailC as unknown as ServerGathering // 박재훈(userId 3) 시점 — 김동규 단위에만 들어 있다
 
 describe('정산 단위 하나 = 정산방 하나', () => {
+  it('회원 ID 없는 참여자의 이름·응답·송금과 기존 총무를 유지한다', () => {
+    const withGuest: ServerGathering = { ...asB, participants: asB.participants.map((person) => person.id === 3 ? { ...person, userId: null } : person) }
+    const room = toRooms(withGuest)[0]
+    expect(room.participants.find((person) => person.id === 3)?.userId).toBeNull()
+    expect(room.hostUserId).toBe(1)
+    expect(room.transfers.find((transfer) => transfer.fromParticipantId === 3)?.amount).toBe(93334)
+    expect(room.responses.some((answer) => answer.participantId === 3)).toBe(true)
+    expect(notificationsFor(room, { ...room, status: 'COMPLETED' }).map((notification) => notification.userId)).toEqual([1, 2])
+  })
   it('내가 들어 있는 단위마다 정산방이 생긴다 — 들어 있지 않은 단위는 보이지 않는다', () => {
     expect(toRooms(asB).map((r) => r.id)).toEqual([1, 2])
     expect(toRooms(asC).map((r) => r.id)).toEqual([1])

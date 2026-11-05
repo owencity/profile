@@ -6,7 +6,7 @@ export const isV3Home = (route: string) => route === '/jungsan' || route === '/j
 
 /**
  * 링크로 들어오는 참여 입구(P1) — `/jungsan/j/{shareToken}`. **로그인 전에도** 열린다:
- * 단톡방 링크를 누른 사람이 술자리부터 보고, [참여]를 누를 때 로그인한다.
+ * API 모드의 비회원은 이름·응답으로 참여하고, 기존 회원의 참여 흐름은 유지한다(FC-028).
  */
 export const isV3JoinRoute = (route: string) => /^\/jungsan\/j\/[^/]+$/.test(route)
 

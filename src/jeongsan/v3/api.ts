@@ -47,7 +47,13 @@ export async function request<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DEL
   }
   if (res.status === 204) return undefined as T
   const text = await res.text()
-  const json: unknown = text ? JSON.parse(text) : undefined
+  let json: unknown
+  try {
+    json = text ? JSON.parse(text) : undefined
+  } catch {
+    // 프록시/CORS 오류의 HTML·평문을 화면에 그대로 노출하지 않는다.
+    throw new ApiError(res.status, res.ok ? 'INVALID_RESPONSE' : `HTTP_${res.status}`, '응답을 확인하지 못했어요. 잠시 뒤 다시 시도해주세요')
+  }
   if (!res.ok) {
     const e = (json ?? {}) as ErrorBody
     throw new ApiError(res.status, e.code ?? `HTTP_${res.status}`, e.message ?? '잠시 뒤 다시 시도해주세요', e.errors ?? null)
@@ -125,7 +131,7 @@ export const api = {
   // 정산 단위 — 다음 차 총무(FC-015)
   createUnit: (gid: number, requestId: string, participantIds: number[], headcount?: number) =>
     request<{ id: number }>('POST', `/api/v1/gatherings/${gid}/settlement-units`, { requestId, participantIds, headcount }),
-  /** 인원(FC-020) — 총무·정산 전. 바꾼 뒤 서버가 자동 정산 판정을 한 번 돈다 */
+  /** 인원(FC-020) — 총무·정산 전. 목표 인원을 바꿔도 확정하지 않는다 */
   putHeadcount: (gid: number, uid: number, headcount: number) => request<unknown>('PUT', `${U(gid, uid)}/headcount`, { headcount }),
   addMember: (gid: number, uid: number, pid: number) => request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}`),
   removeMember: (gid: number, uid: number, pid: number) => request<unknown>('DELETE', `${U(gid, uid)}/participants/${pid}`),

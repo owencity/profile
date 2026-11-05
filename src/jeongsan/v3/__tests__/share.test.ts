@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import { MOCK_ROOMS } from '../mock'
 import { isV3Route } from '../routes'
-import { shareMessage, shareUrl, prefersShareSheet } from '../share'
+import { shareMessage, shareUrl, prefersShareSheet, paymentRequestMessage } from '../share'
 
 const room = (id: number) => structuredClone(MOCK_ROOMS.find((g) => g.id === id)!)
 
@@ -19,17 +19,24 @@ describe('공유 주소', () => {
 describe('공유 문구', () => {
   const url = 'https://x/jungsan/j/k7Qx2'
 
-  it('응답 받는 중이면 "차수마다 마셨는지만 눌러주세요"', () => {
-    expect(shareMessage(room(101), url)).toBe(`[정산어택] 김동규님의 9/28 술자리\n차수마다 마셨는지만 눌러주세요 👉 ${url}`)
+  it('가입 없이 이름과 차수별 응답만 요청한다', () => {
+    expect(shareMessage(room(101), url)).toBe(`[정산어택] 김동규님의 9/28 술자리\n가입 없이 이름과 차수별 참석·음주만 알려주세요 👉 ${url}`)
   })
 
-  it('차수가 아직 없으면 먼저 들어오라고 한다', () => {
+  it('차수가 아직 없으면 입력 이후 응답을 안내한다', () => {
     const g = { ...room(101), rounds: [] }
-    expect(shareMessage(g, url)).toContain('먼저 들어와 있으면 금액이 나올 때 알려드려요')
+    expect(shareMessage(g, url)).toContain('총무가 차수를 입력하면')
   })
 
-  it('정산 뒤면 금액 확인을 권한다', () => {
-    expect(shareMessage(room(102), url)).toContain('정산 금액을 확인하고 보내주세요')
+  it('정산 뒤면 총무가 공유한 이미지로 안내한다', () => {
+    expect(shareMessage(room(102), url)).toContain('총무가 공유한 이미지')
+  })
+
+  it('송금 안내는 참여자에게 앱이나 보냈어요 입력을 요구하지 않는다', () => {
+    const message = paymentRequestMessage(room(102))
+    expect(message).not.toContain('앱에서')
+    expect(message).not.toContain('보냈어요')
+    expect(message).toContain('총무에게 알려주세요')
   })
 
   it('문구에 금액을 넣지 않는다 — 단톡방은 공개된 자리다', () => {

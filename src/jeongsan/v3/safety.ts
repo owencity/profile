@@ -38,7 +38,7 @@ const authorUserId = (g: Gathering, e: TimelineEntry) => g.participants.find((p)
 export const canModerate = (g: Gathering, e: TimelineEntry, viewerUserId: Id) => {
   if (e.type !== 'MESSAGE') return false
   const author = authorUserId(g, e)
-  return author !== undefined && author !== viewerUserId
+  return author != null && author !== viewerUserId
 }
 
 /** 이 사람에게 보여 줄 타임라인 */
@@ -50,7 +50,7 @@ export function visibleTimeline(g: Gathering, viewerUserId: Id, m: Moderation): 
     const reporters = new Set(m.reports.filter((r) => r.key === key).map((r) => r.reporterUserId))
     if (reporters.has(viewerUserId) || reporters.size >= HIDE_FOR_ALL_REPORTS) return false
     const author = authorUserId(g, e)
-    return author === undefined || !blocked.has(author)
+    return author == null || !blocked.has(author)
   })
 }
 

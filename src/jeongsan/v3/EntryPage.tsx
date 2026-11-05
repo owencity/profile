@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, ResponseType } from './model'
-import { RESPONSE_LABEL, SELF_CHOICES, hostOf, participantOfUser, won } from './model'
+import { RESPONSE_LABEL, SELF_CHOICES, hostOf, participantOfUser, responseOf, won } from './model'
 import { ResponseRow } from './ResponseRow'
 import { BackButton } from './BackButton'
 import { MAX_NAME, NAME_GUIDE, validateName } from './name'
@@ -32,7 +32,8 @@ type Props = {
   /** 첫 로그인이라 실명을 아직 안 받았으면 true — P1 안에서 L2(이름 확인)를 같이 받는다 */
   askName?: boolean
   /** name: askName이었을 때 받은 실명 */
-  onJoin: (answers: { roundId: Id; type: ResponseType }[], name?: string) => void
+  responseOnly?: boolean
+  onJoin: (answers: { roundId: Id; type: ResponseType }[], name?: string) => Promise<boolean> | boolean
   onOpenRoom: () => void
   onHome: () => void
   /** 서버 미리보기는 명단 대신 인원수만 준다 — 있으면 이것을 쓴다 */
@@ -47,15 +48,18 @@ const fmtDate = (iso: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome, participantCount, choices, onPick }: Props) {
+export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onOpenRoom, onHome, participantCount, choices, onPick, responseOnly = false }: Props) {
   const [draft, setDraft] = useState<Record<Id, ResponseType | undefined>>({})
   const [name, setName] = useState('')
   // 첫 로그인이면 여기서 이용약관 동의도 받는다(FC-024, L2와 같다)
   const [agreed, setAgreed] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   const notice = (title: string, body: string, action?: { label: string; onClick: () => void }) => (
     <div className="js-shell narrow js-p1">
-      {loggedIn && (
+      {loggedIn && !responseOnly && (
         <header className="js-rtop">
           <BackButton onClick={onHome} to="내 술자리로" />
         </header>
@@ -69,23 +73,29 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
   )
 
   if (!g) return notice('링크가 맞지 않아요', '총무에게 링크를 다시 받아주세요', loggedIn ? { label: '내 술자리로', onClick: onHome } : undefined)
-  // 이미 참여한 사람은 입구를 다시 거치지 않는다
-  if (loggedIn && participantOfUser(g, meUserId)) return notice('이미 참여 중인 술자리예요', g.title, { label: '정산방으로', onClick: onOpenRoom })
+  const mine = participantOfUser(g, meUserId)
+  if (responseOnly && (mine || submitted) && !editing) return notice('응답을 총무에게 보냈어요', '이 창을 닫아도 돼요. 정산 결과는 총무가 알려드려요.',
+    g.status === 'OPEN' ? { label: '내 응답 수정', onClick: () => setEditing(true) } : undefined)
+  if (!responseOnly && loggedIn && mine) return notice('이미 참여 중인 술자리예요', g.title, { label: '정산방으로', onClick: onOpenRoom })
   if (g.status !== 'OPEN') return notice('이미 정산된 술자리예요', '정산이 끝난 뒤에는 참여할 수 없어요', loggedIn ? { label: '내 술자리로', onClick: onHome } : undefined)
 
   const host = hostOf(g)
   const nameErrors = askName ? validateName(name) : []
-  const filled = g.rounds.every((r) => draft[r.id]) && nameErrors.length === 0 && (!askName || agreed)
-  const answers = () => g.rounds.map((r) => ({ roundId: r.id, type: draft[r.id]! }))
-  const join = () => {
-    if (!filled) return
-    onJoin(answers(), askName ? name.trim() : undefined)
+  const value = (roundId: Id) => draft[roundId] ?? (mine ? responseOf(g, mine.id, roundId)?.type : undefined)
+  const filled = g.rounds.every((r) => value(r.id)) && nameErrors.length === 0 && (!askName || agreed)
+  const answers = () => g.rounds.filter((r) => !mine || responseOf(g, mine.id, r.id)?.type !== 'EXEMPT').map((r) => ({ roundId: r.id, type: value(r.id)! }))
+  const join = async () => {
+    if (!filled || busy) return
+    setBusy(true)
+    try {
+      if (await onJoin(answers(), askName ? name.trim() : undefined)) { setSubmitted(true); setEditing(false) }
+    } finally { setBusy(false) }
   }
   const allSame = (t: ResponseType) => setDraft(Object.fromEntries(g.rounds.map((r) => [r.id, t])))
 
   return (
     <div className="js-shell narrow js-p1">
-      {loggedIn && (
+      {loggedIn && !responseOnly && (
         <header className="js-rtop">
           <BackButton onClick={onHome} to="내 술자리로" />
         </header>
@@ -135,7 +145,7 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
                 <li key={r.id} className="js-respitem">
                   <div className="hd">
                     <b>{r.label}</b>
-                    <span>{won(r.total)}</span>
+                    {!responseOnly && <span>{won(r.total)}</span>}
                   </div>
                 </li>
               ))}
@@ -162,9 +172,9 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
               <li key={r.id} className="js-respitem">
                 <div className="hd">
                   <b>{r.label}</b>
-                  <span>{won(r.total)}</span>
+                  {!responseOnly && <span>{won(r.total)}</span>}
                 </div>
-                <ResponseRow label={r.label} value={draft[r.id]} onChange={(t) => setDraft({ ...draft, [r.id]: t })} />
+                {mine && responseOf(g, mine.id, r.id)?.type === 'EXEMPT' ? <p>면제 · 총무 지정</p> : <ResponseRow label={r.label} value={value(r.id)} onChange={(t) => setDraft({ ...draft, [r.id]: t })} />}
               </li>
             ))}
           </ul>
@@ -184,10 +194,10 @@ export function EntryPage({ g, meUserId, loggedIn, onLogin, askName, onJoin, onO
       <div className="js-r2btns stick">
         {loggedIn ? (
           <>
-            {askName && <TermsAgree checked={agreed} onChange={setAgreed} />}
-            {!g.rounds.every((r) => draft[r.id]) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
-            <button className="js-cta" disabled={!filled} onClick={join}>
-              {g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'}
+            {askName && <TermsAgree checked={agreed} onChange={setAgreed} responseOnly={responseOnly} />}
+            {!g.rounds.every((r) => value(r.id)) && <div className="js-hint center">모든 차수를 골라야 참여할 수 있어요</div>}
+            <button className="js-cta" disabled={!filled || busy} onClick={() => { void join() }}>
+              {busy ? '보내고 있어요…' : responseOnly ? '응답 보내기' : g.rounds.length === 0 ? '참여하기' : '참여하고 응답 완료'}
             </button>
           </>
         ) : (
