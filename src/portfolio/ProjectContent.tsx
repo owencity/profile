@@ -40,6 +40,24 @@ export function ProjectContent({
         {project.title}
       </h1>
 
+      {project.highlight && (
+        <div className="mt-5 flex max-w-[640px] flex-col gap-2 rounded-2xl bg-zinc-100 p-5">
+          <span className="text-sm font-semibold text-zinc-600">{project.highlight.label}</span>
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="font-mono text-lg text-zinc-600 line-through">
+              {project.highlight.before}
+            </span>
+            <span aria-hidden className="text-zinc-600">
+              →
+            </span>
+            <span className="font-mono text-4xl font-bold leading-none text-indigo-700">
+              {project.highlight.after}
+            </span>
+          </div>
+          <span className="text-[15px] font-semibold text-zinc-900">{project.highlight.delta}</span>
+        </div>
+      )}
+
       {project.diagram && (
         <DiagramFigure diagram={project.diagram} forPdf={forPdf} className="mt-6" />
       )}
@@ -235,7 +253,7 @@ function DiagramFigure({
 function DetailSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="mt-8">
-      <p className="text-lg font-bold tracking-tight text-blue-700">{title}</p>
+      <p className="text-lg font-bold tracking-tight text-indigo-700">{title}</p>
       <div className="mt-2">{children}</div>
     </div>
   )

@@ -1,74 +1,11 @@
 import { useRef, useState } from 'react'
 import { profile } from '../profile'
-import { portfolio, STATUS_STYLES } from './data'
+import { portfolio, type PortfolioProject } from './data'
 import { ProjectContent } from './ProjectContent'
 import { ProjectModal } from './ProjectModal'
 
 const LONG_PRESS_MS = 800
 const CAPTURE_SCALE = 2
-
-const CATEGORY_BANNER: Record<string, string> = {
-  아키텍처: 'bg-indigo-50 text-indigo-700',
-  '데이터 처리': 'bg-amber-50 text-amber-700',
-  마이그레이션: 'bg-purple-50 text-purple-700',
-  안정성: 'bg-rose-50 text-rose-700',
-  '사이드 프로젝트': 'bg-sky-50 text-sky-700',
-}
-
-function CategoryIcon({ category }: { category: string }) {
-  const common = {
-    width: 18,
-    height: 18,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 2.2,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-  }
-  switch (category) {
-    case '아키텍처':
-      return (
-        <svg {...common}>
-          <path d="M12 2 2 7l10 5 10-5-10-5Z" />
-          <path d="M2 17l10 5 10-5" />
-          <path d="M2 12l10 5 10-5" />
-        </svg>
-      )
-    case '데이터 처리':
-      return (
-        <svg {...common}>
-          <ellipse cx="12" cy="5" rx="9" ry="3" />
-          <path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5" />
-          <path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3" />
-        </svg>
-      )
-    case '마이그레이션':
-      return (
-        <svg {...common}>
-          <path d="M8 3 4 7l4 4" />
-          <path d="M4 7h16" />
-          <path d="M16 21l4-4-4-4" />
-          <path d="M20 17H4" />
-        </svg>
-      )
-    case '안정성':
-      return (
-        <svg {...common}>
-          <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z" />
-        </svg>
-      )
-    case '사이드 프로젝트':
-      return (
-        <svg {...common}>
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-          <line x1="12" y1="18" x2="12.01" y2="18" />
-        </svg>
-      )
-    default:
-      return null
-  }
-}
 
 export function PortfolioHome() {
   const [openSlug, setOpenSlug] = useState<string | null>(null)
@@ -175,15 +112,15 @@ export function PortfolioHome() {
     }, LONG_PRESS_MS)
   }
 
+
+  const { hero, stats, contact } = portfolio
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div
-        ref={pdfContentRef}
-        className="mx-auto w-full max-w-[1680px] px-4 py-10 sm:px-8 sm:py-14 lg:px-16 lg:py-16 2xl:px-24"
-      >
-        <div className="mb-10 sm:mb-14">
+    <div className="min-h-screen break-keep bg-zinc-50 text-zinc-900">
+      <div ref={pdfContentRef} className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
+        <header className="flex flex-wrap items-center justify-between gap-4 py-7">
           <span
-            className={`select-none text-sm font-semibold tracking-tight text-indigo-700 transition ${isExporting ? 'opacity-50' : ''}`}
+            className={`select-none font-mono text-base font-bold text-indigo-700 transition ${isExporting ? 'opacity-50' : ''}`}
             style={{ touchAction: 'none' }}
             onPointerDown={handlePressStart}
             onPointerUp={clearPressTimer}
@@ -192,109 +129,126 @@ export function PortfolioHome() {
           >
             {profile.brand}
           </span>
-        </div>
+          <nav className="flex flex-wrap items-center gap-2">
+            <a
+              href="#projects"
+              className="px-4 py-3 text-[15px] font-medium text-zinc-700 transition hover:text-zinc-900"
+            >
+              프로젝트
+            </a>
+            <a
+              href={profile.links.externalBlog}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-3 text-[15px] font-medium text-zinc-700 transition hover:text-zinc-900"
+            >
+              블로그
+            </a>
+            <a
+              href={contact.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              data-pdf-link
+              className="rounded-full bg-zinc-900 px-5 py-3 text-[15px] font-semibold text-white transition hover:bg-zinc-700"
+            >
+              GitHub
+            </a>
+          </nav>
+        </header>
 
         {/* Hero */}
-        <section className="mb-12 sm:mb-16">
-          <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl">
-            김동규 포트폴리오
-          </h1>
+        <section className="flex flex-wrap items-center gap-12 pb-14 pt-10 sm:pt-16">
+          <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-6">
+            <span className="self-start rounded-full bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700">
+              {hero.badge}
+            </span>
+            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-[56px] sm:leading-[1.2]">
+              {hero.headlineLead}
+              <br />
+              <span className="text-indigo-700">{hero.headlineAccent}</span> {hero.headlineTail}
+            </h1>
+            <p className="max-w-[640px] text-lg leading-[1.75] text-zinc-600 sm:text-[19px]">
+              {hero.description}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={`mailto:${contact.email}`}
+                data-pdf-link
+                className="rounded-xl bg-indigo-700 px-5 py-3.5 text-base font-semibold text-white transition hover:bg-indigo-800"
+              >
+                {contact.email}
+              </a>
+              <a
+                href={contact.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                data-pdf-link
+                className="rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-base font-semibold text-zinc-900 transition hover:border-zinc-900"
+              >
+                {contact.githubLabel}
+              </a>
+            </div>
+          </div>
+          <img
+            src={portfolio.photoUrl}
+            alt="김동규 프로필 사진"
+            className="aspect-[4/5] max-w-[320px] flex-[1_1_280px] rounded-[28px] object-cover"
+          />
         </section>
 
-        <SectionHeading emoji="🚀" title="Projects" />
-        {portfolio.projectGroups.map((group) => {
-          const visibleProjects = group.projects.filter((project) => !project.hidden)
-          if (visibleProjects.length === 0) return null
-          return (
-          <div key={group.name} className="mb-10 last:mb-0">
-            <div className="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              {group.org && (
-                <span className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 py-1">
-                  <img
-                    src={group.org.logo}
-                    alt=""
-                    aria-hidden
-                    className="h-5 w-auto object-contain"
-                  />
-                  <span className="text-sm font-bold tracking-tight text-zinc-900">
-                    {group.org.label}
-                  </span>
-                </span>
-              )}
-              <h3 className="text-lg font-bold text-zinc-900">{group.name}</h3>
-              {!group.org && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    group.kind === '회사 프로젝트'
-                      ? 'bg-zinc-100 text-zinc-700'
-                      : 'bg-sky-50 text-sky-700'
-                  }`}
-                >
-                  {group.kind}
-                </span>
-              )}
-              {group.period && <span className="text-sm text-zinc-500">{group.period}</span>}
+        {/* 핵심 성과 */}
+        <section
+          aria-label="핵심 성과"
+          className="grid grid-cols-2 gap-3 pb-20 sm:gap-4 lg:grid-cols-4"
+        >
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="flex flex-col gap-1.5 rounded-[20px] border border-zinc-200 bg-white p-4 sm:p-6"
+            >
+              <span className="font-mono text-[28px] font-bold leading-none sm:text-[40px] tracking-tight text-indigo-700">
+                {s.value}
+              </span>
+              <span className="mt-2 text-[15px] font-semibold text-zinc-900">{s.label}</span>
+              <span className="text-sm text-zinc-600">{s.sub}</span>
             </div>
-            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleProjects.map((project) => (
-                <button
-                  key={project.slug}
-                  type="button"
-                  onClick={() => setOpenSlug(project.slug)}
-                  className="group flex flex-col items-stretch overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
-                >
-                  <div
-                    className={`flex items-center gap-2 border-b border-black/5 px-5 py-3 text-sm font-semibold ${
-                      CATEGORY_BANNER[project.category] ?? 'bg-zinc-50 text-zinc-600'
-                    }`}
-                  >
-                    <CategoryIcon category={project.category} />
-                    {project.category}
-                  </div>
-                  <div className="flex flex-1 flex-col items-start p-5">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${STATUS_STYLES[project.status]}`}
-                    >
-                      {project.status}
-                    </span>
-                    <h3 className="mt-3 text-base font-semibold leading-6 text-zinc-900">
-                      {project.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-5 text-zinc-900">{project.org}</p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.techStack.slice(0, 4).map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition group-hover:gap-1.5">
-                      자세히 보기
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </section>
-          </div>
-          )
-        })}
+          ))}
+        </section>
 
-        <div className="pb-10" />
+        <div id="projects" className="flex flex-col gap-20 pb-24">
+          {portfolio.projectGroups.map((group) => {
+            const visibleProjects = group.projects.filter((project) => !project.hidden)
+            if (visibleProjects.length === 0) return null
+            const isCompany = group.kind === '회사 프로젝트'
+            return (
+              <section key={group.name} className="flex flex-col gap-7">
+                <div className="flex flex-wrap items-baseline justify-between gap-3 border-t-2 border-zinc-900 pt-5">
+                  <h2 className="text-2xl font-bold tracking-tight sm:text-[32px]">{group.name}</h2>
+                  {(group.period ?? group.subtitle) && (
+                    <span className="text-[15px] text-zinc-600">
+                      {group.period ?? group.subtitle}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                  {visibleProjects.map((project) => (
+                    <ProjectCard
+                      key={project.slug}
+                      project={project}
+                      isCompany={isCompany}
+                      onOpen={() => setOpenSlug(project.slug)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+        </div>
+
+        <footer className="flex flex-wrap justify-between gap-3 border-t border-zinc-200 pb-12 pt-8 text-sm text-zinc-600">
+          <span>© {new Date().getFullYear()} {profile.name}</span>
+          <span>Java · Kotlin · Spring Boot · PostgreSQL · RabbitMQ</span>
+        </footer>
       </div>
 
       {openSlug && <ProjectModal slug={openSlug} onClose={() => setOpenSlug(null)} />}
@@ -322,13 +276,64 @@ export function PortfolioHome() {
   )
 }
 
-function SectionHeading({ emoji, title }: { emoji: string; title: string }) {
+function ProjectCard({
+  project,
+  isCompany,
+  onOpen,
+}: {
+  project: PortfolioProject
+  isCompany: boolean
+  onOpen: () => void
+}) {
+  const { highlight } = project
   return (
-    <div className="mb-4 mt-14 flex items-center gap-2 sm:mt-16">
-      <span className="text-xl">{emoji}</span>
-      <h2 className="text-xl font-bold tracking-tight text-zinc-900">{title}</h2>
-    </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group flex flex-col gap-[18px] rounded-[20px] border border-zinc-200 bg-white p-7 text-left transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-lg"
+    >
+      <span
+        className={`self-start rounded-lg px-2.5 py-1 text-[13px] font-semibold ${
+          isCompany ? 'bg-indigo-50 text-indigo-800' : 'bg-sky-100 text-sky-800'
+        }`}
+      >
+        {project.category}
+      </span>
+      <h3 className="text-[21px] font-bold leading-snug">{project.title}</h3>
+      {highlight && (
+        <div className="flex flex-col gap-2 rounded-2xl bg-zinc-100 p-[18px]">
+          <span className="text-[13px] font-semibold text-zinc-600">{highlight.label}</span>
+          <div className="flex flex-wrap items-baseline gap-2.5">
+            <span className={`text-base text-zinc-600 line-through ${isCompany ? 'font-mono' : ''}`}>
+              {highlight.before}
+            </span>
+            <span aria-hidden className="text-zinc-600">
+              →
+            </span>
+            <span
+              className={`font-bold text-indigo-700 ${isCompany ? 'font-mono text-[30px] leading-none' : 'text-2xl'}`}
+            >
+              {highlight.after}
+            </span>
+          </div>
+          <span className="text-sm font-semibold text-zinc-900">{highlight.delta}</span>
+        </div>
+      )}
+      <p className="text-base leading-[1.7] text-zinc-700">{project.tagline ?? project.summary[0]}</p>
+      <div className="mt-auto flex flex-wrap gap-1.5">
+        {project.techStack.slice(0, 4).map((tag) => (
+          <span
+            key={tag}
+            className="rounded-full border border-zinc-200 px-2.5 py-1 text-[13px] text-zinc-700"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+      <span className="inline-flex items-center gap-1 py-1.5 text-[15px] font-semibold text-indigo-700 transition-all group-hover:gap-2">
+        자세히 보기
+        <span aria-hidden>→</span>
+      </span>
+    </button>
   )
 }
-
-

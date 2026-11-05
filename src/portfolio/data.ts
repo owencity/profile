@@ -27,10 +27,19 @@ export type ProjectResult = {
   note?: string
 }
 
+export type ProjectHighlight = {
+  label: string
+  before: string
+  after: string
+  delta: string
+}
+
 export type ProjectGroup = {
   name: string
   kind: '회사 프로젝트' | '사이드 프로젝트'
   period?: string
+  /** 기간이 없는 그룹의 헤더 오른쪽에 대신 보여줄 한 줄 */
+  subtitle?: string
   /** 그룹 헤더에 표시할 소속 — 약칭과 로고 */
   org?: { label: string; logo: string }
   projects: PortfolioProject[]
@@ -52,6 +61,10 @@ export type PortfolioProject = {
   period?: string
   techStack: string[]
   summary: string[]
+  /** 홈 카드에 보여줄 한 줄 소개 — 없으면 summary 첫 줄 */
+  tagline?: string
+  /** 홈 카드의 전·후 수치 박스 */
+  highlight?: ProjectHighlight
   diagram?: ProjectDiagram
   /** 맨 위 diagram 바로 다음에 이어서 렌더링되는 추가 도해들 */
   diagrams?: ProjectDiagram[]
@@ -85,6 +98,20 @@ export const STATUS_STYLES: Record<ProjectStatus, string> = {
 export const portfolio = {
   photoUrl: '/portfolio-avatar.jpg',
   mascotUrl: '/brand.png',
+  hero: {
+    badge: '김동규 · Backend Engineer · Java / Spring',
+    headlineLead: '비효율의 원인을 찾아',
+    headlineAccent: '구조로 고치는',
+    headlineTail: '백엔드 엔지니어',
+    description:
+      'PIM팀의 엑셀 기반 수작업을 분석해 상품 데이터 통합관리 시스템(PIM/MDM)을 개발했고, 업무 절차를 9단계에서 2단계로 줄였습니다. 동작 원리를 이해한 뒤 문제에 맞는 기술을 고릅니다.',
+  },
+  stats: [
+    { value: '98.7%', label: '10만 행 검증 시간 단축', sub: '30분 34초+ → 23초' },
+    { value: '99.85%', label: '이력 조회 시간 감소', sub: '7,559ms → 11ms' },
+    { value: '9→2', label: '업무 단계 축소', sub: '77.8% 감소' },
+    { value: '30초', label: '롤백 시간', sub: '10분에서 95% 단축' },
+  ],
   introParagraphs: [
     '어느 환경에서든 비효율의 원인을 분석하고 개선하는 백엔드 엔지니어입니다.',
     'PIM(상품관리)팀의 엑셀 기반 수작업을 발견하고 업무 프로세스를 분석했습니다. 이를 바탕으로 상품 데이터 통합관리 시스템(PIM/MDM)의 개발을 완료하고, 업무 절차를 9단계에서 2단계로 축소했습니다(77.8% 축소).',
@@ -130,6 +157,8 @@ export const portfolio = {
         category: '아키텍처',
         status: '완료',
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        tagline: '자사몰 장애 시 반영 누락을 RabbitMQ 비동기 처리와 DLQ 재전송으로 해결했습니다.',
+        highlight: { label: 'PIM 담당자 작업 단계', before: '9단계', after: '2단계', delta: '77.8% 감소 · 거래처별 1시간 → 10분' },
         techStack: ['Java', 'Spring Boot', 'RabbitMQ', 'Loki', 'Grafana'],
         summary: [
           '자사몰 연동을 구축하던 중 자사몰 서버 장애 시 상품 데이터 반영이 누락되는 문제를, RabbitMQ 기반 비동기 처리로 해결했습니다.',
@@ -228,6 +257,8 @@ export const portfolio = {
         category: '마이그레이션',
         status: '완료',
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        tagline: 'Java 1.6·Seasar2 시스템을 Claude Code로 Java 21·Spring Boot 3.5로 전환했습니다.',
+        highlight: { label: '롤백 소요 시간', before: '10분', after: '30초', delta: '95% 단축 · 기능 개발 7일 → 2일' },
         techStack: ['Java 21', 'Spring Boot 3.5', 'PostgreSQL', 'Nginx', 'Jenkins', 'Docker', 'Loki', 'Grafana', 'Claude Code'],
         summary: [
           '타사 설계로 시작한 Java 1.6·Seasar2 기반 시스템을, 운영 전 개발 단계라는 점을 고려해 Claude Code로 Java 21·Spring Boot 3.5 전체 마이그레이션했습니다.',
@@ -302,6 +333,8 @@ export const portfolio = {
         category: '데이터 처리',
         status: '완료',
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        tagline: '실행계획과 DB 통계로 장기 트랜잭션을 병목으로 찾아 청크 커밋으로 바꿨습니다.',
+        highlight: { label: '10만 행 검증 시간', before: '30분 34초+', after: '23초', delta: '98.7% 이상 단축' },
         techStack: ['Java', 'JDBC Batch', 'PostgreSQL'],
         summary: [
           '실행계획과 DB 통계로 단일 장기 트랜잭션을 병목으로 찾아 청크 커밋 구조로 바꿔, 10만 행 기준 30분 34초(미완료)를 23초로 줄였습니다(98.7% 이상 단축).',
@@ -387,6 +420,8 @@ export const portfolio = {
         category: '데이터 처리',
         status: '완료',
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        tagline: '조회마다 하던 1,000만 건 재계산을 저장 시점 계산으로 옮겼습니다.',
+        highlight: { label: '조회 SQL 실행 시간', before: '7,559ms', after: '11ms', delta: '99.85% 감소' },
         techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
         summary: [
           '누적 1,000만 건의 상품 수정 이력을 기간별로 조회할 때마다 7초 이상 걸리던 문제를, 조회 시점의 재계산을 없애는 구조로 바꿔 해결했습니다.',
@@ -432,6 +467,8 @@ export const portfolio = {
         category: '마이그레이션',
         status: '완료',
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        tagline: '가설 5개를 세워 같은 조건에서 측정하고, 드라이버 비대칭까지 바로잡았습니다.',
+        highlight: { label: '동시 재고차감 과다판매', before: '257건', after: '0건', delta: '분석 쿼리 최대 69배 차이' },
         techStack: ['PostgreSQL', 'MySQL', 'sysbench', 'Python'],
         summary: [
           '"PostgreSQL이 다 낫다"는 말을 그대로 받아들이지 않고, 5가지 가설을 세워 동일 리소스·동일 데이터로 직접 측정했습니다.',
@@ -768,6 +805,7 @@ export const portfolio = {
     {
       name: '개인 프로젝트',
       kind: '사이드 프로젝트',
+      subtitle: '직접 기획하고 운영하는 서비스와 도구',
       projects: [
       {
         slug: 'pr-review-pipeline',
@@ -775,6 +813,8 @@ export const portfolio = {
         category: '아키텍처',
         status: '완료',
         org: '개인 사이드 프로젝트',
+        tagline: 'Kafka로 이벤트 유실을 막고, 변경 영역에 맞는 설계 문서를 읽혀 리뷰합니다.',
+        highlight: { label: 'PR 리뷰 절차', before: '리뷰 없음', after: 'AI 1차 리뷰', delta: '로컬 모델 → Gemini 2단 판정' },
         techStack: ['n8n', 'Kafka', 'Ollama', 'Gemini API', 'GitHub API'],
         summary: [
           '사내에 PR 리뷰 절차가 없어, 도입을 제안하기 전에 개인 저장소에 먼저 적용해 검증할 목적으로 만들었습니다.',
@@ -866,6 +906,8 @@ export const portfolio = {
         status: '진행 중',
         org: '개인 사이드 프로젝트',
         period: '2026.08 ~ 현재 · 1인 개발',
+        tagline: '차수별 참석과 음주 여부를 반영하고, 유리수 계산으로 1원 오차도 막습니다.',
+        highlight: { label: '정산 방식', before: '총무 혼자 계산', after: '모두 함께 정산', delta: 'Android 출시 · iOS 심사 중' },
         techStack: ['Kotlin', 'Spring Boot', 'JPA', 'MySQL 8.4', 'Liquibase', 'Kotest', 'Python', 'FastAPI', 'PaddleOCR'],
         summary: [
           '차수별 참석자와 음주 여부를 반영해 참여자 모두가 함께 비용을 정산하는 앱입니다. 총무 혼자 정산을 떠안는 부담에서 출발했습니다.',
