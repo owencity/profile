@@ -17,7 +17,7 @@ export const profile = {
   links: {
     github: 'https://github.com/owencity',
     blog: '/blog/solo-dev-culture',
-    externalBlog: 'https://owencity.tistory.com/',
+    externalBlog: 'https://blog.devkdk.com/',
   },
   valkyrieFs: {
     releaseLatestUrl: 'https://github.com/owencity/valkyrieFS/releases/latest',
