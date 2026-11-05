@@ -431,7 +431,6 @@ export const portfolio = {
         title: 'DB 선택 — PostgreSQL vs MySQL 벤치마크',
         category: '마이그레이션',
         status: '완료',
-        hidden: true,
         org: '상품 데이터 통합관리 시스템(PIM/MDM)',
         techStack: ['PostgreSQL', 'MySQL', 'sysbench', 'Python'],
         summary: [
