@@ -24,6 +24,7 @@ export type RoundDraft = {
   total: Money
   drinks: DrinkItem[]
   payerParticipantId: Id
+  expectedHeadcount?: number
 }
 
 /** 입력칸 문자열 → 원. 숫자 외 글자는 버린다("184,000원" → 184000). */

@@ -79,7 +79,7 @@ describe('지금 할 일(총무)', () => {
   it('인원을 넣었으면 "5명 중 3명 응답 · 다 모이면 자동으로 계산돼요" + [링크 공유]', () => {
     s().setHeadcount(OPEN, 5)
     const a = nextAction(g(), 1)
-    expect(a.banner).toBe('2명이 아직 응답 안 했어요 · 명단을 확인해주세요')
+    expect(a.note).toBe('2명이 아직 응답 안 했어요 · 명단을 확인해주세요')
     expect(a.action?.kind).toBe('SETTLE')
     // 끝까지 안 들어오는 사람이 있을 때를 위해 [지금 계산하기]는 배너 아래 따로 있다
     expect(canSettleNow(g(), 1)).toBe(true)
@@ -127,9 +127,9 @@ describe('인원보다 더 들어오면 (CTO 결정 2026-10-09)', () => {
   it('총무에게 "현재 5명이 참여했어요 · 인원이 맞는지 확인"과 [5명 모두 포함하기]가 먼저 뜬다', () => {
     s().setHeadcount(OPEN, 4)
     const a = nextAction(g(), 1)
-    expect(a.banner).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
-    expect(a.note).toBe('명단에서 잘못된 응답자를 제외하고 예상 금액을 확인한 뒤 확정해주세요.') // 마지막에 들어온 사람
-    expect(a.action).toEqual({ kind: 'SETTLE', label: '명단 확인 · 정산 확정' })
+    expect(a.banner).toBe('응답 받는 중 · 3명 제출')
+    expect(a.note).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
+    expect(a.action).toEqual({ kind: 'SETTLE', label: '명단·예상 금액 확인' })
     expect(canSettleNow(g(), 1)).toBe(true) // "안 들어온 사람"이 없으니 [지금 계산하기]는 숨긴다
   })
 
@@ -190,8 +190,8 @@ describe('인원 밖 사람이 결제자면 (API v8 REMOVE_PAYER, CTO 승인 202
     expect(g().status).toBe('OPEN')
     expect(g().autoSettlementError).toBeUndefined()
     const a = nextAction(g(), 1)
-    expect(a.banner).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
-    expect(a.action).toEqual({ kind: 'SETTLE', label: '명단 확인 · 정산 확정' })
+    expect(a.note).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
+    expect(a.action).toEqual({ kind: 'SETTLE', label: '명단·예상 금액 확인' })
   })
 
   it('결제자를 수정해도 자동 확정하지 않는다', () => {
@@ -207,7 +207,7 @@ describe('인원 밖 사람이 결제자면 (API v8 REMOVE_PAYER, CTO 승인 202
 
   it('그 밖의 이유로 멈추면 [지금 계산하기]로 마무리하게 한다', () => {
     const a = nextAction({ ...g(), headcount: 5, autoSettlementError: 'NO_ROUNDS' }, 1)
-    expect(a.banner).toBe('예상 금액을 계산하지 못했어요 · 입력을 확인해주세요')
+    expect(a.note).toBe('예상 금액을 계산하지 못했어요 · 입력을 확인해주세요')
     expect(a.action?.kind).toBe('SETTLE')
   })
 })

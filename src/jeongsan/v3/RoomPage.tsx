@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, Participant } from './model'
-import { hasResponded, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, won } from './model'
+import { hasResponded, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, roundAttendeeCount, won } from './model'
 import type { ActionKind } from './nextAction'
 import { canSettleNow, nextAction } from './nextAction'
 import { BackButton } from './BackButton'
@@ -91,7 +91,7 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
       {/* 인원을 넣어 자동 정산을 기다리는 중 — 끝까지 안 들어오는 사람이 있으면 총무가 직접 마무리(FC-020) */}
       {canSettleNow(g, meUserId) && act.action?.kind !== 'SETTLE' && (
         <button type="button" className="js-linkbtn js-settlenow" onClick={() => onAction('SETTLE')}>
-          명단 확인 · 정산 확정
+          명단·예상 금액 확인
         </button>
       )}
 
@@ -126,6 +126,11 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         )
       })()}
 
+      {canEditRounds && g.rounds.map((round) => (
+        <p className="js-hint" key={round.id}>
+          {round.label} · 참석 응답 {roundAttendeeCount(g, round.id)}명{round.expectedHeadcount !== undefined && ` / 예상 ${round.expectedHeadcount}명`}
+        </p>
+      ))}
       {g.rounds.length > 0 && (
         <section className="js-rounds" aria-label="차수">
           {g.rounds.map((r) =>

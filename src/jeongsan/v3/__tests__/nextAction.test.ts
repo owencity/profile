@@ -28,18 +28,19 @@ describe('총무 — 정산 전', () => {
 
   it('미응답자가 있으면 몇 명인지 알려주고, 기다리지 않고 정산할 수 있게 정산하기를 준다', () => {
     const a = nextAction(room(OPEN), 1)
-    expect(a.banner).toContain('2명이 아직 응답 안 했어요')
+    expect(a.note).toContain('2명이 아직 응답 안 했어요')
     expect(a.action?.kind).toBe('SETTLE')
     expect(a.tone).toBe('wait')
   })
 
-  it('모두 응답하면 "모두 응답했어요"와 정산하기를 준다', () => {
+  it('현재 명단이 모두 제출해도 추가 응답을 받는다고 표시한다', () => {
     const g = room(OPEN)
     for (const pid of [14, 15]) {
       for (const rid of [1, 2]) g.responses.push({ participantId: pid, roundId: rid, type: 'DRANK', source: 'SELF' })
     }
     const a = nextAction(g, 1)
-    expect(a.banner).toBe('모두 응답했어요')
+    expect(a.banner).toBe('응답 받는 중 · 5명 제출')
+    expect(a.note).toContain('추가 응답을 받을 수 있어요')
     expect(a.action?.kind).toBe('SETTLE')
   })
 })

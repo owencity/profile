@@ -47,6 +47,7 @@ export type Round = {
   total: Money
   payerParticipantId: Id
   drinks: DrinkItem[]
+  expectedHeadcount?: number
 }
 
 export type RoundResponse = {
@@ -170,6 +171,12 @@ export const unrespondedParticipants = (g: Gathering) => g.participants.filter((
 
 /** 모든 차수에 응답을 마친 사람 수 — R1 "5명 중 3명 응답" */
 export const respondedCount = (g: Gathering) => countedParticipants(g).filter((p) => hasResponded(g, p.id)).length
+
+export function roundAttendeeCount(g: Gathering, roundId: Id): number {
+  const memberIds = new Set(g.participants.map((p) => p.id))
+  return g.responses.filter((r) => r.roundId === roundId && memberIds.has(r.participantId) && r.source !== 'AUTO'
+    && (r.type === 'SOBER' || r.type === 'DRANK')).length
+}
 
 /** 전체 명단의 응답 현황이다. 확정은 총무가 별도로 한다(FC-029). */
 export const allIn = (g: Gathering) =>

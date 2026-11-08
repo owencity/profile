@@ -26,7 +26,7 @@ export type ServerGathering = {
   status: Gathering['status']; completedAt: string | null; deleteScheduledAt: string | null
   participants: ServerParticipant[]
   settlementUnits: ServerUnit[]
-  rounds: { id: number; settlementUnitId: number; seq: number; total: number; payerParticipantId: number; drinks: { name: string; unitPrice: number; quantity: number }[] }[]
+  rounds: { id: number; settlementUnitId: number; seq: number; total: number; payerParticipantId: number; drinks: { name: string; unitPrice: number; quantity: number }[]; expectedHeadcount?: number | null }[]
   responses: { participantId: number; roundId: number; type: ResponseType; source: ResponseSource }[]
   transfers: {
     id: number; settlementUnitId: number; fromParticipantId: number; toParticipantId: number; amount: number
@@ -97,7 +97,8 @@ export function toRoom(g: ServerGathering, u: ServerUnit): Gathering {
     // 명단은 서버가 준 단위 순서 그대로 — 총무 먼저, 그다음 이 단위에 들어온 순서. "인원 안"을 이 순서로 센다(API v8)
     participants: u.participantIds.flatMap((id) => g.participants.filter((p) => p.id === id)).map(toParticipant),
     // 차수 이름은 프론트가 붙인다(FC-014 D4). seq 는 술자리 전체 번호라 B의 첫 차수는 "3차"가 된다
-    rounds: rounds.map((r) => ({ id: r.id, seq: r.seq, label: `${r.seq}차`, total: r.total, payerParticipantId: r.payerParticipantId, drinks: r.drinks })),
+    rounds: rounds.map((r) => ({ id: r.id, seq: r.seq, label: `${r.seq}차`, total: r.total, payerParticipantId: r.payerParticipantId,
+      drinks: r.drinks, expectedHeadcount: r.expectedHeadcount ?? undefined })),
     responses: g.responses.filter((x) => roundIds.has(x.roundId) && members.has(x.participantId)),
     transfers: g.transfers
       .filter((t) => t.settlementUnitId === u.id)
