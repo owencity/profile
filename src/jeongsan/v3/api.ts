@@ -85,7 +85,7 @@ export type ServerNotification = {
 }
 
 type Answer = { roundId: number; type: ResponseType }
-type RoundBody = { total: number; payerParticipantId: number; drinks: { name: string; unitPrice: number; quantity: number }[] }
+type RoundBody = { total: number; payerParticipantId: number; drinks: { name: string; unitPrice: number; quantity: number }[]; expectedHeadcount?: number }
 
 /** 정산 단위 경로 `…/gatherings/{gid}/settlement-units/{uid}` (SETTLEMENT_UNITS §4.2의 U) */
 const U = (gid: number, uid: number) => `/api/v1/gatherings/${gid}/settlement-units/${uid}`

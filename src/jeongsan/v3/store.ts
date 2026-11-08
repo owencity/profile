@@ -349,7 +349,8 @@ export const useV3 = create<State>((set, get) => {
       update(roomId, (g) => {
         if (g.hostUserId !== get().me.id || g.status !== 'OPEN') return g
         const exists = draft.id !== undefined && g.rounds.some((r) => r.id === draft.id)
-        const fields = { total: draft.total, drinks: draft.drinks, payerParticipantId: draft.payerParticipantId }
+        const fields = { total: draft.total, drinks: draft.drinks, payerParticipantId: draft.payerParticipantId,
+          ...(draft.expectedHeadcount !== undefined ? { expectedHeadcount: draft.expectedHeadcount } : {}) }
         let rounds
         if (exists) {
           rounds = g.rounds.map((r) => (r.id === draft.id ? { ...r, ...fields } : r))

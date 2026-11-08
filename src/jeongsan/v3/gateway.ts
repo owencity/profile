@@ -205,29 +205,24 @@ export const gateway = {
    * 응답은 새 차수거나 값이 바뀌었을 때만 보낸다 — 같은 값을 또 보내면 타임라인에 "응답을 고쳤어요"가 쌓인다.
    * 서버 변경 없이 기존 `PUT U/responses/me`를 차수 저장 뒤에 한 번 더 부른다.
    */
-  async saveRound(roomId: Id, draft: RoundDraft, mine?: ResponseType, headcount?: number): Promise<{ id: Id } | { error: string }> {
+  async saveRound(roomId: Id, draft: RoundDraft, mine?: ResponseType): Promise<{ id: Id } | { error: string }> {
     const before = s().rooms[roomId]
     const meP = before?.participants.find((p) => p.userId === s().me.id)
     const prev = draft.id !== undefined && meP ? before?.responses.find((x) => x.participantId === meP.id && x.roundId === draft.id)?.type : undefined
     const answer = (id: Id) => (mine && mine !== prev ? [{ roundId: id, type: mine }] : [])
-    // 인원(FC-020)은 바뀌었을 때만 — 응답을 넣은 뒤에 바꿔야 "모두 모였다" 판정이 새 응답까지 본다
-    const headcountChanged = headcount !== undefined && headcount !== before?.headcount
     if (!isApiMode()) {
       const id = s().saveRound(roomId, draft) ?? draft.id ?? 0
       const a = answer(id)
       if (a.length > 0) s().respond(roomId, a)
-      if (headcountChanged) s().setHeadcount(roomId, headcount)
       return { id }
     }
     const { gid, uid } = ctx(roomId)
-    const body = { total: draft.total, payerParticipantId: draft.payerParticipantId, drinks: draft.drinks }
+    const body = { total: draft.total, payerParticipantId: draft.payerParticipantId, drinks: draft.drinks, expectedHeadcount: draft.expectedHeadcount }
     try {
       const r = draft.id !== undefined ? await api.putRound(gid, uid, draft.id, body) : await api.addRound(gid, uid, body)
       const a = answer(r.id)
       // 차수는 들어갔는데 응답만 실패하면 정산 때 "응답 없음"으로 보이는 것뿐이라, 차수 저장을 실패로 돌리지 않는다
       if (a.length > 0) await api.respond(gid, uid, a).catch(() => {})
-      // 인원은 서버가 아직 모르면(FC-020 배포 전) 실패해도 차수 저장은 성공으로 둔다
-      if (headcountChanged) await api.putHeadcount(gid, uid, headcount).catch(() => {})
       await refresh(gid)
       return { id: r.id }
     } catch (e) {
