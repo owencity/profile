@@ -40,6 +40,8 @@ export type ProjectGroup = {
   period?: string
   /** 기간이 없는 그룹의 헤더 오른쪽에 대신 보여줄 한 줄 */
   subtitle?: string
+  /** 그룹 헤더 아래에 붙는 짧은 사실들 — 실사용 시점, 추가 업무 등 */
+  facts?: { label: string; text: string }[]
   /** 그룹 헤더에 표시할 소속 — 약칭과 로고 */
   org?: { label: string; logo: string }
   projects: PortfolioProject[]
@@ -108,17 +110,17 @@ export const portfolio = {
     headlineAccent: '구조로 고치는',
     headlineTail: '백엔드 엔지니어',
     description:
-      'PIM팀의 엑셀 기반 수작업을 분석해 상품 데이터 통합관리 시스템(PIM/MDM)을 개발했고, 업무 절차를 9단계에서 2단계로 줄였습니다. 동작 원리를 이해한 뒤 문제에 맞는 기술을 고릅니다.',
+      '상품 정보를 관리하고 자사몰에 반영하는 시스템을 주 개발자로 만들어, 대량 상품 검사와 수정 내역 조회 시간을 평균 약 99% 줄이고 쇼핑몰 전송 실패를 다시 처리하는 기능을 만들었습니다. 1인 개발한 정산 앱 ‘정산어택’은 Android로 출시했습니다.',
   },
   stats: [
     { value: '98.7%', label: '10만 행 검증 시간 단축', sub: '30분 34초+ → 23초' },
     { value: '99.85%', label: '이력 조회 시간 감소', sub: '7,559ms → 11ms' },
     { value: '9→2', label: '업무 단계 축소', sub: '77.8% 감소' },
-    { value: '30초', label: '롤백 시간', sub: '10분에서 95% 단축' },
+    { value: '20분→1분', label: '정산어택 정산 시간', sub: '7명 모임 테스트 · 95% 단축' },
   ],
   introParagraphs: [
     '어느 환경에서든 비효율의 원인을 분석하고 개선하는 백엔드 엔지니어입니다.',
-    'PIM(상품관리)팀의 엑셀 기반 수작업을 발견하고 업무 프로세스를 분석했습니다. 이를 바탕으로 상품 데이터 통합관리 시스템(PIM/MDM)의 개발을 완료하고, 업무 절차를 9단계에서 2단계로 축소했습니다(77.8% 축소).',
+    'PIM(상품관리)팀의 엑셀 기반 수작업을 발견하고 업무 프로세스를 분석했습니다. 이를 바탕으로 상품 정보 통합관리 시스템(PIM/MDM)의 개발을 완료하고, 업무 절차를 9단계에서 2단계로 축소했습니다(77.8% 축소).',
     '동작 원리와 설계 배경을 이해하는 데 관심이 많으며, 이를 바탕으로 문제에 적합한 기술과 구현 방식을 선택해 적용합니다.',
     '사내 실무자와의 인터뷰를 통해 업무 비효율을 파악하고 개선하는 사내 FDE 역할도 수행하고 있습니다.',
   ],
@@ -131,7 +133,7 @@ export const portfolio = {
     startDate: '2025-03-01',
     company: '유통업 · Backend Developer',
     period: '2025.03 ~ 재직 중 · 정규직 · 개발팀',
-    project: '상품 데이터 통합관리 시스템(PIM/MDM) · 개발 인원 2명, PIM/MDM 시스템 개발 주도',
+    project: '상품 정보 통합관리 시스템(PIM/MDM) · 개발 2명, 주 개발자로 핵심 기능 개발 및 시스템 전환 주도',
   },
   education: {
     degree: '컴퓨터공학 학사 (학점은행제 · 국가평생교육진흥원)',
@@ -142,17 +144,21 @@ export const portfolio = {
     certificates: ['정보처리기사 · 2024.12'],
   },
   skills: {
-    backend: ['Java', 'Kotlin', 'Spring Boot', 'JPA', 'PostgreSQL', 'MySQL', 'RabbitMQ'],
+    backend: ['Java', 'Kotlin', 'Spring Boot', 'JPA', 'Spring JDBC', 'PostgreSQL', 'MySQL', 'RabbitMQ'],
     tools: [
       'Jenkins', 'Docker', 'Nginx', 'Liquibase', 'Loki', 'Alertmanager', 'Grafana',
-      'AWS', 'OCI', 'Claude Code', 'Codex', 'n8n',
+      'AWS EC2·RDS·S3', 'OCI', 'Claude Code', 'Codex', 'n8n',
     ],
   },
   projectGroups: [
     {
-      name: '상품 데이터 통합관리 시스템(PIM/MDM)',
+      name: '상품 정보 통합관리 시스템(PIM/MDM)',
       kind: '회사 프로젝트',
-      period: '2025.03 ~ 현재 · 개발 인원 2명 · 개발 주도',
+      period: '2025.03 ~ 현재 · 개발 2명 · 주 개발자',
+      facts: [
+        { label: '실사용', text: '2026년 10월 말부터 상품관리팀 실무에 사용 중' },
+        { label: '추가 업무', text: '자사몰 이전 검증(QA) 중 주문·결제·배송 연동을 점검해, 결제 후 택배 송장번호를 받지 못하는 오류를 발견' },
+      ],
       org: { label: 'MK', logo: '/mk-logo.png' },
       projects: [
       {
@@ -160,7 +166,7 @@ export const portfolio = {
         title: '외부 쇼핑몰 연동 및 처리 개선',
         category: '아키텍처',
         status: '완료',
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         tagline: '자사몰 장애 시 반영 누락을 RabbitMQ 비동기 처리와 DLQ 재전송으로 해결했습니다.',
         highlight: { label: 'PIM 담당자 작업 단계', before: '9단계', after: '2단계', delta: '77.8% 감소 · 거래처별 1시간 → 10분' },
         techStack: ['Java', 'Spring Boot', 'RabbitMQ', 'Loki', 'Grafana'],
@@ -188,7 +194,7 @@ export const portfolio = {
         ],
         problemPoints: [
           {
-            text: 'PIM팀의 업무 프로세스를 간소화하기 위해 자사몰 연동을 구축했습니다.',
+            text: '실무자 인터뷰로 PIM팀의 엑셀 작업을 분석해 보니, 상품 처리와 자사몰 반영에 9단계의 수작업이 들고 있었습니다. 이를 줄이기 위해 자사몰 연동을 구축했습니다.',
           },
           {
             text: '구축 과정에서 자사몰 서버에 장애가 나면 그 사이 상품 데이터 반영이 누락됐고, 누락 건을 수동으로 찾아 복구해야 했습니다.',
@@ -260,7 +266,7 @@ export const portfolio = {
         title: '레거시 기반 시스템 재구축',
         category: '마이그레이션',
         status: '완료',
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         tagline: 'Java 1.6·Seasar2 시스템을 Claude Code로 Java 21·Spring Boot 3.5로 전환했습니다.',
         highlight: { label: '롤백 소요 시간', before: '10분', after: '30초', delta: '95% 단축 · 기능 개발 7일 → 2일' },
         techStack: ['Java 21', 'Spring Boot 3.5', 'PostgreSQL', 'Nginx', 'Jenkins', 'Docker', 'Loki', 'Grafana', 'Claude Code'],
@@ -299,7 +305,7 @@ export const portfolio = {
           {
             text: '전환 전략 — PoC로 검증하고, AI로 전환한 뒤, 서브에이전트로 대조 검수',
             sub: [
-              '레거시 프레임워크의 제약과 아직 운영 전 개발 단계라는 상황을 고려해, 기존 개발을 이어가는 것보다 AI를 활용한 마이그레이션이 더 빠르다고 판단했습니다. 작은 기능으로 Spring Boot 전환 PoC를 구현해 전환 가능성을 먼저 검증했습니다.',
+              '레거시 프레임워크의 제약과 아직 운영 전 개발 단계라는 상황을 고려해, 기존 개발을 이어가는 것보다 AI를 활용한 마이그레이션이 더 빠르다고 판단했습니다. 개발 시작 약 1개월 후, 작은 기능으로 Spring Boot 전환 PoC를 구현해 전환 가능성을 먼저 검증했습니다.',
               '분석해 보니 Seasar2와 Spring 모두 DI·AOP 컨테이너 위에 올라간 계층 구조라 구조가 비슷했습니다. 기존 흐름을 먼저 파악한 뒤, Claude Code로 시스템 전체를 Java 21·Spring Boot 3.5로 마이그레이션했습니다.',
               '변환 결과를 그대로 믿지 않고, 역할별 페르소나를 부여한 서브에이전트로 기존 동작 대조와 단위·통합 테스트를 수행하며 검수·교정했습니다. 이 검수·교정이 전환 작업에서 가장 많은 시간을 차지했습니다.',
             ],
@@ -324,6 +330,9 @@ export const portfolio = {
             text: '업무 프로세스에 맞춘 기존 기능 수정·개발: 7일 → 2일 (71.4% 단축) — 담당 부서의 업무 요청 처리 속도도 함께 빨라졌습니다.',
           },
           {
+            text: '전환한 시스템을 개발 완료하고, 2026년 10월 말부터 상품관리팀 실무에 적용했습니다.',
+          },
+          {
             text: '롤백: 10분 → 30초 (95% 단축) — 개선 후 Jenkins 버튼 실행부터 복구 완료까지 기준입니다.',
           },
           {
@@ -336,7 +345,7 @@ export const portfolio = {
         title: '10만 행 상품 유효성 검사 개선',
         category: '데이터 처리',
         status: '완료',
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         tagline: '실행계획과 DB 통계로 장기 트랜잭션을 병목으로 찾아 청크 커밋으로 바꿨습니다.',
         highlight: { label: '10만 행 검증 시간', before: '30분 34초+', after: '23초', delta: '98.7% 이상 단축' },
         techStack: ['Java', 'JDBC Batch', 'PostgreSQL'],
@@ -423,7 +432,7 @@ export const portfolio = {
         title: '상품 변경 이력 조회 성능 개선',
         category: '데이터 처리',
         status: '완료',
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         tagline: '조회마다 하던 1,000만 건 재계산을 저장 시점 계산으로 옮겼습니다.',
         highlight: { label: '조회 SQL 실행 시간', before: '7,559ms', after: '11ms', delta: '99.85% 감소' },
         techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
@@ -470,7 +479,7 @@ export const portfolio = {
         title: 'DB 선택 — PostgreSQL vs MySQL 벤치마크',
         category: '마이그레이션',
         status: '완료',
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         tagline: '가설 5개를 세워 같은 조건에서 측정하고, 드라이버 비대칭까지 바로잡았습니다.',
         highlight: { label: '동시 재고차감 과다판매', before: '257건', after: '0건', delta: '분석 쿼리 최대 69배 차이' },
         techStack: ['PostgreSQL', 'MySQL', 'sysbench', 'Python'],
@@ -557,7 +566,7 @@ export const portfolio = {
         category: '데이터 처리',
         status: '완료',
         hidden: true,
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
         summary: [
           '엑셀 파일을 통째로 여는 대신 행 단위로 읽고 1,000건씩 묶어 저장해 메모리 사용량을 줄였습니다.',
@@ -608,7 +617,7 @@ export const portfolio = {
         category: '아키텍처',
         status: '완료',
         hidden: true,
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
         summary: [
           '외부 데이터를 엑셀에 정리해 자사몰·전표 두 양식으로 각각 변환·업로드하던 9단계 프로세스를, 시스템 안에서 작업 후 동기화만 누르면 되는 2단계로 줄였습니다.',
@@ -682,7 +691,7 @@ export const portfolio = {
         category: '마이그레이션',
         status: '완료',
         hidden: true,
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         techStack: ['PostgreSQL'],
         summary: [
           '컬럼명을 한 번에 바꾸지 않고 확장→전환→수축 3단계로 나눠 무중단으로 표준화했습니다.',
@@ -740,7 +749,7 @@ export const portfolio = {
         category: '안정성',
         status: '완료',
         hidden: true,
-        org: '상품 데이터 통합관리 시스템(PIM/MDM)',
+        org: '상품 정보 통합관리 시스템(PIM/MDM)',
         techStack: ['Java', 'Spring Boot', 'PostgreSQL'],
         summary: [
           '컬럼 위치 가정이 만든 전량 유실 사고를 헤더 이름 기반 매칭으로 바꿔 재발을 차단했습니다.',
@@ -910,13 +919,13 @@ export const portfolio = {
         status: '진행 중',
         org: '개인 사이드 프로젝트',
         period: '2026.08 ~ 현재 · 1인 개발',
-        tagline: '차수별 참석과 음주 여부를 반영하고, 유리수 계산으로 1원 오차도 막습니다.',
-        highlight: { label: '정산 방식', before: '총무 혼자 계산', after: '모두 함께 정산', delta: 'Android 출시 · iOS 심사 중' },
-        techStack: ['Kotlin', 'Spring Boot', 'JPA', 'MySQL 8.4', 'Liquibase', 'Kotest', 'Python', 'FastAPI', 'PaddleOCR'],
+        tagline: '1·2차마다 참석자와 음주 여부가 다른 모임에서 누가 누구에게 얼마를 보낼지 계산하고, 총무가 확정합니다.',
+        highlight: { label: '7명 모임 정산 시간', before: '엑셀 20분', after: '앱 1분', delta: '95% 단축 · Android 출시 · iOS 심사 중' },
+        techStack: ['Kotlin', 'Spring Boot 4.1.1', 'JVM 21', 'JPA', 'Spring JDBC', 'MySQL 8.4', 'Liquibase', 'Docker', 'OCI', 'Kotest', 'Python', 'FastAPI', 'PaddleOCR'],
         summary: [
-          '차수별 참석자와 음주 여부를 반영해 참여자 모두가 함께 비용을 정산하는 앱입니다. 총무 혼자 정산을 떠안는 부담에서 출발했습니다.',
-          '정산 계산을 DB·웹 계층에서 떼어낸 순수 core 모듈로 구현하고, 금액을 유리수로 다룬 뒤 원 단위 올림 규칙을 적용해 계산 과정을 단순화했습니다.',
-          'Android 출시를 마쳤고 iOS는 심사 중이며, 실제로 참여하는 모임에서 테스트하고 있습니다.',
+          '1·2차마다 참석자와 음주 여부가 다른 모임에서, 각자 누구에게 얼마를 보내야 하는지 계산하는 앱입니다. 총무가 계산 결과를 확정하고 입금 여부를 기록합니다.',
+          '7명 모임 사용 테스트에서 정산 계산 시간이 엑셀 20분에서 앱 1분으로 줄었습니다(95% 단축).',
+          '활동 점수 중복 적립 방지, 총무 최종 확정과 변경 감지, 비회원 본인 응답 수정을 트랜잭션·DB 잠금·버전 해시·쿠키 식별로 설계했습니다.',
         ],
         problemPoints: [
           {
@@ -956,6 +965,30 @@ export const portfolio = {
             ],
           },
           {
+            text: '총무 활동 점수가 중복 적립되지 않게 — 적립 내역 키 · 트랜잭션 · DB 잠금',
+            sub: [
+              '총무를 제외한 참석자 1명당 총무에게 활동 점수 ‘스푼’ 10개를 적립합니다. 같은 정보가 반복 전송되거나 여러 명이 동시에 응답해도 점수가 중복되면 안 됐습니다.',
+              '모임·총무·참여자별 적립 내역으로 중복을 구분하고, 참석 정보와 점수 적립을 한 트랜잭션으로 묶어 함께 저장했습니다. 같은 총무의 점수 변경은 DB 잠금으로 처리 순서를 제어했습니다.',
+              '실제 MySQL 테스트에서 반복 요청은 한 번만 적립되고, 서로 다른 모임의 보상은 동시에 요청해도 각각 반영됨을 확인했습니다.',
+            ],
+          },
+          {
+            text: '응답이 모여도 총무가 확인한 뒤 확정 — 입력 버전·해시로 변경 감지',
+            sub: [
+              '기존에는 예정 인원만큼 응답하면 정산이 자동 확정돼, 총무가 잘못된 참석 정보를 확인하기도 전에 명단과 금액을 고칠 수 없게 됐습니다.',
+              '응답마다 승인 절차를 넣으면 참여가 번거로워지므로, 참여자는 바로 응답하고 총무가 마지막에 확정하도록 나눴습니다. 미리보기 이후의 변경은 입력 버전·해시로 감지해, 참석 정보나 금액이 바뀌면 다시 확인하게 했습니다.',
+              '테스트에서 응답이 모인 뒤에도 수정할 수 있고, 변경 전 계산 결과로 확정하면 거절됨을 확인했습니다. 동시에 확정을 요청해도 확정 기록은 한 건만 저장됐습니다.',
+            ],
+          },
+          {
+            text: '회원가입 없이 참여하되 자신의 응답만 수정 — 이름과 수정 권한 분리',
+            sub: [
+              '초대받은 사람이 가입 없이 응답하면서도 다른 사람의 응답은 바꾸지 못해야 했습니다. 이름만으로는 동명이인이나 다른 사람의 이름을 입력한 경우를 구분할 수 없었습니다.',
+              '수정 권한을 이름과 분리하고, 브라우저에 보관한 식별 정보(쿠키)로 해당 모임의 본인 응답을 찾도록 했습니다. 이름을 고쳐도 새 참석자로 등록되지 않게 기존 응답과 보상 내역을 유지했습니다.',
+              '테스트에서 같은 브라우저로 기존 응답을 다시 열어 이름을 고칠 수 있고, 다른 참여자나 다른 모임의 응답을 고치는 요청은 거절됨을 확인했습니다.',
+            ],
+          },
+          {
             text: '인증과 스키마 관리 — 카카오 로그인 · httpOnly JWT · Liquibase',
             sub: [
               '카카오 로그인으로 가입 절차를 없애고, 인증 토큰은 httpOnly 쿠키로 내려 브라우저 스크립트에서 토큰을 읽을 수 없게 했습니다.',
@@ -965,10 +998,10 @@ export const portfolio = {
         ],
         resultPoints: [
           {
-            text: 'Android 출시를 마쳤고 iOS는 심사 중입니다.',
+            text: '7명 모임 사용 테스트: 정산 계산 시간 엑셀 20분 → 앱 1분 (95% 단축)',
           },
           {
-            text: '실제로 참여하는 모임에서 테스트를 진행하고 있습니다.',
+            text: 'Android 출시를 마쳤고 iOS는 심사 중입니다.',
           },
         ],
       },

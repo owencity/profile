@@ -157,15 +157,17 @@ export function PortfolioHome() {
         </header>
 
         {/* Hero */}
-        <section className="flex flex-wrap items-center gap-12 pb-14 pt-10 sm:pt-16">
-          <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-6">
+        <section className="grid items-center gap-12 pb-14 pt-10 sm:pt-16 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-10">
+          <div className="flex min-w-0 flex-col gap-6">
             <span className="self-start rounded-full bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700">
               {hero.badge}
             </span>
             <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-[56px] sm:leading-[1.2]">
               {hero.headlineLead}
               <br />
-              <span className="text-indigo-700">{hero.headlineAccent}</span> {hero.headlineTail}
+              <span className="text-indigo-700">{hero.headlineAccent}</span>
+              <br />
+              {hero.headlineTail}
             </h1>
             <p className="max-w-[640px] text-lg leading-[1.75] text-zinc-600 sm:text-[19px]">
               {hero.description}
@@ -190,7 +192,7 @@ export function PortfolioHome() {
             </div>
           </div>
           {/* 사진 두 장을 기울여 겹쳐 놓고, 마우스를 올리면 살짝 벌어진다 */}
-          <div className="group relative mx-auto aspect-[20/21] w-full max-w-[380px] flex-[1_1_300px]">
+          <div className="group relative mx-auto aspect-[20/21] w-full max-w-[420px] lg:max-w-[480px]">
             <img
               src={portfolio.photos.back.src}
               alt={portfolio.photos.back.alt}
@@ -238,6 +240,18 @@ export function PortfolioHome() {
                     </span>
                   )}
                 </div>
+                {group.facts && group.facts.length > 0 && (
+                  <dl className="-mt-2 flex flex-col gap-2">
+                    {group.facts.map((fact) => (
+                      <div key={fact.label} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <dt className="shrink-0 rounded-md bg-indigo-50 px-2 py-0.5 text-[13px] font-semibold text-indigo-800">
+                          {fact.label}
+                        </dt>
+                        <dd className="text-[15px] text-zinc-700">{fact.text}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                   {visibleProjects.map((project) => (
                     <ProjectCard
