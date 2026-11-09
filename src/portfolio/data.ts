@@ -96,7 +96,11 @@ export const STATUS_STYLES: Record<ProjectStatus, string> = {
 }
 
 export const portfolio = {
-  photoUrl: '/portfolio-avatar.jpg',
+  /** 소개 영역에 겹쳐 놓는 사진 두 장 — front가 앞, back이 뒤 */
+  photos: {
+    front: { src: '/portfolio-photo-1.webp', alt: '공항 탑승교에서 뒤돌아 웃고 있는 김동규' },
+    back: { src: '/portfolio-photo-2.webp', alt: '산 정상 표지석 옆에 선 김동규' },
+  },
   mascotUrl: '/brand.png',
   hero: {
     badge: '김동규 · Backend Engineer · Java / Spring',

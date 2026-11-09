@@ -189,11 +189,19 @@ export function PortfolioHome() {
               </a>
             </div>
           </div>
-          <img
-            src={portfolio.photoUrl}
-            alt="김동규 프로필 사진"
-            className="aspect-[4/5] max-w-[320px] flex-[1_1_280px] rounded-[28px] object-cover"
-          />
+          {/* 사진 두 장을 기울여 겹쳐 놓고, 마우스를 올리면 살짝 벌어진다 */}
+          <div className="group relative mx-auto aspect-[20/21] w-full max-w-[380px] flex-[1_1_300px]">
+            <img
+              src={portfolio.photos.back.src}
+              alt={portfolio.photos.back.alt}
+              className="absolute left-0 top-0 aspect-[4/5] w-[60%] -rotate-3 rounded-[22px] border-[6px] border-white object-cover shadow-xl transition duration-500 group-hover:-translate-x-2 group-hover:-rotate-6 sm:-rotate-[5deg]"
+            />
+            <img
+              src={portfolio.photos.front.src}
+              alt={portfolio.photos.front.alt}
+              className="absolute bottom-0 right-0 aspect-[4/5] w-[68%] rotate-2 rounded-[22px] border-[6px] border-white object-cover shadow-2xl transition duration-500 group-hover:translate-x-2 group-hover:rotate-[5deg] sm:rotate-3"
+            />
+          </div>
         </section>
 
         {/* 핵심 성과 */}
