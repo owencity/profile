@@ -39,7 +39,7 @@ describe('총무 — 정산 전', () => {
       for (const rid of [1, 2]) g.responses.push({ participantId: pid, roundId: rid, type: 'DRANK', source: 'SELF' })
     }
     const a = nextAction(g, 1)
-    expect(a.banner).toBe('응답 받는 중 · 5명 제출')
+    expect(a.banner).toBe('응답 받는 중 · 5명 응답 · 총인원 미설정')
     expect(a.note).toContain('추가 응답을 받을 수 있어요')
     expect(a.action?.kind).toBe('SETTLE')
   })

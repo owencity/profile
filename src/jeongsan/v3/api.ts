@@ -133,6 +133,8 @@ export const api = {
     request<{ id: number }>('POST', `/api/v1/gatherings/${gid}/settlement-units`, { requestId, participantIds, headcount }),
   /** 인원(FC-020) — 총무·정산 전. 목표 인원을 바꿔도 확정하지 않는다 */
   putHeadcount: (gid: number, uid: number, headcount: number) => request<unknown>('PUT', `${U(gid, uid)}/headcount`, { headcount }),
+  putTotalHeadcount: (gid: number, uid: number, totalHeadcount: number) =>
+    request<void>('PUT', `${U(gid, uid)}/total-headcount`, { totalHeadcount }),
   addMember: (gid: number, uid: number, pid: number) => request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}`),
   removeMember: (gid: number, uid: number, pid: number) => request<unknown>('DELETE', `${U(gid, uid)}/participants/${pid}`),
   renameGuest: (gid: number, uid: number, pid: number, displayName: string, expectedDisplayName: string) =>

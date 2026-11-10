@@ -38,8 +38,8 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
   }
 
   // ── 인원보다 더 들어옴: 총무에게 (CTO 결정 2026-10-09) — 넘는 순간 한 번 ──
-  if (next.status === 'OPEN' && next.headcount !== undefined && next.participants.length > next.headcount &&
-      prev.participants.length <= (prev.headcount ?? Infinity)) {
+  if (next.status === 'OPEN' && next.totalHeadcount !== undefined && next.participants.length > next.totalHeadcount &&
+      prev.participants.length <= (prev.totalHeadcount ?? Infinity)) {
     out.push({
       userId: host.userId, roomId: next.id, link: room,
       title: `현재 ${next.participants.length}명이 참여했어요. 인원이 맞는지 확인해주세요`,

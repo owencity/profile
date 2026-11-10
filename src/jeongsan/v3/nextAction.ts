@@ -7,7 +7,7 @@
 import type { Gathering, Id } from './model'
 import {
   daysUntilDelete, hasResponded, hostOf, nameOf, participantOfUser, roundsPaidBy,
-  respondedCount, unrespondedParticipants, won,
+  respondedCount, responseProgressLabel, unrespondedParticipants, won,
 } from './model'
 
 export type ActionKind =
@@ -54,12 +54,15 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
       if (g.rounds.length === 0) return { banner: '1차 금액을 넣어주세요', tone: 'todo', action: { kind: 'EDIT_FIRST_ROUND', label: '1차 입력' } }
       if (g.participants.length === 1) return { banner: '링크를 보내서 사람들을 불러주세요', tone: 'todo', action: { kind: 'SHARE', label: '링크 공유' } }
       const waiting = unrespondedParticipants(g).length
+      const submitted = respondedCount(g)
       const note = g.autoSettlementError ? '예상 금액을 계산하지 못했어요 · 입력을 확인해주세요'
-          : g.rounds.every((r) => r.expectedHeadcount === undefined) && g.headcount !== undefined && g.participants.length > g.headcount
-            ? `예상 ${g.headcount}명보다 많은 ${g.participants.length}명이 응답 명단에 있어요`
+          : g.totalHeadcount !== undefined && g.participants.length > g.totalHeadcount
+            ? `총 정산인원 ${g.totalHeadcount}명보다 많은 ${g.participants.length}명이 명단에 있어요. 명단과 총인원을 검토한 뒤 확정해주세요`
+            : g.totalHeadcount !== undefined && submitted < g.totalHeadcount
+              ? `${g.totalHeadcount - submitted}명 응답을 더 기다려요 · 총무가 명단을 확인한 뒤 확정해주세요`
             : waiting > 0 ? `${waiting}명이 아직 응답 안 했어요 · 명단을 확인해주세요` : '총무가 정산을 확정할 때까지 추가 응답을 받을 수 있어요.'
       return {
-        banner: `응답 받는 중 · ${respondedCount(g)}명 제출`, note,
+        banner: `응답 받는 중 · ${responseProgressLabel(g)}`, note,
         tone: 'wait', action: { kind: 'SETTLE', label: '명단·예상 금액 확인' },
       }
     }

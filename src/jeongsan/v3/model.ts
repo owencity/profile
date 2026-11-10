@@ -87,11 +87,10 @@ export type Gathering = {
   id: Id
   /** 서버의 술자리 id — 한 술자리에 총무별 정산 단위(정산방)가 여럿일 수 있다. 목데이터는 id 와 같거나 비어 있다 */
   gatheringId?: Id
-  /**
-   * 총무가 넣은 인원(총무 포함, FC-020). 이만큼 들어와 모두 응답하면 자동으로 정산된다.
-   * 없으면(옛 술자리·아직 안 넣음) 총무가 [지금 계산하기]로 정산한다
-   */
+  /** 기존 인원 필드. 총 정산인원으로 추정해서 사용하지 않는다. */
   headcount?: number
+  /** 총무를 포함해 이 정산방에서 응답할 전체 인원. 차수별 예상 참석 인원과 독립적이다. */
+  totalHeadcount?: number
   /**
    * 자동 계산이 멈춘 이유(API v8 AUTO_SETTLEMENT) — 인원은 다 응답했는데 확정하지 못했다. 정상이면 없다.
    * `REMOVE_PAYER`: 인원 밖 사람이 결제자라 빼면 그 차수의 돈을 받을 사람이 사라진다(CTO 승인 2026-10-10). 그 밖은 계산 오류 코드
@@ -163,14 +162,21 @@ export const nameOf = (g: Gathering, participantId: Id) =>
 export const responseOf = (g: Gathering, participantId: Id, roundId: Id) =>
   g.responses.find((r) => r.participantId === participantId && r.roundId === roundId)
 
-/** 모든 차수에 응답이 있는가 */
+/** 정산 때 채운 AUTO를 포함해 모든 차수에 응답 데이터가 있는가. */
 export const hasResponded = (g: Gathering, participantId: Id) =>
   g.rounds.length > 0 && g.rounds.every((r) => responseOf(g, participantId, r.id))
 
-export const unrespondedParticipants = (g: Gathering) => g.participants.filter((p) => !hasResponded(g, p.id))
+/** 직접 또는 총무 대리 응답이 모든 차수에 있어야 제출로 센다. */
+export const hasSubmittedResponses = (g: Gathering, participantId: Id) =>
+  g.rounds.length > 0 && g.rounds.every((r) => {
+    const response = responseOf(g, participantId, r.id)
+    return response !== undefined && response.source !== 'AUTO'
+  })
+
+export const unrespondedParticipants = (g: Gathering) => g.participants.filter((p) => !hasSubmittedResponses(g, p.id))
 
 /** 모든 차수에 응답을 마친 사람 수 — R1 "5명 중 3명 응답" */
-export const respondedCount = (g: Gathering) => countedParticipants(g).filter((p) => hasResponded(g, p.id)).length
+export const respondedCount = (g: Gathering) => countedParticipants(g).filter((p) => hasSubmittedResponses(g, p.id)).length
 
 export function roundAttendeeCount(g: Gathering, roundId: Id): number {
   const memberIds = new Set(g.participants.map((p) => p.id))
@@ -180,7 +186,7 @@ export function roundAttendeeCount(g: Gathering, roundId: Id): number {
 
 /** 전체 명단의 응답 현황이다. 확정은 총무가 별도로 한다(FC-029). */
 export const allIn = (g: Gathering) =>
-  g.status === 'OPEN' && g.rounds.length > 0 && g.participants.length > 0 && g.participants.every((p) => hasResponded(g, p.id))
+  g.status === 'OPEN' && g.rounds.length > 0 && g.participants.length > 0 && g.participants.every((p) => hasSubmittedResponses(g, p.id))
 
 export const countedParticipants = (g: Gathering) => g.participants
 
@@ -195,6 +201,15 @@ export const extraPayers = (g: Gathering) =>
 
 export const HEADCOUNT_MIN = 2
 export const HEADCOUNT_MAX = 50
+
+export const validateTotalHeadcount = (value: number): string | null =>
+  Number.isInteger(value) && value >= HEADCOUNT_MIN && value <= HEADCOUNT_MAX
+    ? null : '총 정산인원은 나를 포함해 2~50명으로 입력해주세요'
+
+/** 전체 인원이 없는 옛 방도 응답 수를 그대로 표시한다. 기존 headcount로 분모를 만들지 않는다. */
+export const responseProgressLabel = (g: Gathering) => g.totalHeadcount === undefined
+  ? `${respondedCount(g)}명 응답 · 총인원 미설정`
+  : `${respondedCount(g)}/${g.totalHeadcount}명 응답`
 
 /**
  * 다음 차 정산 단위의 시작 인원 — 고른 사람 + 나, 단 최소 2명(FC-023). [나 혼자 시작하기]도 1이 아니라 2로 보낸다 —

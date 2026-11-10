@@ -478,6 +478,7 @@ export function AppV3({ route, navigate, onLeave, loggedIn = true, onLogin = () 
         onExempt={(pid, rid, ex) => setExempt(g.id, pid, rid, ex)}
         onRemove={(pid) => void ok(gateway.removeParticipant(g.id, pid))}
         onRename={(pid, name, expected) => gateway.renameGuest(g.id, pid, name, expected)}
+        onTotalHeadcount={(totalHeadcount) => gateway.setTotalHeadcount(g.id, totalHeadcount)}
         myNextRoomId={myNext?.id}
         onOpenMyNext={() => myNext && navigate(`/jungsan/r/${myNext.id}`)}
         onStartNext={async (participantIds) => {

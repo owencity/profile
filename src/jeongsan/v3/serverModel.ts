@@ -16,6 +16,8 @@ export type ServerUnit = {
   id: number; hostParticipantId: number; status: Gathering['status']; inputRevision: number
   /** 총무가 넣은 인원(FC-020). 서버가 아직 안 주면 undefined */
   headcount?: number | null
+  /** 총 정산인원. 기존 서버의 누락/null은 미설정이며 headcount로 대체하지 않는다. */
+  totalHeadcount?: number | null
   /** 자동 계산이 멈춘 이유(API v8). 정상이면 null */
   autoSettlementError?: string | null
   completedAt: string | null; participantIds: number[]
@@ -92,6 +94,7 @@ export function toRoom(g: ServerGathering, u: ServerUnit): Gathering {
     shareToken: g.shareToken,
     inputRevision: u.inputRevision,
     headcount: u.headcount ?? undefined,
+    totalHeadcount: u.totalHeadcount ?? undefined,
     autoSettlementError: u.autoSettlementError ?? undefined,
     completedAt: u.completedAt ?? undefined,
     // 명단은 서버가 준 단위 순서 그대로 — 총무 먼저, 그다음 이 단위에 들어온 순서. "인원 안"을 이 순서로 센다(API v8)

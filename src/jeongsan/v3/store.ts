@@ -5,7 +5,7 @@
  */
 import { create } from 'zustand'
 import type { AppNotification, Gathering, Id, Payout, ResponseType, RoundResponse, TimelineEntry, User } from './model'
-import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, HEADCOUNT_MIN, HEADCOUNT_MAX, nextUnitHeadcount } from './model'
+import { hasResponded, hostOf, isLockedByHost, nameOf, participantOfUser, responseOf, HEADCOUNT_MIN, HEADCOUNT_MAX, nextUnitHeadcount, validateTotalHeadcount } from './model'
 import { ME, MOCK_NOTIFICATIONS, MOCK_ROOMS, MOCK_USERS } from './mock'
 import { isApiMode } from './api'
 import { mockPreview, withAutoResponses } from './mockServer'
@@ -47,6 +47,7 @@ type State = {
   settle: (roomId: Id, inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
   /** 인원(총무 포함, FC-020) — 총무·정산 전. 2~50으로 맞춘다. 예상 인원 안내용이며 확정은 총무가 별도로 한다 */
   setHeadcount: (roomId: Id, headcount: number) => void
+  setTotalHeadcount: (roomId: Id, totalHeadcount: number) => string | null
 
   /** 모든 사람의 알림 — 화면은 지금 보는 사람 것만 거른다 */
   notifications: AppNotification[]
@@ -498,6 +499,16 @@ export const useV3 = create<State>((set, get) => {
       if (g.inputRevision !== inputRevision) return 'STALE'
       set((s) => commit(s, g, settleNow(g)))
       return 'OK'
+    },
+
+    setTotalHeadcount: (roomId, totalHeadcount) => {
+      const g = get().rooms[roomId]
+      if (!g || g.hostUserId !== get().me.id) return '이 정산방의 총무만 총인원을 바꿀 수 있어요'
+      if (g.status !== 'OPEN') return '이미 확정한 정산방의 총인원은 바꿀 수 없어요'
+      const error = validateTotalHeadcount(totalHeadcount)
+      if (error) return error
+      update(roomId, (room) => room.totalHeadcount === totalHeadcount ? room : { ...room, totalHeadcount })
+      return null
     },
 
     setHeadcount: (roomId, headcount) =>

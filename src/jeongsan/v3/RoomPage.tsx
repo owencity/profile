@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { HostCharacter } from '../character/HostCharacter'
 import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, Participant } from './model'
-import { hasResponded, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, roundAttendeeCount, won } from './model'
+import { hasSubmittedResponses, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, roundAttendeeCount, won } from './model'
 import type { ActionKind } from './nextAction'
 import { canSettleNow, nextAction } from './nextAction'
 import { BackButton } from './BackButton'
@@ -19,6 +19,7 @@ import { canModerate } from './safety'
 import { SHOW_EXEMPT } from './features'
 import { isApiMode } from './api'
 import { SettlementTablePanel } from './SettlementTablePanel'
+import { TotalHeadcountCard } from './TotalHeadcountCard'
 
 type Props = {
   g: Gathering
@@ -35,6 +36,7 @@ type Props = {
   /** R4 — 총무가 정산 전 한 사람을 내보낸다 */
   onRemove: (participantId: Id) => void
   onRename?: (participantId: Id, name: string, expected: string) => Promise<string | null>
+  onTotalHeadcount?: (totalHeadcount: number) => Promise<string | null>
   /** 참여자가 "다음 차는 내가 계산했어요" — 내가 총무인 새 술자리를 만든다 */
   /** 다음 차 총무 되기 — 고른 사람(나 빼고)과 함께 이 술자리 안에 내 정산 단위를 만든다(FC-015) */
   onStartNext: (participantIds: Id[]) => void
@@ -47,7 +49,7 @@ type Props = {
   onBlock: (participantId: Id) => void
 }
 
-export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onRename, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
+export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRound, onSend, onConfirm, onNotReceived, onExempt, onRemove, onRename, onTotalHeadcount, onStartNext, myNextRoomId, onOpenMyNext, onReport, onBlock }: Props) {
   const [managing, setManaging] = useState<Id | null>(null)
   const [showTable, setShowTable] = useState(false)
   const [msgMenu, setMsgMenu] = useState<Id | null>(null)
@@ -84,11 +86,13 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         </div>
       </section>
 
+      {isHost && <TotalHeadcountCard key={g.id} g={g} onSave={onTotalHeadcount} />}
+
       <section className={`js-banner ${act.tone}`} role="status">
         <b>{act.banner}</b>
         {act.note && <span>{act.note}</span>}
       </section>
-      {/* 인원을 넣어 자동 정산을 기다리는 중 — 끝까지 안 들어오는 사람이 있으면 총무가 직접 마무리(FC-020) */}
+      {/* 응답 수와 관계없이 총무가 명단·예상 금액을 확인하고 확정한다. */}
       {canSettleNow(g, meUserId) && act.action?.kind !== 'SETTLE' && (
         <button type="button" className="js-linkbtn js-settlenow" onClick={() => onAction('SETTLE')}>
           명단·예상 금액 확인
@@ -230,7 +234,7 @@ function NextRoundOffer({ others, onStart }: { others: Participant[]; onStart: (
 function People({ g, onPick }: { g: Gathering; onPick?: (participantId: Id) => void }) {
   const stateOf = (p: Participant): { mark: string; cls: string; label: string } => {
     if (g.status === 'OPEN') {
-      return hasResponded(g, p.id)
+      return hasSubmittedResponses(g, p.id)
         ? { mark: '●', cls: 'ok', label: '응답함' }
         : { mark: '○', cls: 'wait', label: '아직' }
     }

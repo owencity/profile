@@ -81,6 +81,17 @@
 
 .js-room { gap: 12px; }
 
+.js-totalheadcount { border: var(--bd); box-shadow: var(--sh-sm); background: #fff; padding: 12px; }
+.js-totalheadcount-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.js-totalheadcount-heading b { font-size: 14px; }
+.js-totalheadcount-heading p { margin: 4px 0 0; color: var(--p700); font-size: 20px; font-weight: 800; }
+.js-totalheadcount-progress { font-size: 14px; font-weight: 700; margin: 10px 0 4px; }
+.js-totalheadcount .js-hint { line-height: 1.55; }
+.js-totalheadcount-edit { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.js-totalheadcount-edit input { width: 85px; min-width: 0; padding: 8px; border: var(--bd-l); background: var(--p50); font: inherit; font-size: 16px; }
+.js-totalheadcount-edit button:disabled { opacity: .5; cursor: default; }
+.js-totalheadcount-error { color: var(--warn); font-size: 13px; line-height: 1.5; margin: 8px 0 0; }
+
 /* ── 상단 줄 ── */
 .js-rtop { display: flex; align-items: center; gap: 10px; }
 /* 뒤로가기 — ‹ 기호만으로는 버튼인지 몰랐다. "뒤로가기" 글자를 쓴 버튼으로 (BackButton.tsx) */

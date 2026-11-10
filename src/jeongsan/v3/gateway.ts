@@ -10,7 +10,7 @@
 import { ApiError, api, isApiMode, toUser } from './api'
 import type { ServerNotification } from './api'
 import type { AppNotification, Gathering, Id, Payout, ResponseType } from './model'
-import { nextUnitHeadcount } from './model'
+import { nextUnitHeadcount, validateTotalHeadcount } from './model'
 import type { SettlePreview } from './mockServer'
 import { mockPreview } from './mockServer'
 import { validateName } from './name'
@@ -390,6 +390,20 @@ export const gateway = {
     } catch (e) {
       return messageOf(e)
     }
+  },
+
+  async setTotalHeadcount(roomId: Id, totalHeadcount: number): Promise<string | null> {
+    const room = s().rooms[roomId]
+    if (!room || room.hostUserId !== s().me.id) return '이 정산방의 총무만 총인원을 바꿀 수 있어요'
+    if (room.status !== 'OPEN') return '이미 확정한 정산방의 총인원은 바꿀 수 없어요'
+    const error = validateTotalHeadcount(totalHeadcount)
+    if (error) return error
+    if (!isApiMode()) return s().setTotalHeadcount(roomId, totalHeadcount)
+    const { gid, uid } = ctx(roomId)
+    try { await api.putTotalHeadcount(gid, uid, totalHeadcount) }
+    catch (e) { return messageOf(e) }
+    try { await refresh(gid); return null }
+    catch { return '총인원은 저장했지만 최신 정보를 불러오지 못했어요. 새로고침해서 확인해주세요' }
   },
 
   /** 인원(FC-020) — R1 [포함하기]. 서버는 목표 인원을 바꿔도 확정하지 않는다 */

@@ -124,17 +124,17 @@ describe('입금 요청 문구', () => {
 })
 
 describe('인원보다 더 들어오면 (CTO 결정 2026-10-09)', () => {
-  it('총무에게 "현재 5명이 참여했어요 · 인원이 맞는지 확인"과 [5명 모두 포함하기]가 먼저 뜬다', () => {
+  it('기존 headcount만 있는 방은 전체 응답 인원을 추정하지 않고 미설정으로 안내한다', () => {
     s().setHeadcount(OPEN, 4)
     const a = nextAction(g(), 1)
-    expect(a.banner).toBe('응답 받는 중 · 3명 제출')
-    expect(a.note).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
+    expect(a.banner).toBe('응답 받는 중 · 3명 응답 · 총인원 미설정')
+    expect(a.note).toBe('2명이 아직 응답 안 했어요 · 명단을 확인해주세요')
     expect(a.action).toEqual({ kind: 'SETTLE', label: '명단·예상 금액 확인' })
     expect(canSettleNow(g(), 1)).toBe(true) // "안 들어온 사람"이 없으니 [지금 계산하기]는 숨긴다
   })
 
   it('링크로 인원보다 한 명 더 들어오는 순간 총무에게 알림이 한 번 간다', () => {
-    s().setHeadcount(OPEN, 5)
+    s().setTotalHeadcount(OPEN, 5)
     actAs(6) // 한서연 — 6번째
     s().joinGathering(g().shareToken, [])
     actAs(2)
@@ -190,7 +190,7 @@ describe('인원 밖 사람이 결제자면 (API v8 REMOVE_PAYER, CTO 승인 202
     expect(g().status).toBe('OPEN')
     expect(g().autoSettlementError).toBeUndefined()
     const a = nextAction(g(), 1)
-    expect(a.note).toBe('예상 4명보다 많은 5명이 응답 명단에 있어요')
+    expect(a.note).toBe('1명이 아직 응답 안 했어요 · 명단을 확인해주세요')
     expect(a.action).toEqual({ kind: 'SETTLE', label: '명단·예상 금액 확인' })
   })
 
