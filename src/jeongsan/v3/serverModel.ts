@@ -9,7 +9,7 @@
 import type { Gathering, Id, Participant, ResponseSource, ResponseType, TransferBasis, TransferStatus } from './model'
 
 export type ServerParticipant = {
-  id: number; userId: number; displayName: string; nickname: string | null; spoonCount: number
+  id: number; userId: number | null; displayName: string; nickname: string | null; spoonCount: number
   hasPayout: boolean; payout: { bank: string; accountNo: string; holder: string } | null
 }
 export type ServerUnit = {

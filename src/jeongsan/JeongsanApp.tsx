@@ -16,6 +16,7 @@ import { AppV3 } from './v3/AppV3'
 import { isV3JoinRoute, isV3PublicRoute, isV3Route } from './v3/routes'
 import { PrivacyPage, SupportPage } from './v3/PrivacyPage'
 import { TermsPage } from './v3/TermsPage'
+import { GuestFlow } from './v3/GuestFlow'
 
 type Props = {
   /** 현재 경로. 포트폴리오 App.tsx 가 넘긴다. */
@@ -26,6 +27,7 @@ type Props = {
 export default function JeongsanApp({ route, navigate }: Props) {
   // 로그인 상태. mock 모드에서는 로그인 버튼이 상태만 켠다.
   const [loggedIn, setLoggedIn] = useState(false)
+  const [authChecked, setAuthChecked] = useState(!isApiMode())
 
   // 탭 제목·파비콘을 포트폴리오("김동규 | Backend Developer")가 아니라
   // 정산어택으로 바꾼다. index.html 은 두 서브앱이 공유하는 정적 파일이라
@@ -52,7 +54,7 @@ export default function JeongsanApp({ route, navigate }: Props) {
   useEffect(() => {
     void gateway.loadMe().then((ok) => {
       if (ok) setLoggedIn(true)
-    })
+    }).finally(() => setAuthChecked(true))
   }, [])
 
   // 지워진 v2 화면의 주소는 첫 화면으로 보낸다. 렌더 중에 navigate 하지 않게 effect 로.
@@ -73,9 +75,8 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }
   const logout = () => setLoggedIn(false)
 
-  // v3 참여 입구(P1)는 로그인 확인 **앞**에서 받는다 — 링크를 누른 사람이 술자리 미리보기부터 보고,
-  // [카카오로 로그인하고 참여하기]로 로그인한 뒤 같은 주소로 돌아와 응답을 고른다(returnTo).
-  // 응답은 로그인 **뒤**에 고르므로 카카오 인가로 페이지를 떠나도 잃을 입력이 없다(CTO 결정 2026-10-19).
+  // FC-028: 비로그인 참여자는 전용 웹 흐름을 사용한다. 기존 회원·총무는 회원 화면을 유지한다.
+  // 회원 확인을 기다려 총무가 실수로 별도 비회원 좌석을 만들지 않게 한다.
   // 개인정보처리방침·지원 — 로그인과 상관없이 누구나(스토어 심사관 포함) 읽을 수 있어야 한다
   if (isV3PublicRoute(route)) {
     const home = () => navigate('/jungsan')
@@ -84,6 +85,8 @@ export default function JeongsanApp({ route, navigate }: Props) {
   }
 
   if (isV3JoinRoute(route)) {
+    if (isApiMode() && !authChecked) return <div className="js-root"><main className="js-shell"><p role="status">참여 정보를 확인하고 있어요…</p></main></div>
+    if (isApiMode() && !loggedIn) return <GuestFlow key={route} token={route.split('/')[3]} />
     return <AppV3 route={route} navigate={navigate} onLeave={logout} loggedIn={loggedIn} onLogin={login} />
   }
 

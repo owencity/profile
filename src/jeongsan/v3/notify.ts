@@ -13,7 +13,7 @@ export type NewNotification = Omit<AppNotification, 'id' | 'read' | 'createdAt'>
 const userOf = (g: Gathering, participantId: number) => g.participants.find((p) => p.id === participantId)!.userId
 
 export function notificationsFor(prev: Gathering, next: Gathering): NewNotification[] {
-  const out: NewNotification[] = []
+  const out: (Omit<NewNotification, 'userId'> & { userId: number | null })[] = []
   const room = `/jungsan/r/${next.id}`
   const host = hostOf(next)
 
@@ -43,7 +43,7 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     out.push({
       userId: host.userId, roomId: next.id, link: room,
       title: `현재 ${next.participants.length}명이 참여했어요. 인원이 맞는지 확인해주세요`,
-      body: `그대로면 ${next.headcount}명으로 계산되고 마지막에 들어온 사람은 빠져요`,
+      body: `명단에서 잘못된 응답자를 제외한 뒤 정산을 확정해주세요`,
     })
   }
 
@@ -138,5 +138,5 @@ export function notificationsFor(prev: Gathering, next: Gathering): NewNotificat
     }
   }
 
-  return out
+  return out.filter((notification): notification is NewNotification => notification.userId !== null)
 }

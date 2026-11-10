@@ -38,7 +38,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
     const cur = round ? responseOf(g, host.id, round.id)?.type : undefined
     return cur && cur !== 'EXEMPT' ? cur : 'DRANK'
   })
-  // 인원(FC-020) — 이만큼 모두 응답하면 자동 정산. 처음엔 지금 들어온 사람 수(최소 2)에서 시작한다
+  // 인원(FC-020) — 예상 인원 안내용. 처음엔 지금 들어온 사람 수(최소 2)에서 시작한다
   const [headcount, setHeadcount] = useState(() => g.headcount ?? Math.max(HEADCOUNT_MIN, g.participants.length))
 
   const total = parseAmount(amountText)
@@ -141,7 +141,7 @@ export function RoundEditPage({ g, round, onBack, onSave, onDelete }: Props) {
       </section>
 
       <section className="js-field">
-        <div className="js-lab">몇 명이서 마셨나요? <small>나 포함 · 다 응답하면 자동으로 계산돼요</small></div>
+        <div className="js-lab">몇 명이서 마셨나요? <small>나 포함 · 예상 인원</small></div>
         <div className="js-qty js-headcount" role="group" aria-label="인원">
           <button type="button" onClick={() => setHeadcount(Math.max(HEADCOUNT_MIN, headcount - 1))} aria-label="한 명 빼기" disabled={headcount <= HEADCOUNT_MIN}>−</button>
           <b aria-live="polite">{headcount}명</b>

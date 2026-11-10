@@ -1,0 +1,51 @@
+.js-guest { display: grid; gap: 18px; padding-bottom: 40px; }
+.js-guest h1 { font-size: 24px; overflow-wrap: anywhere; }
+.js-guest-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 16px; }
+.js-guest-fields .js-field { display: grid; gap: 8px; }
+.js-guest-error { color: #b42318; margin: 0; overflow-wrap: anywhere; }
+.js-guest-error:empty { display: none; }
+.js-guest-money { display: grid; gap: 12px; border-top: 2px solid var(--line, #ccd8eb); padding-top: 16px; }
+.js-guest-money h2, .js-guest-money p { margin: 0; }
+.js-guest-money article { display: grid; gap: 10px; }
+.js-guest-total { font-size: 28px; }
+.js-account { user-select: text; overflow-wrap: anywhere; }
+.js-table-panel { display: grid; gap: 14px; min-width: 0; }
+.js-table-panel h2, .js-table-panel p { margin: 0; }
+.js-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--line, #ccd8eb); }
+.js-money-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-variant-numeric: tabular-nums; background: white; color: #172338; font-size: 12px; }
+.js-money-table caption { text-align: left; padding: 9px 6px; font-size: 11px; background: #f4f7ff; }
+.js-money-table th, .js-money-table td { border: 1px solid #aab8cd; padding: 7px 5px; text-align: right; overflow-wrap: anywhere; }
+.js-table-scroll .js-money-table th, .js-table-scroll .js-money-table td { min-width: 76px; white-space: nowrap; }
+.js-money-table th { text-align: center; background: #eaf1fd; }
+.js-money-table thead th, .js-money-table tfoot th, .js-money-table tfoot td { background: #fff0cc; font-weight: 800; }
+.js-money-table small { display: block; font-size: 10px; font-weight: 400; }
+.js-money-table .js-round-heading th { text-align: left; background: #dde8fa; }
+.js-money-table .js-cell-note { font-size: 10px; text-align: center; }
+.js-money-table[data-kind="round"] { font-size: 11px; }
+.js-money-table[data-kind="round"] th, .js-money-table[data-kind="round"] td { padding: 7px 2px; }
+.js-money-value { white-space: nowrap; }
+.js-money-value[data-long="true"] { white-space: normal; overflow-wrap: anywhere; }
+.js-capture-page { display: grid; gap: 12px; padding-bottom: 20px; border-bottom: 2px solid var(--line, #ccd8eb); }
+.js-capture-card { padding: 10px; background: #fff; color: #172338; }
+.js-capture-card header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+.js-capture-card header b { overflow-wrap: anywhere; }
+.js-capture-card header span { white-space: nowrap; }
+.js-capture-card .js-money-table { font-size: 11px; }
+.js-capture-card .js-money-table td { padding: 7px 2px; }
+.js-capture-card .js-money-table td.js-cell-note { white-space: normal; }
+.js-capture-card .js-money-value[data-long="true"] { font-size: 10px; }
+.js-capture-card p { margin-top: 6px; font-size: 10px; }
+.js-capture-image { display: block; max-width: 100%; height: auto; }
+.js-settlement-export { display: grid; gap: 10px; padding: 12px; background: #fff0cc; border: 2px solid #aab8cd; }
+.js-export-offscreen { position: fixed; left: -100000px; top: 0; pointer-events: none; }
+.js-export-canvas { box-sizing: border-box; padding: 20px; background: #fff; color: #172338; font-family: Pretendard, sans-serif; font-size: 16px; overflow-wrap: anywhere; }
+.js-export-canvas table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.js-export-canvas th, .js-export-canvas td { border: 1px solid #aab8cd; padding: 12px 8px; text-align: right; }
+.js-export-canvas th { text-align: center; background: #eaf1fd; }
+.js-export-canvas thead th, .js-export-canvas .js-export-total > * { background: #fff0cc; font-weight: 800; }
+.js-export-canvas .js-export-round th { background: #dde8fa; text-align: left; }
+.js-export-canvas .js-export-send > * { background: #fff0cc; border: 2px solid #284979; }
+.js-export-send td { text-align: center; }
+.js-export-send strong { display: block; font-size: 22px; color: #123b73; }
+.js-export-send span { display: block; font-size: 14px; }
+.js-export-send div + div { margin-top: 12px; border-top: 1px solid #aab8cd; padding-top: 12px; }

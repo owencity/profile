@@ -6,7 +6,7 @@
  */
 import type { Gathering, Id } from './model'
 import {
-  daysUntilDelete, extraParticipants, extraPayers, hasResponded, hostOf, nameOf, participantOfUser, respondedCount, roundsPaidBy,
+  daysUntilDelete, hasResponded, hostOf, nameOf, participantOfUser, roundsPaidBy,
   unrespondedParticipants, won,
 } from './model'
 
@@ -53,49 +53,20 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
     if (isHost) {
       if (g.rounds.length === 0) return { banner: '1차 금액을 넣어주세요', tone: 'todo', action: { kind: 'EDIT_FIRST_ROUND', label: '1차 입력' } }
       if (g.participants.length === 1) return { banner: '링크를 보내서 사람들을 불러주세요', tone: 'todo', action: { kind: 'SHARE', label: '링크 공유' } }
-      // 인원보다 더 들어왔으면 총무 확인이 먼저(CTO 결정 2026-10-09) — 그대로면 인원만큼만 계산되고 뒤에 온 사람은 빠진다
-      // 인원이 다 응답했는데 서버가 자동 계산을 멈췄다(API v8) — 총무가 풀어야 한다
-      if (g.autoSettlementError) {
-        const payers = extraPayers(g)
-        return g.autoSettlementError === 'REMOVE_PAYER' && payers.length > 0
-          ? {
-              banner: `인원 밖 ${payers.map((p) => p.displayName).join('·')}님이 결제자라 자동 계산을 멈췄어요`,
-              note: '모두 포함하거나, 낸 사람을 바꾸거나, 지금 계산하기로 마무리할 수 있어요',
-              tone: 'todo', action: { kind: 'INCLUDE_EXTRA', label: `${g.participants.length}명 모두 포함하기` },
-            }
-          : { banner: '자동 계산이 멈췄어요 · 금액을 확인하고 지금 계산해주세요', tone: 'todo', action: { kind: 'SETTLE', label: '지금 계산하기' } }
-      }
-      const extras = extraParticipants(g)
-      if (extras.length > 0) {
-        return {
-          banner: `현재 ${g.participants.length}명이 참여했어요 · 인원(${g.headcount}명)이 맞는지 확인해주세요`,
-          note: `그대로면 ${g.headcount}명으로 계산되고 ${extras.map((p) => p.displayName).join('·')}님은 빠져요`,
-          tone: 'todo', action: { kind: 'INCLUDE_EXTRA', label: `${g.participants.length}명 모두 포함하기` },
-        }
-      }
       const waiting = unrespondedParticipants(g).length
-      // 인원을 넣었으면 다 모일 때 서버가 자동 정산한다(FC-020) — 총무는 링크만 돌리면 된다.
-      // 안 들어오는 사람이 있을 때의 [지금 계산하기]는 R1 배너 아래 작은 버튼(canSettleNow)
-      if (g.headcount !== undefined && waiting + Math.max(0, g.headcount - g.participants.length) > 0) {
-        return {
-          banner: `${g.headcount}명 중 ${respondedCount(g)}명 응답했어요 · 다 모이면 자동으로 계산돼요`,
-          tone: 'wait', action: { kind: 'SHARE', label: '링크 공유' },
-        }
+      return {
+        banner: g.autoSettlementError ? '예상 금액을 계산하지 못했어요 · 입력을 확인해주세요'
+          : g.headcount !== undefined && g.participants.length > g.headcount
+            ? `예상 ${g.headcount}명보다 많은 ${g.participants.length}명이 응답 명단에 있어요`
+            : waiting > 0 ? `${waiting}명이 아직 응답 안 했어요 · 명단을 확인해주세요` : '모두 응답했어요',
+        note: '명단에서 잘못된 응답자를 제외하고 예상 금액을 확인한 뒤 확정해주세요.',
+        tone: waiting > 0 ? 'wait' : 'todo', action: { kind: 'SETTLE', label: '명단 확인 · 정산 확정' },
       }
-      return waiting > 0
-        ? { banner: `${waiting}명이 아직 응답 안 했어요 · 준비되면 정산하세요`, tone: 'wait', action: { kind: 'SETTLE', label: '지금 계산하기' } }
-        : { banner: '모두 응답했어요', tone: 'todo', action: { kind: 'SETTLE', label: '지금 계산하기' } }
     }
     const labels = g.rounds.map((r) => r.label).join('·')
-    // 인원 밖에 들어온 사람 — 총무가 포함하면 함께, 아니면 이번 정산에서 빠진다
-    if (extraParticipants(g).some((p) => p.id === me.id)) {
-      return hasResponded(g, me.id)
-        ? { banner: '인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요', tone: 'wait', action: { kind: 'EDIT_RESPONSE', label: '응답 고치기' } }
-        : { banner: `${labels} 응답을 남겨주세요`, note: '인원이 다 찼어요 · 총무가 포함하면 함께 정산돼요', tone: 'todo', action: { kind: 'RESPOND', label: '응답하기' } }
-    }
     return hasResponded(g, me.id)
       ? {
-          banner: g.headcount !== undefined ? '응답 완료! 다 모이면 자동으로 계산돼요' : '응답 완료! 총무가 정산하면 알려드릴게요',
+          banner: '응답을 총무에게 보냈어요. 총무가 확인 후 정산해요',
           tone: 'wait', action: { kind: 'EDIT_RESPONSE', label: '응답 고치기' },
         }
       : { banner: `${labels} 응답을 남겨주세요`, tone: 'todo', action: { kind: 'RESPOND', label: '응답하기' } }
@@ -145,11 +116,6 @@ export function nextAction(g: Gathering, meUserId: Id): NextAction {
   return { banner: '다른 사람들 입금을 기다리는 중이에요', tone: 'wait' }
 }
 
-/**
- * R1 배너 아래 작은 [지금 계산하기](FC-020) — 인원을 넣어 자동 정산을 기다리는 중인데, 끝까지 안 들어오는 사람이 있으면
- * 총무가 직접 마무리한다. 하단 버튼은 [링크 공유]라 이 버튼이 따로 있어야 한다.
- */
+/** 미리보기 진입 권한. 목표 인원은 제한이 아니다. */
 export const canSettleNow = (g: Gathering, meUserId: Id) =>
-  g.status === 'OPEN' && g.hostUserId === meUserId && g.headcount !== undefined && g.rounds.length > 0 && g.participants.length >= 2 &&
-  // 인원보다 더 들어왔으면 "안 들어온 사람"이 없다 — 그때는 [포함하기]만
-  extraParticipants(g).length === 0
+  g.status === 'OPEN' && g.hostUserId === meUserId && g.rounds.length > 0 && g.participants.length >= 2
