@@ -17,9 +17,11 @@ type Props = {
   onLogout: () => void
   /** 실패면 보여줄 문구, 성공이면 null(`gateway.confirmName`) */
   onConfirm: (name: string) => Promise<string | null>
+  /** 현재 브라우저에서 이 계정이 이미 약관에 동의했으면 다시 체크하게 하지 않는다. */
+  termsAccepted?: boolean
 }
 
-export function NamePage({ me, onLogout, onConfirm }: Props) {
+export function NamePage({ me, onLogout, onConfirm, termsAccepted = false }: Props) {
   const [name, setName] = useState('')
   const [tried, setTried] = useState(false)
   // 서버가 거절한 이유(예: 이미 이름을 정함). 입력을 고치면 지운다
@@ -33,7 +35,7 @@ export function NamePage({ me, onLogout, onConfirm }: Props) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTried(true)
-    if (busy || !agreed || validateName(name).length > 0) return
+    if (busy || !(termsAccepted || agreed) || validateName(name).length > 0) return
     setBusy(true)
     setServerError(await onConfirm(name.trim()))
     setBusy(false)
@@ -71,8 +73,8 @@ export function NamePage({ me, onLogout, onConfirm }: Props) {
       {tried && errors.length > 0 && <div className="js-errs" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
 
       <div className="js-r2btns stick">
-        <TermsAgree checked={agreed} onChange={setAgreed} />
-        <button type="submit" className="js-cta" disabled={busy || !agreed}>{busy ? '저장하는 중…' : '이 이름으로 시작'}</button>
+        {!termsAccepted && <TermsAgree checked={agreed} onChange={setAgreed} />}
+        <button type="submit" className="js-cta" disabled={busy || !(termsAccepted || agreed)}>{busy ? '저장하는 중…' : '이 이름으로 시작'}</button>
         <button type="button" className="js-linkbtn js-namelogout" onClick={onLogout}>잘못 로그인했나요? 로그아웃</button>
       </div>
     </form>
