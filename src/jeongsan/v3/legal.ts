@@ -17,8 +17,11 @@ export const CONTACT_EMAIL = 'skyko6530@gmail.com'
 /** 서버가 있는 곳 — 국외면 국외 이전 고지가 필요하다 */
 export const SERVER_LOCATION = '싱가포르(Oracle Cloud ap-singapore-1)'
 
-/** 시행일 — 내용을 바꾸면 날짜도 바꾼다 */
+/** 기존 방침 시행일. 새 선택 기능의 사전 안내일은 아래에서 별도로 표시한다. */
 export const EFFECTIVE_DATE = '2026년 11월 10일'
+
+/** 영수증 사진 입력·간단 N빵 기능을 제공하기 전 정보 처리 방식을 안내한 날 */
+export const OPTIONAL_FEATURE_NOTICE_DATE = '2026년 11월 15일'
 
 /**
  * 국외 이전(개인정보 보호법 제28조의8) — 서버가 싱가포르에 있어 고지한다. 웹은 Vercel(미국)이 화면을 내보내며 접속 기록을 남긴다.
@@ -29,9 +32,9 @@ export const OVERSEAS_TRANSFERS = [
     to: 'Oracle Corporation (Oracle Cloud Infrastructure)',
     country: '싱가포르',
     items: '1항의 처리하는 개인정보 전부',
-    purpose: '서버와 데이터베이스 운영·보관',
+    purpose: '서버와 데이터베이스 운영·보관, 선택한 영수증 사진의 일시적 문자 인식과 간단 N빵 계산',
     when: '서비스를 이용할 때마다 네트워크로 전송',
-    period: '4항의 보관 기간과 같음',
+    period: '4항의 보관 기간과 같음. 영수증 사진·인식 후보와 간단 N빵 입력·결과는 응답 후 보관하지 않음',
   },
   {
     to: 'Vercel Inc.',

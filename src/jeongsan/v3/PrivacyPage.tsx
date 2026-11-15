@@ -2,7 +2,7 @@
  * 개인정보처리방침(`/jungsan/privacy`)·지원(`/jungsan/support`) — 로그인 없이 열린다. 앱스토어·플레이스토어 심사에
  * 이 두 주소를 넣는다. 내용은 실제 동작과 같아야 한다(`legal.ts` 머리말).
  */
-import { CONTACT_EMAIL, EFFECTIVE_DATE, OPERATOR, OVERSEAS_TRANSFERS, SERVER_LOCATION } from './legal'
+import { CONTACT_EMAIL, EFFECTIVE_DATE, OPERATOR, OPTIONAL_FEATURE_NOTICE_DATE, OVERSEAS_TRANSFERS, SERVER_LOCATION } from './legal'
 
 export function PrivacyPage({ onHome }: { onHome: () => void }) {
   return (
@@ -11,6 +11,11 @@ export function PrivacyPage({ onHome }: { onHome: () => void }) {
       <h1>정산어택 개인정보처리방침</h1>
       <p className="js-legal-meta">시행일 {EFFECTIVE_DATE}</p>
       <p>정산어택(이하 "서비스")은 술자리 비용을 차수별로 나누어 정산하는 데 필요한 최소한의 개인정보만 처리합니다.</p>
+
+      <h2>선택 기능 사전 안내</h2>
+      <p className="js-legal-meta">안내일 {OPTIONAL_FEATURE_NOTICE_DATE}</p>
+      <p>영수증 촬영·사진 선택과 간단 N빵 기능의 정보 처리 방식을 미리 안내합니다.
+        아래의 해당 항목은 이 기능을 직접 선택한 경우에만 적용합니다. 사진 없이 금액을 직접 입력할 수도 있습니다.</p>
 
       <h2>1. 처리하는 개인정보</h2>
       <table>
@@ -21,16 +26,22 @@ export function PrivacyPage({ onHome }: { onHome: () => void }) {
           <tr><td>표시 이름을 직접 입력할 때</td><td>정산방에서 쓰는 이름 — Apple 로그인은 이름을 다시 입력하지 않아도 됩니다</td></tr>
           <tr><td>돈을 받는 사람이 될 때(직접 입력)</td><td>받을 계좌: 은행, 계좌번호, 예금주</td></tr>
           <tr><td>서비스를 쓰는 동안</td><td>참여한 술자리, 차수별 응답(불참·논알코올·알코올), 정산 금액, 송금 상태, 정산방 메시지, 받은 스푼 수</td></tr>
+          <tr><td>영수증 촬영·사진 선택을 이용할 때(선택)</td><td>선택한 영수증 사진과 사진에 포함된 문자·금액, 인식한 총액과 주류 항목</td></tr>
+          <tr><td>간단 N빵 계산을 이용할 때(선택)</td><td>입력한 총액·인원수와 계산 결과</td></tr>
           <tr><td>메시지를 신고하거나 사람을 차단할 때</td><td>신고한 메시지와 사유, 차단한 사람 — 부적절한 메시지를 처리하고 차단한 사람의 메시지를 가리는 데만 씁니다</td></tr>
           <tr><td>자동으로</td><td>접속 기록(IP 주소, 접속 시각) — 장애 확인과 부정 이용 방지에만 씁니다</td></tr>
         </tbody>
       </table>
-      <p>이메일, 전화번호, 카드 정보는 별도로 요청하거나 계정 정보로 저장하지 않습니다. 서비스는 송금을 대신하지 않으며 결제 정보를 처리하지 않습니다.</p>
+      <p>이메일, 전화번호, 카드 정보는 별도로 요청하거나 계정 정보로 저장하지 않습니다.
+        선택한 영수증 사진에는 결제 내역 등의 정보가 포함될 수 있으며, 아래 목적과 기간에 따라 일시적으로 처리합니다.
+        서비스는 송금·결제를 대신 처리하지 않습니다.</p>
 
       <h2>2. 이용 목적</h2>
       <ul>
         <li>로그인과 회원 식별</li>
         <li>차수별 정산 금액 계산과 안내, 송금 상태 확인</li>
+        <li>선택한 영수증 사진에서 총액·주류 항목을 읽어 사용자가 확인하고 고칠 수 있는 입력 후보 제공</li>
+        <li>간단 N빵에서 총액과 인원수에 따른 분담금 계산</li>
         <li>정산 진행 알림(정산 완료, 입금 확인 요청 등)</li>
         <li>부적절한 메시지 신고 처리와 차단(<a href="/jungsan/terms">이용약관</a> 제5조)</li>
       </ul>
@@ -47,11 +58,17 @@ export function PrivacyPage({ onHome }: { onHome: () => void }) {
           완료되지 않은 술자리는 마지막 활동 후 <b>30일</b>이 지나면 삭제합니다.</li>
         <li>계정 정보(로그인 정보, 표시 이름, 받을 계좌, 스푼 수): <b>탈퇴하면 지체 없이</b> 삭제합니다.
           다른 사람과 함께한 지난 정산 기록에서는 이름이 &lsquo;탈퇴한 사용자&rsquo;로 바뀌고, 직접 쓴 메시지는 지웁니다.</li>
+        <li>선택한 영수증 사진과 인식 후보: 서버 메모리에서 일시적으로 처리하고 응답 후 보관하지 않습니다.
+          사진·인식 원문·후보를 파일, 데이터베이스, 로그에 저장하지 않습니다.
+          사용자가 확인 후 차수에 저장한 금액·술 항목은 술자리 정보의 보관 기간을 따릅니다.</li>
+        <li>간단 N빵의 입력 금액·인원수와 계산 결과: 계산 응답 후 서버에 보관하지 않습니다.</li>
         <li>삭제한 정보는 복구할 수 없는 방법으로 지웁니다.</li>
       </ul>
 
       <h2>5. 제3자 제공과 처리 위탁</h2>
       <p>개인정보를 제3자에게 제공하지 않습니다. 서비스 운영을 위해 다음 업체를 이용합니다.</p>
+      <p>영수증 문자 인식(OCR)은 {SERVER_LOCATION}의 정산어택 서버에서 Paddle 모델로 처리합니다.
+        사진을 외부 AI API로 보내지 않습니다.</p>
       <table>
         <thead><tr><th>업체</th><th>하는 일</th></tr></thead>
         <tbody>
