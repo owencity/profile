@@ -106,11 +106,11 @@ export const portfolio = {
   mascotUrl: '/brand.png',
   hero: {
     badge: '김동규 · Backend Engineer · Java / Spring',
-    headlineLead: 'AI에게 역할을 맡기고',
-    headlineAccent: '방향과 결과를 책임지는',
-    headlineTail: '백엔드 엔지니어',
+    headlineLead: 'AI에 역할을 부여하고,',
+    headlineAccent: '개발의 방향과 결과를 책임지는',
+    headlineTail: '백엔드 오케스트레이터 김동규입니다.',
     description:
-      '회사 백오피스를 개발하며 Claude Code 세션 여러 개에 백엔드, 프론트엔드, 앱, 리서치 역할을 나눠 맡기고 있습니다. 저는 요구사항과 설계 방향을 정하고, 세션마다 작업을 배정한 뒤 중간 결과를 검토합니다. 구현부터 검증, 배포, 운영까지 이끌었고, 상품 정보 관리 시스템에서는 대량 상품 검증 시간을 98.7% 줄였습니다.',
+      '현재 백오피스 개발을 맡아 여러 Claude Code 세션에 역할별 페르소나를 부여하고, 컨텍스트 엔지니어링을 적용해 운영합니다. 요구사항과 설계 방향을 정하고, 각 세션에 작업을 배정하며 중간 결과를 검토합니다. 구현부터 검증·배포·운영까지 개발을 이끌어 개선 과정에서는 검증 처리 시간을 98% 단축했습니다.',
   },
   /** 성과 숫자 카드 아래 'AI와 일하는 방식' 섹션 */
   aiWorkflow: {
