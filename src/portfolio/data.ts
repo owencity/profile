@@ -1034,7 +1034,7 @@ export const portfolio = {
       },
       ] as PortfolioProject[],
     },
-  ],
+  ] as ProjectGroup[],
 }
 
 export function getProjectBySlug(slug: string): PortfolioProject | undefined {
