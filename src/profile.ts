@@ -15,7 +15,7 @@ export const profile = {
   // 줄바꿈은 App.tsx 의 whitespace-pre-line 이 살린다
   intro: 'this is mococo!\nmococo just do it!',
   links: {
-    github: 'https://github.com/owencity',
+    github: 'https://owencity.github.io/',
     blog: '/blog/solo-dev-culture',
     externalBlog: 'https://blog.devkdk.com/',
   },

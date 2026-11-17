@@ -157,8 +157,8 @@ export const portfolio = {
   ],
   contact: {
     email: 'skyko6530@gmail.com',
-    githubLabel: 'github.com/owencity',
-    githubUrl: 'https://github.com/owencity',
+    githubLabel: 'owencity.github.io',
+    githubUrl: 'https://owencity.github.io/',
   },
   career: {
     startDate: '2025-03-01',
