@@ -155,10 +155,6 @@ export const portfolio = {
       name: '상품 정보 통합관리 시스템(PIM/MDM)',
       kind: '회사 프로젝트',
       period: '2025.03 ~ 현재 · 개발 2명 · 주 개발자',
-      facts: [
-        { label: '실사용', text: '2026년 10월 말부터 상품관리팀 실무에 사용 중' },
-        { label: '추가 업무', text: '자사몰 이전 검증(QA) 중 주문·결제·배송 연동을 점검해, 결제 후 택배 송장번호를 받지 못하는 오류를 발견' },
-      ],
       org: { label: 'MK', logo: '/mk-logo.png' },
       projects: [
       {
