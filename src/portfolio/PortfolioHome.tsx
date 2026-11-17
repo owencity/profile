@@ -7,6 +7,71 @@ import { ProjectModal } from './ProjectModal'
 const LONG_PRESS_MS = 800
 const CAPTURE_SCALE = 2
 
+/** 성과 숫자 아래: 역할을 나눈 AI 세션들과 일하는 순서, 검증에서 잡은 사례 */
+function AiWorkflowSection() {
+  const ai = portfolio.aiWorkflow
+  return (
+    <section aria-label={ai.title} className="flex flex-col gap-8 pb-24">
+      <div className="flex flex-wrap items-baseline justify-between gap-3 border-t-2 border-zinc-900 pt-5">
+        <h2 className="text-2xl font-bold tracking-tight sm:text-[32px]">{ai.title}</h2>
+        <span className="text-[15px] text-zinc-600">{ai.subtitle}</span>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-10">
+        <div className="flex flex-col gap-4">
+          {ai.lead.map((p) => (
+            <p key={p} className="text-[17px] leading-[1.8] text-zinc-700">
+              {p}
+            </p>
+          ))}
+        </div>
+
+        {/* 나(테크 리드) 아래로 역할을 맡은 세션 4개 */}
+        <div className="flex flex-col items-stretch gap-3">
+          <div className="rounded-[20px] bg-indigo-700 p-5 text-white">
+            <p className="text-lg font-bold">{ai.leadRole.name}</p>
+            <p className="mt-1 text-[15px] leading-relaxed text-indigo-100">{ai.leadRole.desc}</p>
+          </div>
+          <div aria-hidden className="mx-auto h-5 w-px bg-zinc-300" />
+          <ul className="grid grid-cols-2 gap-3">
+            {ai.roles.map((role) => (
+              <li key={role.name} className="rounded-[16px] border border-zinc-200 bg-white p-4">
+                <p className="font-mono text-xs font-semibold text-indigo-700">Claude Code</p>
+                <p className="mt-1 text-base font-bold text-zinc-900">{role.name}</p>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-600">{role.desc}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {ai.steps.map((step, i) => (
+          <li key={step.title} className="flex flex-col gap-1.5 rounded-[16px] border border-zinc-200 bg-white p-4">
+            <span className="font-mono text-sm font-bold text-indigo-700">{String(i + 1).padStart(2, '0')}</span>
+            <span className="text-base font-bold text-zinc-900">{step.title}</span>
+            <span className="text-sm leading-relaxed text-zinc-600">{step.desc}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="rounded-[20px] border border-indigo-100 bg-indigo-50/60 p-6 sm:p-8">
+        <span className="rounded-md bg-white px-2 py-0.5 text-[13px] font-semibold text-indigo-800">
+          {ai.case.label}
+        </span>
+        <h3 className="mt-3 text-xl font-bold tracking-tight text-zinc-900">{ai.case.title}</h3>
+        <div className="mt-3 flex flex-col gap-3">
+          {ai.case.body.map((p) => (
+            <p key={p} className="text-[16px] leading-[1.8] text-zinc-700">
+              {p}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function PortfolioHome() {
   const [openSlug, setOpenSlug] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -224,6 +289,8 @@ export function PortfolioHome() {
             </div>
           ))}
         </section>
+
+        <AiWorkflowSection />
 
         <div id="projects" className="flex flex-col gap-20 pb-24">
           {portfolio.projectGroups.map((group) => {
