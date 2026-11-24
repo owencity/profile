@@ -379,3 +379,9 @@ button.js-person.pick:focus-visible { outline: 2px solid var(--acc); outline-off
 .js-nextbtns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 .js-payerline { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13.5px; color: var(--ink2); }
 .js-payerline b { color: var(--ink); }
+
+/* R2 인원(FC-020) — 병 수 [−][+]와 같은 모양, 숫자 자리만 넓게 */
+.js-headcount { align-self: flex-start; }
+.js-headcount b { min-width: 64px; text-align: center; font-size: 16px; }
+/* R1 배너 아래 [지금 계산하기] — 하단 버튼(링크 공유)과 겹치지 않게 작은 글자 버튼 */
+.js-settlenow { align-self: flex-end; font-size: 13px; }

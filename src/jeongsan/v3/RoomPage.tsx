@@ -10,7 +10,7 @@ import { levelOf, titleOf } from '../character/hostSprite'
 import type { Gathering, Id, Participant } from './model'
 import { hasResponded, hostOf, initialOf, nameOf, nameWithNick, participantOfUser, won } from './model'
 import type { ActionKind } from './nextAction'
-import { nextAction } from './nextAction'
+import { canSettleNow, nextAction } from './nextAction'
 import { BackButton } from './BackButton'
 import { ParticipantSheet } from './ParticipantSheet'
 import { SHOW_EXEMPT } from './features'
@@ -72,6 +72,12 @@ export function RoomPage({ g, meUserId, onBack, onAction, onEditRound, onAddRoun
         <b>{act.banner}</b>
         {act.note && <span>{act.note}</span>}
       </section>
+      {/* 인원을 넣어 자동 정산을 기다리는 중 — 끝까지 안 들어오는 사람이 있으면 총무가 직접 마무리(FC-020) */}
+      {canSettleNow(g, meUserId) && act.action?.kind !== 'SETTLE' && (
+        <button type="button" className="js-linkbtn js-settlenow" onClick={() => onAction('SETTLE')}>
+          안 들어온 사람이 있나요? 지금 계산하기
+        </button>
+      )}
 
       {/* 총무는 사람을 눌러 면제·내보내기(R4). 총무 자신은 관리 대상이 아니다 */}
       <People g={g} onPick={isHost ? (pid) => { if (pid !== host.id) setManaging(pid) } : undefined} />

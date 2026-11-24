@@ -45,7 +45,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
     <div className="js-shell narrow js-r3">
       <header className="js-rtop">
         <BackButton onClick={onBack} to="정산방으로" />
-        <div className="js-rtitle"><b>정산하기</b></div>
+        <div className="js-rtitle"><b>지금 계산하기</b></div>
       </header>
 
       {missing.length > 0 && (
@@ -123,7 +123,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
       {error && <div className="js-errs" role="alert">{error}</div>}
 
       <div className="js-r2btns stick">
-        <button className="js-cta" onClick={settle} disabled={busy}>{busy ? '정산하는 중…' : '정산하기'}</button>
+        <button className="js-cta" onClick={settle} disabled={busy}>{busy ? '계산하는 중…' : '지금 계산하기'}</button>
       </div>
     </div>
   )

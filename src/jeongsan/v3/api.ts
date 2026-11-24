@@ -106,8 +106,10 @@ export const api = {
     request<{ gatheringId: number; participantId: number }>('POST', `/api/v1/join/${encodeURIComponent(token)}`, { settlementUnitId, responses }),
 
   // 정산 단위 — 다음 차 총무(FC-015)
-  createUnit: (gid: number, requestId: string, participantIds: number[]) =>
-    request<{ id: number }>('POST', `/api/v1/gatherings/${gid}/settlement-units`, { requestId, participantIds }),
+  createUnit: (gid: number, requestId: string, participantIds: number[], headcount?: number) =>
+    request<{ id: number }>('POST', `/api/v1/gatherings/${gid}/settlement-units`, { requestId, participantIds, headcount }),
+  /** 인원(FC-020) — 총무·정산 전. 바꾼 뒤 서버가 자동 정산 판정을 한 번 돈다 */
+  putHeadcount: (gid: number, uid: number, headcount: number) => request<unknown>('PUT', `${U(gid, uid)}/headcount`, { headcount }),
   addMember: (gid: number, uid: number, pid: number) => request<unknown>('PUT', `${U(gid, uid)}/participants/${pid}`),
   removeMember: (gid: number, uid: number, pid: number) => request<unknown>('DELETE', `${U(gid, uid)}/participants/${pid}`),
   addRound: (gid: number, uid: number, body: RoundBody) => request<{ id: number }>('POST', `${U(gid, uid)}/rounds`, body),
