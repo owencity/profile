@@ -49,6 +49,10 @@ export function validateRound(d: RoundDraft, g: Gathering): string[] {
 }
 
 /** 차수 이름은 순서로 정한다. 중간 차수를 지우면 뒤 차수가 당겨진다(1·2·3차 → 2차 삭제 → 1·2차). */
-export function relabel<T extends { seq: number; label: string }>(rounds: T[]): T[] {
-  return [...rounds].sort((a, b) => a.seq - b.seq).map((r, i) => ({ ...r, seq: i + 1, label: `${i + 1}차` }))
+/**
+ * 차수 번호를 다시 매긴다. start: 이 정산방의 첫 차수 번호 — 다음 차 총무의 정산방은 술자리 전체 번호를 이어받는다
+ * (B의 첫 차수가 3차). 서버 모드는 서버가 준 seq 를 그대로 쓰고 이 함수는 목데이터에서만 쓴다
+ */
+export function relabel<T extends { seq: number; label: string }>(rounds: T[], start = 1): T[] {
+  return [...rounds].sort((a, b) => a.seq - b.seq).map((r, i) => ({ ...r, seq: start + i, label: `${start + i}차` }))
 }

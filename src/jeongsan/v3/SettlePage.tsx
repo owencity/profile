@@ -18,7 +18,8 @@ type Props = {
   preview: SettlePreview
   onBack: () => void
   onRespondFor: (participantId: Id, roundId: Id, type: ResponseType) => void
-  onSettle: (inputRevision: number) => 'OK' | 'STALE' | 'DENIED'
+  /** 미리보기를 그대로 돌려보낸다(입력 버전·해시 — ADR-004). 실패면 이유 */
+  onSettle: (preview: SettlePreview) => Promise<'OK' | 'STALE' | 'DENIED' | { error: string }>
 }
 
 export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props) {
@@ -29,10 +30,15 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
   const sum = preview.lines.reduce((s, l) => s + l.total, 0)
   const roundsTotal = g.rounds.reduce((s, r) => s + r.total, 0)
 
-  const settle = () => {
-    const res = onSettle(preview.inputRevision)
+  const [busy, setBusy] = useState(false)
+  const settle = async () => {
+    if (busy) return
+    setBusy(true)
+    const res = await onSettle(preview)
+    setBusy(false)
     if (res === 'STALE') setError('그 사이 응답이 바뀌었어요. 바뀐 금액을 확인하고 다시 눌러주세요')
-    if (res === 'DENIED') setError('지금은 정산할 수 없어요')
+    else if (res === 'DENIED') setError('지금은 정산할 수 없어요')
+    else if (typeof res === 'object') setError(res.error)
   }
 
   return (
@@ -117,7 +123,7 @@ export function SettlePage({ g, preview, onBack, onRespondFor, onSettle }: Props
       {error && <div className="js-errs" role="alert">{error}</div>}
 
       <div className="js-r2btns stick">
-        <button className="js-cta" onClick={settle}>정산하기</button>
+        <button className="js-cta" onClick={settle} disabled={busy}>{busy ? '정산하는 중…' : '정산하기'}</button>
       </div>
     </div>
   )
